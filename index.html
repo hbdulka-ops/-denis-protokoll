@@ -7,9 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* تخصيص مظهر القوائم المنسدلة المخصصة */
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; }
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .max-w-md { max-w: 100% !important; border: none !important; box-shadow: none !important; }
+            input, select, text { border: none !important; background: transparent !important; padding: 0 !important; }
+        }
     </style>
 </head>
 <body class="bg-stone-100 font-sans min-h-screen p-2 sm:p-4">
@@ -21,55 +26,61 @@
             <p class="text-xs font-bold tracking-widest text-slate-400 uppercase">Sicherheitsdienst</p>
         </div>
 
-        <div class="grid grid-cols-4 gap-2">
+        <div class="no-print grid grid-cols-4 gap-2">
             <button class="bg-white border border-stone-200 rounded-xl p-3 text-slate-600 hover:bg-stone-50"><i class="fa-solid fa-gear"></i></button>
             <button class="bg-white border border-stone-200 rounded-xl p-3 text-slate-600 hover:bg-stone-50"><i class="fa-solid fa-pen-nib"></i></button>
             <button class="bg-white border border-stone-200 rounded-xl p-3 text-slate-600 hover:bg-stone-50"><i class="fa-solid fa-moon"></i></button>
             <button class="bg-white border border-stone-200 rounded-xl p-3 text-slate-600 hover:bg-stone-50"><i class="fa-solid fa-bell"></i></button>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="no-print grid grid-cols-2 gap-2">
             <button class="bg-emerald-500 text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 shadow-sm"><i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp</button>
             <button class="bg-blue-600 text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="no-print grid grid-cols-2 gap-2">
             <button onclick="resetForm()" class="bg-white border border-stone-200 text-slate-600 rounded-xl py-2 text-sm font-semibold"><i class="fa-solid fa-rotate-left mr-1"></i> Reset</button>
-            <button class="bg-rose-500 text-white rounded-xl py-2 text-sm font-bold shadow-sm"><i class="fa-solid fa-print mr-1"></i> Drucken</button>
+            <button onclick="window.print()" class="bg-rose-500 text-white rounded-xl py-2 text-sm font-bold shadow-sm"><i class="fa-solid fa-print mr-1"></i> Drucken</button>
         </div>
 
         <div class="bg-slate-700 text-white rounded-2xl p-4 space-y-3">
-            <div class="bg-slate-600/50 rounded-lg py-1 px-3 w-fit text-xs font-medium flex items-center gap-2 text-slate-300">
-                <i class="fa-solid fa-calendar-days text-rose-400"></i> Nachtschicht von gestern (24.05.2026)
+            <div class="bg-slate-600/50 rounded-lg py-1 px-2 w-full text-xs font-medium flex items-center gap-2 text-slate-300">
+                <i class="fa-solid fa-calendar-days text-rose-400"></i>
+                <input type="text" id="shift-title" value="Nachtschicht von gestern" oninput="saveData()" class="bg-transparent focus:outline-none w-full text-slate-200 font-medium">
             </div>
             
             <div class="space-y-1">
-                <div class="flex justify-between text-xs font-mono text-slate-300">
-                    <span>20:00 &rarr; 07:00</span>
-                    <span class="font-bold text-white">80%</span>
+                <div class="flex justify-between text-xs font-mono text-slate-300 items-center">
+                    <div class="flex items-center gap-1">
+                        <input type="text" id="shift-start-hour" value="20:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">&rarr;
+                        <input type="text" id="shift-end-hour" value="07:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">
+                    </div>
+                    <div class="flex items-center gap-0.5">
+                        <span id="progress-percent-label" class="font-bold text-white">0%</span>
+                    </div>
                 </div>
                 <div class="w-full bg-slate-600 h-2 rounded-full overflow-hidden">
-                    <div class="bg-rose-400 h-full rounded-full" style="width: 80%"></div>
+                    <div id="progress-bar-fill" class="bg-rose-400 h-full rounded-full" style="width: 0%"></div>
                 </div>
             </div>
 
-            <div class="flex gap-2 pt-2">
-                <div class="bg-slate-600/40 border border-slate-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm flex-1 text-center font-medium">Sonntag</div>
-                <div class="bg-slate-600/40 border border-slate-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm flex-1 text-center font-mono">24.05.2026</div>
+            <div class="flex flex-col items-end space-y-1">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Mitarbeiter</span>
+                <input type="text" id="employee-name" placeholder="Vorname Nachname" oninput="saveData()" class="bg-slate-600/30 border border-slate-500/20 text-xs text-center rounded-lg px-2 py-1 w-44 text-white focus:outline-none focus:border-rose-400 font-medium">
             </div>
-        </div>
 
-        <div class="grid grid-cols-4 gap-1 text-center text-[11px] font-bold text-slate-500 pt-2">
-            <div class="bg-stone-100 py-1 rounded">Kunde</div>
-            <div class="bg-emerald-50 py-1 rounded text-emerald-700">Beginn</div>
-            <div class="bg-amber-50 py-1 rounded text-amber-700">Ende</div>
-            <div class="bg-rose-50 py-1 rounded text-rose-700">Dienstnotiz</div>
+            <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
+                <input type="text" id="shift-day" oninput="saveData()" class="bg-slate-600/40 border border-slate-500/30 rounded-xl py-2 text-xs font-medium text-white text-center focus:outline-none">
+                <input type="text" id="shift-date" oninput="saveData()" class="bg-slate-600/40 border border-slate-500/30 rounded-xl py-2 text-xs font-mono text-white text-center focus:outline-none">
+                <input type="text" id="shift-type" value="🟢 Regulär" oninput="saveData()" class="bg-slate-600/40 border border-slate-500/30 rounded-xl py-2 text-[10px] font-bold text-emerald-400 text-center focus:outline-none">
+                <input type="text" id="shift-alert" value="🔔 Ton" oninput="saveData()" class="bg-slate-600/40 border border-slate-500/30 rounded-xl py-2 text-[10px] font-bold text-amber-400 text-center focus:outline-none">
+            </div>
         </div>
 
         <div id="rows-container" class="space-y-3">
             </div>
 
-        <div class="grid grid-cols-3 gap-2 pt-2 items-center">
+        <div class="no-print grid grid-cols-3 gap-2 pt-2 items-center">
             <button onclick="removeRow()" class="bg-white border border-stone-200 text-slate-600 rounded-xl py-2 text-sm font-bold hover:bg-stone-50">- Zeile</button>
             <div id="row-counter" class="text-center text-xs font-bold text-slate-400 font-mono">0 Zeilen</div>
             <button onclick="addRow()" class="bg-rose-500 text-white rounded-xl py-2 text-sm font-bold shadow-sm hover:bg-rose-600">+ Zeile</button>
@@ -81,7 +92,7 @@
                 <span>🔴 <span id="status-vorfaelle">0</span> Vorfälle</span>
             </div>
             <div class="bg-stone-50 rounded-full px-3 py-1.5 flex items-center justify-between border border-stone-200/60 font-mono">
-                <span class="text-blue-500"><i class="fa-solid fa-floppy-disk"></i> <span id="save-time">04:49:55</span></span>
+                <span class="text-blue-500"><i class="fa-solid fa-floppy-disk"></i> <span id="save-time">00:00:00</span></span>
             </div>
         </div>
 
@@ -98,12 +109,62 @@
             "Sachschaden festgestellt - Dokumentiert"
         ];
 
+        function setAutomaticDateTime() {
+            const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+            const now = new Date();
+            if(!document.getElementById('shift-day').value) {
+                document.getElementById('shift-day').value = days[now.getDay()];
+            }
+            if(!document.getElementById('shift-date').value) {
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                document.getElementById('shift-date').value = `${day}.${month}.${year}`;
+            }
+        }
+
+        // حساب وقت النوبة التلقائي الذكي لشريط التقدم
+        function calculateProgress() {
+            const startStr = document.getElementById('shift-start-hour').value.split(':');
+            const endStr = document.getElementById('shift-end-hour').value.split(':');
+            
+            if(startStr.length !== 2 || endStr.length !== 2) return;
+            
+            let start = parseInt(startStr[0]) * 60 + parseInt(startStr[1]);
+            let end = parseInt(endStr[0]) * 60 + parseInt(endStr[1]);
+            
+            if (end <= start) end += 24 * 60; // نوبة ليلية عابرة للتاريخ
+            
+            const now = new Date();
+            let current = now.getHours() * 60 + now.getMinutes();
+            
+            if (current < start && current + 24 * 60 <= end) current += 24 * 60;
+            if (current < start) current += 24 * 60;
+
+            let percentage = 0;
+            if (current >= start && current <= end) {
+                percentage = Math.round(((current - start) / (end - start)) * 100);
+            } else if (current > end) {
+                percentage = 100;
+            }
+
+            document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
+            document.getElementById('progress-percent-label').innerText = `${percentage}%`;
+            saveData();
+        }
+
         function updateStatus() {
             document.getElementById('row-counter').innerText = `${rowCount} Zeilen`;
             document.getElementById('status-kunden').innerText = rowCount;
-            // حساب افتراضي للأحداث المفعلة
-            const activeVorfälle = document.querySelectorAll('.ereignis-select').length;
-            document.getElementById('status-vorfaelle').innerText = rowCount > 0 ? 1 : 0;
+            
+            let vorfaelleCount = 0;
+            document.querySelectorAll('.ereignis-btn-text').forEach(btn => {
+                if(btn.innerText !== '+ Ereignis') vorfaelleCount++;
+            });
+            document.getElementById('status-vorfaelle').innerText = vorfaelleCount;
+            
+            const now = new Date();
+            document.getElementById('save-time').innerText = now.toTimeString().split(' ')[0];
         }
 
         function setNow(buttonId) {
@@ -113,61 +174,168 @@
             button.innerText = timeString;
             button.classList.remove('bg-stone-50', 'text-slate-400');
             button.classList.add('bg-slate-700', 'text-white', 'font-mono');
+            updateStatus();
+            saveData();
         }
 
         function toggleDropdown(id) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if(menu.id !== id) menu.classList.remove('show');
+            });
             document.getElementById(id).classList.toggle('show');
         }
 
+        // ميزة اختيار العدد والتخصيص المباشر
         function selectEreignis(rowIndex, text) {
-            const btn = document.getElementById(`ereignis-btn-${rowIndex}`);
-            btn.innerText = text;
-            btn.classList.remove('text-rose-400');
-            btn.classList.add('text-slate-700', 'font-medium');
+            const btnText = document.getElementById(`ereignis-text-${rowIndex}`);
+            const counterSection = document.getElementById(`counter-section-${rowIndex}`);
+            
+            btnText.innerText = text;
+            btnText.classList.remove('text-rose-400');
+            btnText.classList.add('text-slate-700', 'font-medium');
+            
+            // إذا كان الحدث يتعلق بالأشخاص بلا مأوى أو المركبات، أظهر أداة تحديد الأرقام التلقائية
+            if(text.includes("Obdachlose") || text.includes("Fahrzeuge") || text.includes("Person")) {
+                counterSection.classList.remove('hidden');
+                document.getElementById(`count-val-${rowIndex}`).innerText = "1";
+                btnText.innerText = `1 ${text}`;
+            } else {
+                counterSection.classList.add('hidden');
+            }
+            
             toggleDropdown(`dropdown-${rowIndex}`);
+            updateStatus();
+            saveData();
         }
 
-        function addRow() {
+        function changeCount(rowIndex, direction) {
+            const countVal = document.getElementById(`count-val-${rowIndex}`);
+            const btnText = document.getElementById(`ereignis-text-${rowIndex}`);
+            let current = parseInt(countVal.innerText);
+            
+            current = direction === 'up' ? current + 1 : current - 1;
+            if(current < 1) current = 1;
+            
+            countVal.innerText = current;
+            
+            // استخلاص النص الأصلي بدون أرقام سابقة لإعادة صياغته
+            let cleanText = btnText.innerText.replace(/^[0-9]+\s/, '');
+            btnText.innerText = `${current} ${cleanText}`;
+            saveData();
+        }
+
+        // محاكاة ميزة مساعد الصياغة الذكية لربطها بالحدث
+        function triggerKI(rowIndex) {
+            const btnText = document.getElementById(`ereignis-text-${rowIndex}`);
+            if(btnText.innerText.includes("+ Ereignis")) return alert("Bitte wählen Sie zuerst ein Ereignis aus!");
+            
+            let original = btnText.innerText;
+            if(!original.includes("Eine") && !original.includes("wurden")) {
+                btnText.innerText = `[KI] Eine Person wurde höflich aus dem Objekt verwiesen.`;
+                btnText.classList.add('text-indigo-600');
+            } else {
+                btnText.innerText = original.replace('[KI] ', '');
+                btnText.classList.remove('text-indigo-600');
+            }
+            saveData();
+        }
+
+        // ميزة إرفاق الصور والتقاط لقطات توثيقية
+        function triggerCamera(rowIndex) {
+            const fileInput = document.getElementById(`photo-input-${rowIndex}`);
+            fileInput.click();
+        }
+        
+        function previewPhoto(rowIndex) {
+            const fileInput = document.getElementById(`photo-input-${rowIndex}`);
+            const preview = document.getElementById(`photo-preview-${rowIndex}`);
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" class="w-full h-8 object-cover rounded-lg border border-stone-200">`;
+                }
+                reader.readAsDataURL(fileInput.files[0]);
+                setTimeout(saveData, 500);
+            }
+        }
+
+        function addRow(savedDataObj = null) {
             rowCount++;
             const container = document.getElementById('rows-container');
             
             const rowHtml = `
-                <div id="row-${rowCount}" class="grid grid-cols-4 gap-1 items-start bg-white p-1 rounded-xl relative border border-transparent hover:border-stone-100">
-                    <div class="border border-stone-200 rounded-xl p-2 text-center text-xs font-bold text-slate-700 bg-white shadow-sm min-h-[50px] flex flex-col justify-center">
-                        <span class="text-[10px] text-stone-400 block font-mono">#0${rowCount}</span>
-                        <input type="text" placeholder="— Standort —" class="w-full text-center bg-transparent focus:outline-none text-xs">
-                    </div>
-                    
-                    <div class="flex flex-col justify-between min-h-[50px]">
-                        <button id="start-btn-${rowCount}" onclick="setNow('start-btn-${rowCount}')" class="border border-stone-200 rounded-xl py-3 text-center text-[11px] font-medium text-slate-400 bg-stone-50 hover:bg-stone-100 flex flex-col items-center justify-center gap-1">
-                            <i class="fa-solid fa-stopwatch text-[10px]"></i> Jetzt
-                        </button>
-                    </div>
-
-                    <div class="flex flex-col justify-between min-h-[50px]">
-                        <button id="end-btn-${rowCount}" onclick="setNow('end-btn-${rowCount}')" class="border border-stone-200 rounded-xl py-3 text-center text-[11px] font-medium text-slate-400 bg-stone-50 hover:bg-stone-100 flex flex-col items-center justify-center gap-1">
-                            <i class="fa-solid fa-stopwatch text-[10px]"></i> Jetzt
-                        </button>
-                    </div>
-
-                    <div class="relative min-h-[50px] flex flex-col justify-center">
-                        <button id="ereignis-btn-${rowCount}" onclick="toggleDropdown('dropdown-${rowCount}')" class="border border-stone-200 rounded-xl p-2 text-center text-[10px] font-bold text-rose-400 bg-rose-50/30 hover:bg-rose-50 min-h-[46px] flex items-center justify-center break-words overflow-hidden">
-                            + Ereignis
-                        </button>
+                <div id="row-${rowCount}" class="bg-stone-50/50 border border-stone-200/60 rounded-2xl p-2 space-y-2 relative">
+                    <div class="grid grid-cols-4 gap-1 items-start">
+                        <div class="border border-stone-200 rounded-xl p-1.5 text-center bg-white shadow-sm min-h-[46px] flex flex-col justify-center">
+                            <span class="text-[9px] text-stone-400 block font-mono">#0${rowCount}</span>
+                            <input type="text" id="input-standort-${rowCount}" placeholder="— Ort —" oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-bold text-slate-700">
+                        </div>
                         
-                        <div id="dropdown-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-1 w-48 bg-white border border-stone-200 rounded-xl shadow-xl z-50 p-1 text-left hidden">
-                            <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-600 px-2 py-1 border-b border-stone-100">&mdash; Regulär &mdash;</div>
-                            ${ereignisse.map(e => `
-                                <button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[11px] text-slate-700 hover:bg-stone-50 rounded-lg truncate block">
-                                    ${e}
-                                </button>
-                            `).join('')}
+                        <button id="start-btn-${rowCount}" onclick="setNow('start-btn-${rowCount}')" class="border border-stone-200 rounded-xl py-3 text-center text-[11px] font-medium text-slate-400 bg-white shadow-sm hover:bg-stone-50 min-h-[46px] flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-clock text-[10px] text-emerald-500"></i> <span id="start-lbl-${rowCount}">Jetzt</span>
+                        </button>
+
+                        <button id="end-btn-${rowCount}" onclick="setNow('end-btn-${rowCount}')" class="border border-stone-200 rounded-xl py-3 text-center text-[11px] font-medium text-slate-400 bg-white shadow-sm hover:bg-stone-50 min-h-[46px] flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-clock text-[10px] text-amber-500"></i> <span id="end-lbl-${rowCount}">Jetzt</span>
+                        </button>
+
+                        <div class="relative min-h-[46px] flex flex-col justify-center">
+                            <button id="ereignis-btn-${rowCount}" onclick="toggleDropdown('dropdown-${rowCount}')" class="border border-stone-200 rounded-xl p-1.5 text-center text-[10px] font-bold text-rose-400 bg-rose-50/20 border-dashed border-rose-300 hover:bg-rose-50 min-h-[46px] flex items-center justify-center break-words overflow-hidden">
+                                <span id="ereignis-text-${rowCount}" class="ereignis-btn-text">+ Ereignis</span>
+                            </button>
+                            
+                            <div id="dropdown-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-1 w-48 bg-white border border-stone-200 rounded-xl shadow-xl z-50 p-1 text-left hidden">
+                                <div class="text-[9px] uppercase font-bold tracking-wider text-emerald-600 px-2 py-1 border-b border-stone-100">&mdash; Liste &mdash;</div>
+                                ${ereignisse.map(e => `
+                                    <button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[11px] text-slate-700 hover:bg-stone-50 rounded-lg truncate block">${e}</button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="no-print flex items-center justify-between bg-white/60 rounded-xl p-1 border border-stone-100 text-xs">
+                        <div id="counter-section-${rowCount}" class="hidden flex items-center gap-1 bg-stone-100 rounded-lg px-2 py-0.5">
+                            <button onclick="changeCount(${rowCount}, 'down')" class="text-slate-500 font-bold px-1 hover:text-rose-500">-</button>
+                            <span id="count-val-${rowCount}" class="font-mono font-bold text-slate-700">1</span>
+                            <button onclick="changeCount(${rowCount}, 'up')" class="text-slate-500 font-bold px-1 hover:text-emerald-500">+</button>
+                        </div>
+                        <div class="flex items-center gap-2 ml-auto">
+                            <button onclick="triggerKI(${rowCount})" class="text-indigo-500 hover:text-indigo-700 font-bold px-2 py-1 bg-indigo-50 rounded-lg text-[10px]"><i class="fa-solid fa-wand-magic-sparkles"></i> KI الصياغة</button>
+                            <div id="photo-preview-${rowCount}" class="w-8"></div>
+                            <input type="file" id="photo-input-${rowCount}" accept="image/*" capture="environment" class="hidden" onchange="previewPhoto(${rowCount})">
+                            <button onclick="triggerCamera(${rowCount})" class="text-slate-500 hover:text-slate-700 px-2 py-1 bg-stone-100 rounded-lg text-[11px]"><i class="fa-solid fa-camera"></i> Foto</button>
                         </div>
                     </div>
                 </div>
             `;
             
             container.insertAdjacentHTML('beforeend', rowHtml);
+            
+            // ملء البيانات المحفوظة إن وجدت
+            if(savedDataObj) {
+                document.getElementById(`input-standort-${rowCount}`).value = savedDataObj.standort || '';
+                if(savedDataObj.start) {
+                    const btn = document.getElementById(`start-btn-${rowCount}`);
+                    btn.querySelector('span').innerText = savedDataObj.start;
+                    btn.className = "border border-stone-200 rounded-xl py-3 text-center text-[11px] bg-slate-700 text-white font-mono min-h-[46px] flex items-center justify-center gap-1";
+                }
+                if(savedDataObj.end) {
+                    const btn = document.getElementById(`end-btn-${rowCount}`);
+                    btn.querySelector('span').innerText = savedDataObj.end;
+                    btn.className = "border border-stone-200 rounded-xl py-3 text-center text-[11px] bg-slate-700 text-white font-mono min-h-[46px] flex items-center justify-center gap-1";
+                }
+                if(savedDataObj.ereignis) {
+                    const txt = document.getElementById(`ereignis-text-${rowCount}`);
+                    txt.innerText = savedDataObj.ereignis;
+                    txt.classList.remove('text-rose-400');
+                    txt.classList.add('text-slate-700', 'font-medium');
+                    if(savedDataObj.count && savedDataObj.count > 1) {
+                        document.getElementById(`counter-section-${rowCount}`).classList.remove('hidden');
+                        document.getElementById(`count-val-${rowCount}`).innerText = savedDataObj.count;
+                    }
+                }
+            }
+            
             updateStatus();
         }
 
@@ -177,18 +345,100 @@
                 if (lastRow) lastRow.remove();
                 rowCount--;
                 updateStatus();
+                saveData();
             }
         }
 
-        function resetForm() {
-            document.getElementById('rows-container').innerHTML = '';
-            rowCount = 0;
-            updateStatus();
+        // إدارة ميزة الحفظ التلقائي في الذاكرة المحلية لتجنب ضياع البيانات
+        function saveData() {
+            const data = {
+                title: document.getElementById('shift-title').value,
+                startHour: document.getElementById('shift-start-hour').value,
+                endHour: document.getElementById('shift-end-hour').value,
+                employee: document.getElementById('employee-name').value,
+                day: document.getElementById('shift-day').value,
+                date: document.getElementById('shift-date').value,
+                type: document.getElementById('shift-type').value,
+                alert: document.getElementById('shift-alert').value,
+                rows: []
+            };
+
+            for(let i = 1; i <= rowCount; i++) {
+                const standortInput = document.getElementById(`input-standort-${i}`);
+                if(!standortInput) continue;
+                
+                const startLbl = document.getElementById(`start-btn-${i}`).querySelector('span').innerText;
+                const endLbl = document.getElementById(`end-btn-${i}`).querySelector('span').innerText;
+                const ereignisTxt = document.getElementById(`ereignis-text-${i}`).innerText;
+                const countVal = document.getElementById(`count-val-${i}`) ? document.getElementById(`count-val-${i}`).innerText : 1;
+
+                data.rows.push({
+                    standort: standortInput.value,
+                    start: startLbl !== 'Jetzt' ? startLbl : null,
+                    end: endLbl !== 'Jetzt' ? endLbl : null,
+                    ereignis: ereignisTxt !== '+ Ereignis' ? ereignisTxt : null,
+                    count: countVal
+                });
+            }
+
+            localStorage.setItem('denis_protokoll_data', JSON.stringify(data));
+            const now = new Date();
+            document.getElementById('save-time').innerText = now.toTimeString().split(' ')[0];
         }
 
-        // إضافة سطر أول تلقائياً عند الفتح
+        function loadSavedData() {
+            const raw = localStorage.getItem('denis_protokoll_data');
+            if(!raw) {
+                setAutomaticDateTime();
+                addRow();
+                return;
+            }
+
+            const data = JSON.parse(raw);
+            document.getElementById('shift-title').value = data.title || 'Nachtschicht von gestern';
+            document.getElementById('shift-start-hour').value = data.startHour || '20:00';
+            document.getElementById('shift-end-hour').value = data.endHour || '07:00';
+            document.getElementById('employee-name').value = data.employee || '';
+            document.getElementById('shift-day').value = data.day || '';
+            document.getElementById('shift-date').value = data.date || '';
+            document.getElementById('shift-type').value = data.type || '🟢 Regulär';
+            document.getElementById('shift-alert').value = data.alert || '🔔 Ton';
+
+            if(data.rows && data.rows.length > 0) {
+                data.rows.forEach(r => addRow(r));
+            } else {
+                addRow();
+            }
+            setAutomaticDateTime();
+            calculateProgress();
+        }
+
+        function removeSavedData() {
+            localStorage.removeItem('denis_protokoll_data');
+        }
+
+        function resetForm() {
+            if(confirm("Möchten Sie das Protokoll wirklich zurücksetzen?")) {
+                removeSavedData();
+                document.getElementById('rows-container').innerHTML = '';
+                rowCount = 0;
+                document.getElementById('employee-name').value = '';
+                document.getElementById('shift-day').value = '';
+                document.getElementById('shift-date').value = '';
+                setAutomaticDateTime();
+                calculateProgress();
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.relative')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('show'));
+            }
+        });
+
         window.onload = function() {
-            addRow();
+            loadSavedData();
+            setInterval(calculateProgress, 60000); // تحديث عداد شريط الوقت تلقائياً كل دقيقة
         };
     </script>
 </body>
