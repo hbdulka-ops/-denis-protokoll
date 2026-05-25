@@ -17,7 +17,7 @@
 :root{--red:#E8394A;--red2:#ff6b7a;--green:#4cba6b;--bg:#ECEEF2;--card:#ffffff;--border:#E2E5EC;--text:#141518;--muted:#8890A0;--row-hover:#fff8f8}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:24px 16px 60px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 1px 1px,#c8cdd8 1px,transparent 0);background-size:28px 28px;opacity:.35;pointer-events:none;z-index:0}
-.toolbar{position:relative;z-index:2;max-width:900px;margin:0 auto 18px;display:flex;align-items:center;justify-content:between}
+.toolbar{position:relative;z-index:2;max-width:900px;margin:0 auto 18px;display:flex;align-items:center;justify-content:space-between}
 .toolbar-brand{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
 .toolbar-brand span{color:var(--red)}
 .toolbar-right{display:flex;gap:8px}
@@ -27,7 +27,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .btn-ghost{background:#fff;color:#555;border:1.5px solid var(--border)}
 .btn-ghost:hover{background:#f8f8f8}
 .card{position:relative;z-index:1;max-width:900px;margin:0 auto;background:var(--card);border-radius:24px;box-shadow:0 2px 0 #d0d4dc,0 8px 40px rgba(0,0,0,.09);overflow:hidden}
-.card-header{background:linear-gradient(135deg,#4a6080 0%,#3d5268 100%);padding:22px 28px 18px;display:flex;align-items:center;justify-content:between;gap:16px}
+.card-header{background:linear-gradient(135deg,#4a6080 0%,#3d5268 100%);padding:22px 28px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .header-left{display:flex;flex-direction:column;gap:2px}
 .header-eyebrow{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,200,200,.85);margin-bottom:2px}
 .header-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.5px}
@@ -39,35 +39,37 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .status-dot{width:7px;height:7px;border-radius:50%;background:#4cba6b}
 .status-badge.incident{background:rgba(232,57,74,.12);border-color:rgba(232,57,74,.3);color:var(--red)}
 .status-badge.incident .status-dot{background:var(--red)}
-.col-headers{display:grid;grid-template-columns:160px 100px 100px 1fr;gap:0;padding:14px 20px 6px;border-bottom:1px solid var(--border);background:#fdfdfd}
+
+/* ترويسة وتصميم الجدول الممتد النظيف والفاخر الخاص بك */
+.col-headers{display:grid;grid-template-columns:180px 100px 100px 1fr;gap:0;padding:14px 20px 6px;border-bottom:1px solid var(--border);background:#fdfdfd}
 .col-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:4px}
 .tag-kunde{color:#555}
 .tag-beginn{color:#2e7d32}
 .tag-ende {color:#b78103}
 .tag-notiz{color:#c62828}
 .rows-wrap{padding:10px 0;background:#fff}
-.proto-row{display:grid;grid-template-columns:160px 100px 100px 1fr;gap:0;border-bottom:1px solid #f1f3f7;transition:background .15s;align-items:stretch}
+.proto-row{display:grid;grid-template-columns:180px 100px 100px 1fr;gap:0;border-bottom:1px solid #f1f3f7;transition:background .15s;align-items:stretch}
 .proto-row:hover{background:var(--row-hover)}
 .proto-row:last-child{border-bottom:none}
 .cell{padding:12px 15px;display:flex;align-items:center;border-right:1px solid #edf0f5;position:relative}
 .cell:last-child{border-right:none}
-.row-num{font-size:10px;font-weight:700;color:#ccd2de;margin-right:6px;font-family:'Syne',sans-serif}
-select,input[type="text"],input[type="time"]{width:100%;border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
+.row-num{font-size:10px;font-weight:700;color:#ccd2de;margin-right:8px;font-family:'Syne',sans-serif}
+
+select,input[type="text"]{width:100%;border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
 select{cursor:pointer;color:#334155;font-weight:700}
-.time-box-interactive{font-weight:700;color:#64748b;font-family:monospace;cursor:pointer;font-size:13px;text-align:center;width:100%}
+
+/* أزرار الوقت المنبثقة التفاعلية الخاصة بك */
+.time-box-interactive{font-weight:700;color:#64748b;font-family:monospace;cursor:pointer;font-size:13px;text-align:center;width:100%;user-select:none}
 .time-box-filled{color:var(--text);font-weight:800}
-.notiz-container{width:100%;display:flex;align-items:center;justify-content:between;gap:8px}
-.dropdown-wrapper{position:relative;flex-grow:1}
-.dropdown-menu{display:none;position:absolute;left:0;top:100%;mt:4px;width:260px;background:#fff;border:1px solid #dcdfe6;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.15);z-index:100;padding:4px}
-.dropdown-menu.show{display:block}
-.dropdown-item{width:100%;text-align:left;padding:8px 12px;background:none;border:none;font-size:11px;font-weight:600;color:#475569;cursor:pointer;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dropdown-item:hover{background:#f1f5f9;color:var(--text)}
+
+.notiz-container{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
+
 .add-zone{padding:20px;display:flex;align-items:center;justify-content:center;gap:20px;border-top:1px solid var(--border);background:#fcfdfe}
 .rm-row-btn,.add-row-btn2{padding:8px 18px;border-radius:10px;border:1.5px solid var(--border);font-family:'Syne',sans-serif;font-size:12px;font-weight:800;cursor:pointer;background:#fff;color:#666;transition:all .15s}
 .add-row-btn2{border-color:var(--red);color:var(--red)}
 .add-row-btn2:hover{background:var(--red);color:#fff}
 .rm-row-btn:hover{background:#f8f8f8}
-.card-footer{background:#f8fafc;padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:between}
+.card-footer{background:#f8fafc;padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .chips{display:flex;gap:12px}
 .chip{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;color:#555}
 .chip-dot{width:5px;height:5px;border-radius:50%;background:#94a3b8}
@@ -77,16 +79,9 @@ select{cursor:pointer;color:#334155;font-weight:700}
 .proto-row:hover .delete-btn{opacity:1}
 .delete-btn:hover {color:var(--red)}
 
-/* ======================================================== */
-/* 🛠️ الستايلات الجديدة لأزرار البلاغات السريعة والقلم الذكي */
-/* ======================================================== */
-.quick-panic-bar {
-    max-width: 900px; margin: 0 auto 14px; display: flex; gap: 8px; flex-wrap: wrap; 
-}
-.panic-btn {
-    padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'DM Sans', sans-serif;
-    cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid transparent; transition: all 0.2s;
-}
+/* 🚨 شريط البلاغات السريعة والميزات الميدانية الاختيارية */
+.quick-panic-bar {max-width: 900px; margin: 0 auto 14px; display: flex; gap: 8px; flex-wrap: wrap;}
+.panic-btn {padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid transparent; transition: all 0.2s;}
 .p-danger { background: rgba(232,57,74,0.1); color: var(--red); border-color: rgba(232,57,74,0.2); }
 .p-danger:hover { background: var(--red); color: white; }
 .p-warning { background: rgba(245,166,35,0.1); color: #b78103; border-color: rgba(245,166,35,0.2); }
@@ -94,22 +89,20 @@ select{cursor:pointer;color:#334155;font-weight:700}
 .p-info { background: rgba(43,97,205,0.1); color: #2b61cd; border-color: rgba(43,97,205,0.2); }
 .p-info:hover { background: #2b61cd; color: white; }
 
-.magic-fix-btn {
-    background: none; border: none; color: #a4b3cc; cursor: pointer; padding: 4px; font-size: 11px; transition: color 0.2s; margin-right: 4px;
-}
+.magic-fix-btn {background: none; border: none; color: #cbd5e1; cursor: pointer; padding: 4px; font-size: 12px; transition: color 0.2s; display: flex; align-items: center;}
 .magic-fix-btn:hover { color: #2b61cd; }
 
 @media print{
     .no-print,.btn,.add-zone,.delete-btn,.quick-panic-bar,.magic-fix-btn{display:none!important}
-    body{background:#fff!important;padding:0!important}
+    body{background:#fff!important;padding:0!important;color:#000!important}
     .card{box-shadow:none!important;border:1px solid #000!important;max-width:100%!important;margin:0!important;border-radius:0!important}
     .card-header{background:#4a6080!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .proto-row{border-bottom:1px solid #94a3b8!important;page-break-inside:avoid}
-    .cell{border-right:1px solid #94a3b8!important}
+    .proto-row{border-bottom:1px solid #000!important;page-break-inside:avoid}
+    .cell{border-right:1px solid #000!important}
     select{appearance:none;-webkit-appearance:none}
 }
 
-/* شاشة تسجيل الدخول الأصلية */
+/* شاشة تسجيل الدخول والنظام الأمني الأصلي الخاص بك */
 #checkinScreen{position:fixed;inset:0;background:#141518;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;font-family:'DM Sans',sans-serif}
 .ci-card{background:#1f2126;width:100%;max-width:360px;border-radius:28px;padding:32px 24px;box-shadow:0 20px 50px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden}
 .ci-eyebrow{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#e8394a;text-align:center;margin-bottom:6px}
@@ -245,22 +238,11 @@ select{cursor:pointer;color:#334155;font-weight:700}
 
 <script>
 const KUNDEN = ['— Standort —','Galerie','Lüneburg Parkhaus','Fuhle','Parking Millerntorplatz','Parkhaus My Falkenried'];
-const EREIGNISSE = [
-    'Obdachlose nach draußen gebracht',
-    'Fahrzeuge herausgelassen',
-    'Unbefugte Person entfernt',
-    'Vandalismus gemeldet',
-    'Fahrzeugschaden festgestellt',
-    'Parkverstoß dokumentiert',
-    'Technischer Defekt gemeldet',
-    'Streit geschlichtet'
-];
 
 let globalRowId = 0;
 let statusOk = true;
 let saveTimeout = null;
 
-// تشغيل توقيت الشاشة الأصلية للـ Check-in
 function updateCheckinTime(){
   const now = new Date();
   const timeStr = now.toTimeString().split(' ')[0].substring(0,5);
@@ -275,7 +257,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function handleCheckin(){
   const pin = document.getElementById('ciPin').value;
-  if(pin === '1995') { // الرمز السري الأصلي الخاص بك
+  if(pin === '1995') {
     showWelcomeOverlay();
   } else {
     ciShowToast('Falscher PIN-Code!');
@@ -290,7 +272,7 @@ function showWelcomeOverlay(){
   document.querySelectorAll('.proto-row').forEach(r => {
     const id = r.id.split('-')[1];
     if(document.getElementById(`kunde-${id}`).value !== '— Standort —') totalKunden++;
-    if(document.getElementById(`notiz-input-${id}`).value !== '') totalVorf++;
+    if(document.getElementById(`notiz-${id}`).value !== '') totalVorf++;
   });
 
   const overlay = document.createElement('div');
@@ -364,32 +346,13 @@ function setNowTime(id, field) {
     triggerAutosave();
 }
 
-function toggleDropdown(id) {
-    document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== id) m.classList.remove('show'); });
-    const menu = document.getElementById(id);
-    if(menu) menu.classList.toggle('show');
-}
-
-function selectEreignis(id, text) {
-    const btn = document.getElementById(`notiz-btn-${id}`);
-    const input = document.getElementById(`notiz-input-${id}`);
-    btn.innerText = text;
-    btn.style.color = '#141518';
-    input.value = text;
-    toggleDropdown(`drop-${id}`);
-    updateSummaryCounters();
-    triggerAutosave();
-}
-
-// 🪄 دالة تحسين وصقل الملاحظات تلقائياً (القلم الذكي)
+// 🪄 دالة تحسين الكتابة وصقلها لغوياً للـ B2 (تعمل على حقل الإدخال الحر الأصلي الخاص بك)
 function optimizeText(id) {
-    const btn = document.getElementById(`notiz-btn-${id}`);
-    const input = document.getElementById(`notiz-input-${id}`);
-    let currentText = btn.innerText;
+    const input = document.getElementById(`notiz-${id}`);
+    let currentText = input.value.trim();
 
-    if(currentText.includes('...') || currentText === '') return;
+    if(currentText === '') return;
 
-    // قاموس ذكي محلي لتحويل الكلمات العادية أو السريعة إلى صياغة تقارير أمنية احترافية
     const corrections = {
         'alles gut': 'Kontrollrunde durchgeführt - Keine Unregelmäßigkeiten festgestellt.',
         'alles ok': 'Objekt kontrolliert und gesichert. Keine Vorkommnisse.',
@@ -402,7 +365,6 @@ function optimizeText(id) {
     let optimized = false;
     for (let key in corrections) {
         if(currentText.toLowerCase().includes(key)) {
-            btn.innerText = corrections[key];
             input.value = corrections[key];
             optimized = true;
             break;
@@ -410,20 +372,15 @@ function optimizeText(id) {
     }
 
     if(!optimized) {
-        // إذا لم يجد كلمة مفتاحية، يقوم بجعل الحرف الأول كبيراً ويضيف نقطة ليكون التقرير منسقاً رسمياً
-        btn.innerText = currentText.charAt(0).toUpperCase() + currentText.slice(1) + ".";
-        input.value = btn.innerText;
+        input.value = currentText.charAt(0).toUpperCase() + currentText.slice(1) + ".";
     }
 
-    btn.style.color = '#2b61cd'; // تغيير خفيف للون يوضح أنه تم التحسين بنجاح
     triggerAutosave();
 }
 
-// 🚨 دالة إضافة بلاغ طوارئ سريع بضغطة واحدة من الشريط العلوي
+// 🚨 بلاغ سريع من الشريط العلوي يفتح سطر ويكتب الملاحظة تلقائياً
 function addPanicRow(predefinedText) {
-    // نقوم بتغيير الحالة العامة للتقرير فوراً إلى "Vorfall aktiv"
     if(statusOk) { toggleStatus(); }
-    
     const now = new Date();
     const currentTimeStr = now.toTimeString().split(' ')[0].substring(0, 5);
 
@@ -446,8 +403,9 @@ function addNewRow(savedData = null) {
     const currentKunde = savedData?.kunde || '— Standort —';
     const currentStart = savedData?.start || '--:--';
     const currentEnd = savedData?.end || '--:--';
-    const currentNotiz = savedData?.notiz || 'Notiz hinzufügen...';
+    const currentNotiz = savedData?.notiz || '';
     
+    // بناء السطر تماماً كما في صورتك: حقل إدخال حر للكتابة بيدك
     row.innerHTML = `
         <div class="cell">
             <span class="row-num">#${String(globalRowId).padStart(2,'0')}</span>
@@ -466,18 +424,12 @@ function addNewRow(savedData = null) {
 
         <div class="cell">
             <div class="notiz-container">
-                <div class="dropdown-wrapper">
-                    <button id="notiz-btn-${globalRowId}" onclick="event.stopPropagation(); toggleDropdown('drop-${globalRowId}')" style="background:none; border:none; text-align:left; font-size:13px; font-weight:600; color:${currentNotiz.includes('...') ? '#8890A0' : '#141518'}; cursor:pointer; width:100%; outline:none;">
-                        ${currentNotiz}
-                    </button>
-                    <input type="hidden" id="notiz-input-${globalRowId}" value="${currentNotiz.includes('...') ? '' : currentNotiz}">
-                    <div id="drop-${globalRowId}" class="dropdown-menu">
-                        ${EREIGNISSE.map(e => `<button onclick="event.stopPropagation(); selectEreignis(${globalRowId}, '${e}')" class="dropdown-item">${e}</button>`).join('')}
-                    </div>
-                </div>
-                <button onclick="event.stopPropagation(); optimizeText(${globalRowId})" class="magic-fix-btn no-print" title="Text optimieren (B2)">
+                <input type="text" id="notiz-${globalRowId}" value="${currentNotiz}" placeholder="Notiz schreiben..." oninput="triggerAutosave(); updateSummaryCounters();">
+                
+                <button onclick="optimizeText(${globalRowId})" class="magic-fix-btn no-print" title="Text optimieren (B2)">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </button>
+                
                 <button onclick="deleteSpecificRow(${globalRowId})" class="delete-btn no-print" title="Zeile löschen">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
@@ -517,10 +469,10 @@ function updateSummaryCounters() {
     rows.forEach(r => {
         const id = r.id.split('-')[1];
         const kVal = document.getElementById(`kunde-${id}`).value;
-        const nVal = document.getElementById(`notiz-input-${id}`).value;
+        const nVal = document.getElementById(`notiz-${id}`).value.trim();
         
         if(kVal !== '— Standort —') activeKunden++;
-        if(nVal && nVal !== '') activeVorfaelle++;
+        if(nVal !== '') activeVorfaelle++;
     });
 
     document.getElementById('chipK').innerText = `${activeKunden} Kunden`;
@@ -535,7 +487,7 @@ function saveAllDataDirectly() {
             kunde: document.getElementById(`kunde-${id}`).value,
             start: document.getElementById(`start-lbl-${id}`).innerText,
             end: document.getElementById(`end-lbl-${id}`).innerText,
-            notiz: document.getElementById(`notiz-btn-${id}`).innerText
+            notiz: document.getElementById(`notiz-${id}`).value
         });
     });
 
@@ -585,10 +537,6 @@ function resetForm() {
         loadAllData();
     }
 }
-
-document.addEventListener('click', function() {
-    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
-});
 </script>
 </body>
 </html>
