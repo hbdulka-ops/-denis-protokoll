@@ -1,434 +1,594 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Denis Protokoll</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --red: #E8394A; 
-            --red2: #ff6b7a; 
-            --green: #4cba6b;
-            --bg: #ECEEF2; 
-            --card: #ffffff; 
-            --border: #E2E5EC;
-            --text: #141518; 
-            --muted: #8890A0; 
-            --row-hover: #fff8f8;
-        }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg); 
-            min-height: 100vh;
-            padding: 24px 16px 60px;
-        }
-        body::before {
-            content:''; position:fixed; inset:0;
-            background-image: radial-gradient(circle at 1px 1px, #c8cdd8 1px, transparent 0);
-            background-size: 28px 28px; opacity: 0.35;
-            pointer-events: none; z-index: 0;
-        }
-        .toolbar {
-            position: relative; z-index: 2;
-            max-width: 900px; margin: 0 auto 18px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .toolbar-brand { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
-        .toolbar-brand span { color: var(--red); }
-        .toolbar-right { display: flex; gap: 8px; }
-        .btn { padding: 9px 20px; border-radius: 10px; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.18s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-red { background: var(--red); color: white; box-shadow: 0 4px 12px rgba(232,57,74,0.35); }
-        .btn-red:hover { background: #c8102e; transform: translateY(-1px); }
-        .btn-ghost { background: white; color: #555; border: 1.5px solid var(--border); }
-        .btn-ghost:hover { background: #f8f8f8; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denis Protokoll</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Check-in">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#3d5268">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233d5268'/%3E%3Ctext y='.9em' font-size='72' x='50%25' text-anchor='middle'%3E⏱%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%233d5268'/%3E%3Ctext y='.9em' font-size='72' x='50%25' text-anchor='middle'%3E⏱%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#E8394A;--red2:#ff6b7a;--green:#4cba6b;--bg:#ECEEF2;--card:#ffffff;--border:#E2E5EC;--text:#141518;--muted:#8890A0;--row-hover:#fff8f8}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:24px 16px 60px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 1px 1px,#c8cdd8 1px,transparent 0);background-size:28px 28px;opacity:.35;pointer-events:none;z-index:0}
+.toolbar{position:relative;z-index:2;max-width:900px;margin:0 auto 18px;display:flex;align-items:center;justify-content:between}
+.toolbar-brand{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.toolbar-brand span{color:var(--red)}
+.toolbar-right{display:flex;gap:8px}
+.btn{padding:9px 20px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px}
+.btn-red{background:var(--red);color:#fff;box-shadow:0 4px 12px rgba(232,57,74,.35)}
+.btn-red:hover{background:#c8102e;transform:translateY(-1px)}
+.btn-ghost{background:#fff;color:#555;border:1.5px solid var(--border)}
+.btn-ghost:hover{background:#f8f8f8}
+.card{position:relative;z-index:1;max-width:900px;margin:0 auto;background:var(--card);border-radius:24px;box-shadow:0 2px 0 #d0d4dc,0 8px 40px rgba(0,0,0,.09);overflow:hidden}
+.card-header{background:linear-gradient(135deg,#4a6080 0%,#3d5268 100%);padding:22px 28px 18px;display:flex;align-items:center;justify-content:between;gap:16px}
+.header-left{display:flex;flex-direction:column;gap:2px}
+.header-eyebrow{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,200,200,.85);margin-bottom:2px}
+.header-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.5px}
+.header-title span{color:#ffb3b9}
+.header-right{display:flex;align-items:center;gap:12px}
+.day-select{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:6px 12px;cursor:pointer;outline:none}
+.date-input{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:rgba(255,255,255,.85);background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.18);border-radius:10px;padding:6px 12px;outline:none}
+.status-badge{display:flex;align-items:center;gap:7px;background:rgba(76,186,107,.12);border:1px solid rgba(76,186,107,.3);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:#4cba6b;cursor:pointer;transition:all .2s;user-select:none}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#4cba6b}
+.status-badge.incident{background:rgba(232,57,74,.12);border-color:rgba(232,57,74,.3);color:var(--red)}
+.status-badge.incident .status-dot{background:var(--red)}
+.col-headers{display:grid;grid-template-columns:160px 100px 100px 1fr;gap:0;padding:14px 20px 6px;border-bottom:1px solid var(--border);background:#fdfdfd}
+.col-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:4px}
+.tag-kunde{color:#555}
+.tag-beginn{color:#2e7d32}
+.tag-ende {color:#b78103}
+.tag-notiz{color:#c62828}
+.rows-wrap{padding:10px 0;background:#fff}
+.proto-row{display:grid;grid-template-columns:160px 100px 100px 1fr;gap:0;border-bottom:1px solid #f1f3f7;transition:background .15s;align-items:stretch}
+.proto-row:hover{background:var(--row-hover)}
+.proto-row:last-child{border-bottom:none}
+.cell{padding:12px 15px;display:flex;align-items:center;border-right:1px solid #edf0f5;position:relative}
+.cell:last-child{border-right:none}
+.row-num{font-size:10px;font-weight:700;color:#ccd2de;margin-right:6px;font-family:'Syne',sans-serif}
+select,input[type="text"],input[type="time"]{width:100%;border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
+select{cursor:pointer;color:#334155;font-weight:700}
+.time-box-interactive{font-weight:700;color:#64748b;font-family:monospace;cursor:pointer;font-size:13px;text-align:center;width:100%}
+.time-box-filled{color:var(--text);font-weight:800}
+.notiz-container{width:100%;display:flex;align-items:center;justify-content:between;gap:8px}
+.dropdown-wrapper{position:relative;flex-grow:1}
+.dropdown-menu{display:none;position:absolute;left:0;top:100%;mt:4px;width:260px;background:#fff;border:1px solid #dcdfe6;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.15);z-index:100;padding:4px}
+.dropdown-menu.show{display:block}
+.dropdown-item{width:100%;text-align:left;padding:8px 12px;background:none;border:none;font-size:11px;font-weight:600;color:#475569;cursor:pointer;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dropdown-item:hover{background:#f1f5f9;color:var(--text)}
+.add-zone{padding:20px;display:flex;align-items:center;justify-content:center;gap:20px;border-top:1px solid var(--border);background:#fcfdfe}
+.rm-row-btn,.add-row-btn2{padding:8px 18px;border-radius:10px;border:1.5px solid var(--border);font-family:'Syne',sans-serif;font-size:12px;font-weight:800;cursor:pointer;background:#fff;color:#666;transition:all .15s}
+.add-row-btn2{border-color:var(--red);color:var(--red)}
+.add-row-btn2:hover{background:var(--red);color:#fff}
+.rm-row-btn:hover{background:#f8f8f8}
+.card-footer{background:#f8fafc;padding:16px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:between}
+.chips{display:flex;gap:12px}
+.chip{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;color:#555}
+.chip-dot{width:5px;height:5px;border-radius:50%;background:#94a3b8}
+.footer-brand{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.footer-brand span{color:var(--red)}
+.delete-btn{background:none;border:none;color:#cbd5e1;cursor:pointer;opacity:0;transition:opacity .2s,color .2s;padding:4px}
+.proto-row:hover .delete-btn{opacity:1}
+.delete-btn:hover {color:var(--red)}
 
-        .card { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; background: var(--card); border-radius: 24px; box-shadow: 0 2px 0 #d0d4dc, 0 8px 40px rgba(0,0,0,0.09); overflow: hidden; }
-        .card-header { background: linear-gradient(135deg, #4a6080 0%, #3d5268 100%); padding: 22px 28px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-        .header-left { display: flex; flex-direction: column; gap: 2px; }
-        .header-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,200,200,0.85); margin-bottom: 2px; }
-        .header-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: white; line-height: 1; letter-spacing: -0.5px; }
-        .header-title span { color: #ffb3b9; }
-        .header-right { display: flex; align-items: center; gap: 12px; }
-        .day-select { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: white; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 6px 12px; cursor: pointer; outline: none; }
-        .date-input { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 6px 12px; outline: none; }
-        
-        .status-badge { display: flex; align-items: center; gap: 7px; background: rgba(76,186,107,0.12); border: 1px solid rgba(76,186,107,0.3); border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #4cba6b; cursor: pointer; transition: all 0.2s; user-select: none; }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4cba6b; }
-        .status-badge.incident { background: rgba(232,57,74,0.12); border-color: rgba(232,57,74,0.3); color: var(--red); }
-        .status-badge.incident .status-dot { background: var(--red); }
+/* ======================================================== */
+/* 🛠️ الستايلات الجديدة لأزرار البلاغات السريعة والقلم الذكي */
+/* ======================================================== */
+.quick-panic-bar {
+    max-width: 900px; margin: 0 auto 14px; display: flex; gap: 8px; flex-wrap: wrap; 
+}
+.panic-btn {
+    padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid transparent; transition: all 0.2s;
+}
+.p-danger { background: rgba(232,57,74,0.1); color: var(--red); border-color: rgba(232,57,74,0.2); }
+.p-danger:hover { background: var(--red); color: white; }
+.p-warning { background: rgba(245,166,35,0.1); color: #b78103; border-color: rgba(245,166,35,0.2); }
+.p-warning:hover { background: #f5a623; color: white; }
+.p-info { background: rgba(43,97,205,0.1); color: #2b61cd; border-color: rgba(43,97,205,0.2); }
+.p-info:hover { background: #2b61cd; color: white; }
 
-        .col-headers { display: grid; grid-template-columns: 160px 100px 100px 1fr; gap: 0; padding: 14px 20px 6px; border-bottom: 1px solid var(--border); background: #fdfdfd; }
-        .col-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 4px; }
-        .tag-kunde { color: #555; }
-        .tag-beginn { color: #2e7d32; }
-        .tag-ende { color: #b78103; }
-        .tag-notiz { color: #c62828; }
+.magic-fix-btn {
+    background: none; border: none; color: #a4b3cc; cursor: pointer; padding: 4px; font-size: 11px; transition: color 0.2s; margin-right: 4px;
+}
+.magic-fix-btn:hover { color: #2b61cd; }
 
-        .rows-wrap { padding: 10px 0; background: #ffffff; }
-        .proto-row { display: grid; grid-template-columns: 160px 100px 100px 1fr; gap: 0; border-bottom: 1px solid #f1f3f7; transition: background 0.15s; align-items: stretch; }
-        .proto-row:hover { background: var(--row-hover); }
-        .proto-row:last-child { border-bottom: none; }
-        
-        .cell { padding: 12px 15px; display: flex; align-items: center; border-right: 1px solid #edf0f5; position: relative; }
-        .cell:last-child { border-right: none; }
-        
-        .row-num { font-size: 10px; font-weight: 700; color: #ccd2de; margin-right: 6px; font-family: 'Syne', sans-serif; }
-        
-        select, input[type="text"] {
-            width: 100%; border: none; background: transparent; outline: none;
-            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--text);
-        }
-        select { cursor: pointer; color: #334155; font-weight: 700; }
-        
-        .time-box-interactive { font-weight: 700; color: #64748b; font-family: monospace; cursor: pointer; font-size: 13px; text-align: center; width: 100%; user-select: none; }
-        .time-box-filled { color: var(--text); font-weight: 800; }
+@media print{
+    .no-print,.btn,.add-zone,.delete-btn,.quick-panic-bar,.magic-fix-btn{display:none!important}
+    body{background:#fff!important;padding:0!important}
+    .card{box-shadow:none!important;border:1px solid #000!important;max-width:100%!important;margin:0!important;border-radius:0!important}
+    .card-header{background:#4a6080!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .proto-row{border-bottom:1px solid #94a3b8!important;page-break-inside:avoid}
+    .cell{border-right:1px solid #94a3b8!important}
+    select{appearance:none;-webkit-appearance:none}
+}
 
-        .notiz-container { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .dropdown-wrapper { position: relative; flex-grow: 1; }
-        .dropdown-menu {
-            display: none; position: absolute; left: 0; top: 100%; margin-top: 4px; 
-            width: 260px; background: white; border: 1px solid #dcdfe6; 
-            border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; padding: 4px;
-        }
-        .dropdown-menu.show { display: block; }
-        .dropdown-item {
-            width: 100%; text-align: left; padding: 8px 12px; background: none; border: none;
-            font-size: 11px; font-weight: 600; color: #475569; cursor: pointer; border-radius: 8px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .dropdown-item:hover { background: #f1f5f9; color: var(--text); }
-
-        .add-zone { padding: 20px; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid var(--border); background: #fcfdfe; }
-        .rm-row-btn, .add-row-btn2 { padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--border); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; cursor: pointer; background: white; color: #666; transition: all 0.15s; }
-        .add-row-btn2 { border-color: var(--red); color: var(--red); }
-        .add-row-btn2:hover { background: var(--red); color: white; }
-        .rm-row-btn:hover { background: #f8f8f8; }
-
-        .card-footer { background: #f8fafc; padding: 16px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .chips { display: flex; gap: 12px; }
-        .chip { display: flex; align-items: center; gap: 6px; background: white; border: 1.5px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; color: #555; }
-        .chip-dot { width: 5px; height: 5px; border-radius: 50%; background: #94a3b8; }
-        .footer-brand { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-        .footer-brand span { color: var(--red); }
-
-        .delete-btn { background: none; border: none; color: #cbd5e1; cursor: pointer; opacity: 0; transition: opacity 0.2s, color 0.2s; padding: 4px; }
-        .proto-row:hover .delete-btn { opacity: 1; }
-        .delete-btn:hover { color: var(--red); }
-
-        /* ======================================================= */
-        /* 🖨️ إعدادات الطباعة الصارمة والذكية لمنع البهتان تماماً */
-        /* ======================================================= */
-        @media print {
-            .no-print, .btn, .add-zone, .delete-btn { display: none !important; }
-            body { background: white !important; padding: 0 !important; color: #000000 !important; }
-            body::before { display: none !important; }
-            
-            .card { 
-                box-shadow: none !important; 
-                border: 1.5px solid #141518 !important; 
-                max-w: 100% !important; 
-                margin: 0 !important; 
-                border-radius: 0 !important; 
-            }
-            .card-header { 
-                background: #3d5268 !important; 
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important; 
-            }
-            .col-headers {
-                background: #f1f3f7 !important;
-                border-bottom: 1.5px solid #141518 !important;
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important;
-            }
-            .proto-row { 
-                border-bottom: 1.5px solid #141518 !important; 
-                page-break-inside: avoid; 
-                background: white !important;
-            }
-            .cell { 
-                border-right: 1.5px solid #141518 !important; 
-            }
-            .cell:last-child { 
-                border-right: none !important; 
-            }
-            .col-tag, .row-num, select, .time-box-interactive, button {
-                color: #000000 !important;
-                font-weight: bold !important;
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important;
-            }
-            select { appearance: none; -webkit-appearance: none; }
-        }
-    </style>
+/* شاشة تسجيل الدخول الأصلية */
+#checkinScreen{position:fixed;inset:0;background:#141518;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;font-family:'DM Sans',sans-serif}
+.ci-card{background:#1f2126;width:100%;max-width:360px;border-radius:28px;padding:32px 24px;box-shadow:0 20px 50px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden}
+.ci-eyebrow{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#e8394a;text-align:center;margin-bottom:6px}
+.ci-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;text-align:center;margin-bottom:24px;letter-spacing:-.5px}
+.ci-title span{color:rgba(255,255,255,.4)}
+.ci-field{margin-bottom:16px}
+.ci-label{font-size:11px;font-weight:700;color:#8890a0;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block}
+.ci-input-wrapper{position:relative;display:flex;align-items:center}
+.ci-input-wrapper i{position:absolute;left:14px;color:#4a505c;font-size:14px}
+.ci-select,.ci-input{width:100%;background:#262930;border:1.5px solid #2d313a;border-radius:12px;padding:12px 14px 12px 40px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;outline:none;transition:all .2s;appearance:none;-webkit-appearance:none}
+.ci-select:focus,.ci-input:focus{border-color:#e8394a;background:#2a2d36}
+.ci-select{cursor:pointer;color:#fff}
+.ci-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.ci-btn{width:100%;padding:14px;border-radius:12px;border:none;background:#e8394a;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 15px rgba(232,57,74,.3);display:flex;align-items:center;justify-content:center;gap:8px}
+.ci-btn:hover{background:#c8102e;transform:translateY(-1px)}
+.ci-toast{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:#e8394a;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap;opacity:1;transition:opacity .3s}
+.autosave-indicator{position:fixed;bottom:16px;right:16px;background:rgba(20,21,24,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);padding:6px 12px;border-radius:20px;font-size:10px;font-weight:700;color:#4cba6b;display:flex;align-items:center;gap:6px;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.15);pointer-events:none;opacity:0;transition:opacity .3s}
+.autosave-indicator i{animation:spin 2s linear infinite}
+@keyframes spin{100%{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 
-    <div class="toolbar no-print">
-        <div class="toolbar-brand">Denis <span>Protokoll</span></div>
-        <div class="toolbar-right">
-            <button onclick="resetForm()" class="btn btn-ghost"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-            <button onclick="window.print()" class="btn btn-red"><i class="fa-solid fa-print"></i> Drucken</button>
+<div id="checkinScreen">
+  <div class="ci-card">
+    <div class="ci-eyebrow">Wachdienst</div>
+    <div class="ci-title">Check-in <span>Meldung</span></div>
+    <div class="ci-field">
+      <label class="ci-label">Mitarbeiter</label>
+      <div class="ci-input-wrapper">
+        <i class="fa-solid fa-user-shield"></i>
+        <select id="ciUser" class="ci-select">
+          <option value="Denis">Denis</option>
+        </select>
+      </div>
+    </div>
+    <div class="ci-field">
+      <label class="ci-label">Dienstschicht</label>
+      <div class="ci-input-wrapper">
+        <i class="fa-solid fa-clock"></i>
+        <select id="ciSchicht" class="ci-select">
+          <option value="Frühschicht">Frühschicht</option>
+          <option value="Spätschicht">Spätschicht</option>
+          <option value="Nachtschicht" selected>Nachtschicht</option>
+        </select>
+      </div>
+    </div>
+    <div class="ci-grid">
+      <div>
+        <label class="ci-label">PIN-Code</label>
+        <div class="ci-input-wrapper">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="ciPin" class="ci-input" placeholder="••••" maxlength="4" inputmode="numeric">
+        </div>
+      </div>
+      <div>
+        <label class="ci-label">Uhrzeit</label>
+        <div class="ci-input-wrapper">
+          <i class="fa-solid fa-stopwatch"></i>
+          <input type="text" id="ciTime" class="ci-input" readonly style="color:#8890A0;background:#1f2126;border-color:transparent;padding-left:34px">
+        </div>
+      </div>
+    </div>
+    <button onclick="handleCheckin()" class="ci-btn">
+      <i class="fa-solid fa-right-to-bracket"></i> Dienst beginnen
+    </button>
+  </div>
+</div>
+
+<div class="autosave-indicator" id="autosaveIndicator">
+  <i class="fa-solid fa-circle-notch"></i> Speichern...
+</div>
+
+<div class="toolbar no-print">
+    <div class="toolbar-brand">Denis <span>Protokoll</span></div>
+    <div class="toolbar-right">
+        <button onclick="resetForm()" class="btn btn-ghost"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+        <button onclick="window.print()" class="btn btn-red"><i class="fa-solid fa-print"></i> Drucken</button>
+    </div>
+</div>
+
+<div class="quick-panic-bar no-print">
+    <button class="panic-btn p-danger" onclick="addPanicRow('Unbefugte Person entfernt')"><i class="fa-solid fa-user-xmark"></i> Person entfernt</button>
+    <button class="panic-btn p-danger" onclick="addPanicRow('Vandalismus gemeldet')"><i class="fa-solid fa-burst"></i> Vandalismus</button>
+    <button class="panic-btn p-warning" onclick="addPanicRow('Wasserschaden festgestellt')"><i class="fa-solid fa-droplet"></i> Wasserschaden</button>
+    <button class="panic-btn p-warning" onclick="addPanicRow('Technischer Defekt gemeldet')"><i class="fa-solid fa-gear"></i> Tech. Defekt</button>
+    <button class="panic-btn p-info" onclick="addPanicRow('Kontrollrunde durchgeführt - Ohne Vorkommnisse')"><i class="fa-solid fa-clipboard-check"></i> Kontrollrunde OK</button>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="header-left">
+            <div class="header-eyebrow">Sicherheitsdienst · Vorfallprotokoll</div>
+            <div class="header-title">Denis <span>Protokoll</span></div>
+        </div>
+        <div class="header-right">
+            <select class="day-select" id="daySelect" onchange="triggerAutosave()">
+                <option>Montag</option><option>Dienstag</option><option>Mittwoch</option>
+                <option>Donnerstag</option><option>Freitag</option><option>Samstag</option><option>Sonntag</option>
+            </select>
+            <input class="date-input" type="date" id="dateInput" onchange="triggerAutosave()">
+            <div class="status-badge" id="statusBadge" onclick="toggleStatus()">
+                <span class="status-dot"></span>
+                <span id="statusText">Regulär</span>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="header-left">
-                <div class="header-eyebrow">Sicherheitsdienst · Vorfallprotokoll</div>
-                <div class="header-title">Denis <span>Protokoll</span></div>
-            </div>
-            <div class="header-right">
-                <select class="day-select" id="daySelect" onchange="saveAllData()">
-                    <option>Montag</option><option>Dienstag</option><option>Mittwoch</option>
-                    <option>Donnerstag</option><option>Freitag</option><option>Samstag</option><option>Sonntag</option>
-                </select>
-                <input class="date-input" type="date" id="dateInput" onchange="saveAllData()">
-                <div class="status-badge" id="statusBadge" onclick="toggleStatus()">
-                    <span class="status-dot"></span>
-                    <span id="statusText">Regulär</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-headers">
-            <div class="col-tag tag-kunde">Kunde</div>
-            <div class="col-tag tag-beginn">Beginn</div>
-            <div class="col-tag tag-ende">Ende</div>
-            <div class="col-tag tag-notiz">Dienstnotiz</div>
-        </div>
-
-        <div class="rows-wrap" id="rowsWrap">
-            </div>
-
-        <div class="add-zone no-print">
-            <button class="rm-row-btn" onclick="removeLastRow()">− Zeile</button>
-            <span id="rowCount">0 Zeilen</span>
-            <button class="add-row-btn2" onclick="addNewRow()">＋ Zeile</button>
-        </div>
-
-        <div class="card-footer">
-            <div class="chips">
-                <div class="chip"><span class="chip-dot" style="background:#4cba6b"></span><span id="chipK">0 Kunden</span></div>
-                <div class="chip"><span class="chip-dot" style="background:var(--red)"></span><span id="chipV">0 Vorfälle</span></div>
-                <div class="chip"><span class="chip-dot" style="background:#2b61cd"></span><span id="chipR">0 Zeilen</span></div>
-            </div>
-            <div class="footer-brand">Denis <span>Protokoll</span></div>
-        </div>
+    <div class="col-headers">
+        <div class="col-tag tag-kunde">Kunde</div>
+        <div class="col-tag tag-beginn">Beginn</div>
+        <div class="col-tag tag-ende">Ende</div>
+        <div class="col-tag tag-notiz">Dienstnotiz</div>
     </div>
 
-    <script>
-        const KUNDEN = ['— Standort —','Galerie','Lüneburg Parkhaus','Fuhle','Parking Millerntorplatz','Parkhaus My Falkenried'];
-        const EREIGNISSE = [
-            'Obdachlose nach draußen gebracht',
-            'Fahrzeuge herausgelassen',
-            'Unbefugte Person entfernt',
-            'Vandalismus gemeldet',
-            'Fahrzeugschaden festgestellt',
-            'Parkverstoß dokumentiert',
-            'Technischer Defekt gemeldet',
-            'Streit geschlichtet'
-        ];
+    <div class="rows-wrap" id="rowsWrap"></div>
 
-        let globalRowId = 0;
-        let statusOk = true;
+    <div class="add-zone no-print">
+        <button class="rm-row-btn" onclick="removeLastRow()">− Zeile</button>
+        <span id="rowCount">0 Zeilen</span>
+        <button class="add-row-btn2" onclick="addNewRow()">＋ Zeile</button>
+    </div>
 
-        function toggleStatus() {
-            statusOk = !statusOk;
-            document.getElementById('statusBadge').className = 'status-badge' + (statusOk ? '' : ' incident');
-            document.getElementById('statusText').textContent = statusOk ? 'Regulär' : 'Vorfall active';
-            saveAllData();
+    <div class="card-footer">
+        <div class="chips">
+            <div class="chip"><span class="chip-dot" style="background:#4cba6b"></span><span id="chipK">0 Kunden</span></div>
+            <div class="chip"><span class="chip-dot" style="background:var(--red)"></span><span id="chipV">0 Vorfälle</span></div>
+            <div class="chip"><span class="chip-dot" style="background:#2b61cd"></span><span id="chipR">0 Zeilen</span></div>
+        </div>
+        <div class="footer-brand">Denis <span>Protokoll</span></div>
+    </div>
+</div>
+
+<script>
+const KUNDEN = ['— Standort —','Galerie','Lüneburg Parkhaus','Fuhle','Parking Millerntorplatz','Parkhaus My Falkenried'];
+const EREIGNISSE = [
+    'Obdachlose nach draußen gebracht',
+    'Fahrzeuge herausgelassen',
+    'Unbefugte Person entfernt',
+    'Vandalismus gemeldet',
+    'Fahrzeugschaden festgestellt',
+    'Parkverstoß dokumentiert',
+    'Technischer Defekt gemeldet',
+    'Streit geschlichtet'
+];
+
+let globalRowId = 0;
+let statusOk = true;
+let saveTimeout = null;
+
+// تشغيل توقيت الشاشة الأصلية للـ Check-in
+function updateCheckinTime(){
+  const now = new Date();
+  const timeStr = now.toTimeString().split(' ')[0].substring(0,5);
+  const el = document.getElementById('ciTime');
+  if(el) el.value = timeStr;
+}
+setInterval(updateCheckinTime, 1000);
+window.addEventListener('DOMContentLoaded', () => {
+  updateCheckinTime();
+  loadAllData();
+});
+
+function handleCheckin(){
+  const pin = document.getElementById('ciPin').value;
+  if(pin === '1995') { // الرمز السري الأصلي الخاص بك
+    showWelcomeOverlay();
+  } else {
+    ciShowToast('Falscher PIN-Code!');
+  }
+}
+
+function showWelcomeOverlay(){
+  const user = document.getElementById('ciUser').value;
+  const schicht = document.getElementById('ciSchicht').value;
+  const totalRows = document.querySelectorAll('.proto-row').length;
+  let totalKunden = 0, totalVorf = 0;
+  document.querySelectorAll('.proto-row').forEach(r => {
+    const id = r.id.split('-')[1];
+    if(document.getElementById(`kunde-${id}`).value !== '— Standort —') totalKunden++;
+    if(document.getElementById(`notiz-input-${id}`).value !== '') totalVorf++;
+  });
+
+  const overlay = document.createElement('div');
+  overlay.style = `position:fixed;inset:0;background:#141518;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;font-family:'DM Sans',sans-serif;`;
+  overlay.innerHTML = `
+  <div class="ci-card" style="text-align:center;">
+    <div style="font-size:48px;margin-bottom:16px;">✓</div>
+    <div class="ci-eyebrow" style="color:#4cba6b;">Erfolgreich</div>
+    <div class="ci-title" style="margin-bottom:16px;">Guten Appetit, ${user}!</div>
+    <div style="font-size:13px;color:#8890A0;margin-bottom:24px;">Schicht: <b>${schicht}</b></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:#262930;padding:16px;border-radius:16px;margin-bottom:24px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#4cba6b;\">${totalKunden}</div>
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:2px;\">Kunden</div>
+      </div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#2b61cd;\">${totalRows}</div>
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:2px;\">Zeilen</div>
+      </div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#f5a623;\">${totalVorf}</div>
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-top:2px;\">Vorfälle</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.35);text-align:center;margin-bottom:16px;\">💾 Protokoll wurde gespeichert</div>
+    <button onclick="this.closest('div[style]').parentElement.remove();hideCheckin();"
+      style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#4cba6b,#2e8b47);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;\">
+      ✓ Zum Protokoll
+    </button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function hideCheckin(){
+  document.getElementById('checkinScreen').style.display = 'none';
+}
+
+function ciShowToast(msg){
+  const old=document.querySelector('.ci-toast'); if(old) old.remove();
+  const t=document.createElement('div'); t.className='ci-toast'; t.textContent=msg;
+  document.getElementById('checkinScreen').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),300);},2000);
+}
+
+function triggerAutosave(){
+  const ind = document.getElementById('autosaveIndicator');
+  if(ind) ind.style.opacity = '1';
+  if(saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    saveAllDataDirectly();
+    if(ind) ind.style.opacity = '0';
+  }, 800);
+}
+
+function toggleStatus() {
+    statusOk = !statusOk;
+    document.getElementById('statusBadge').className = 'status-badge' + (statusOk ? '' : ' incident');
+    document.getElementById('statusText').textContent = statusOk ? 'Regulär' : 'Vorfall aktiv';
+    triggerAutosave();
+}
+
+function setNowTime(id, field) {
+    const now = new Date();
+    const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+    const span = document.getElementById(`${field}-lbl-${id}`);
+    span.innerText = timeStr;
+    span.className = "time-box-interactive window-time time-box-filled";
+    
+    if(field === 'start') { span.style.color = '#2e7d32'; } else { span.style.color = '#b78103'; }
+    updateSummaryCounters();
+    triggerAutosave();
+}
+
+function toggleDropdown(id) {
+    document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== id) m.classList.remove('show'); });
+    const menu = document.getElementById(id);
+    if(menu) menu.classList.toggle('show');
+}
+
+function selectEreignis(id, text) {
+    const btn = document.getElementById(`notiz-btn-${id}`);
+    const input = document.getElementById(`notiz-input-${id}`);
+    btn.innerText = text;
+    btn.style.color = '#141518';
+    input.value = text;
+    toggleDropdown(`drop-${id}`);
+    updateSummaryCounters();
+    triggerAutosave();
+}
+
+// 🪄 دالة تحسين وصقل الملاحظات تلقائياً (القلم الذكي)
+function optimizeText(id) {
+    const btn = document.getElementById(`notiz-btn-${id}`);
+    const input = document.getElementById(`notiz-input-${id}`);
+    let currentText = btn.innerText;
+
+    if(currentText.includes('...') || currentText === '') return;
+
+    // قاموس ذكي محلي لتحويل الكلمات العادية أو السريعة إلى صياغة تقارير أمنية احترافية
+    const corrections = {
+        'alles gut': 'Kontrollrunde durchgeführt - Keine Unregelmäßigkeiten festgestellt.',
+        'alles ok': 'Objekt kontrolliert und gesichert. Keine Vorkommnisse.',
+        'tür offen': 'Unverschlossene Tür vorgefunden und ordnungsgemäß verschlossen.',
+        'licht an': 'Lichtquellen überprüft und wie vorgeschrieben ausgeschaltet.',
+        'person da': 'Unbefugte Person auf dem Gelände gesichtet und weggewiesen.',
+        'streit': 'Hitzige Diskussion festgestellt, die Situation wurde erfolgreich geschlichtet.'
+    };
+
+    let optimized = false;
+    for (let key in corrections) {
+        if(currentText.toLowerCase().includes(key)) {
+            btn.innerText = corrections[key];
+            input.value = corrections[key];
+            optimized = true;
+            break;
         }
+    }
 
-        function setNowTime(id, field) {
-            const now = new Date();
-            const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
-            const span = document.getElementById(`${field}-lbl-${id}`);
-            span.innerText = timeStr;
-            span.className = "time-box-interactive window-time time-box-filled";
-            
-            if(field === 'start') {
-                span.style.color = '#2e7d32';
-            } else {
-                span.style.color = '#b78103';
-            }
-            
-            updateSummaryCounters();
-            saveAllData();
-        }
+    if(!optimized) {
+        // إذا لم يجد كلمة مفتاحية، يقوم بجعل الحرف الأول كبيراً ويضيف نقطة ليكون التقرير منسقاً رسمياً
+        btn.innerText = currentText.charAt(0).toUpperCase() + currentText.slice(1) + ".";
+        input.value = btn.innerText;
+    }
 
-        function toggleDropdown(id) {
-            document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== id) m.classList.remove('show'); });
-            const menu = document.getElementById(id);
-            if(menu) menu.classList.toggle('show');
-        }
+    btn.style.color = '#2b61cd'; // تغيير خفيف للون يوضح أنه تم التحسين بنجاح
+    triggerAutosave();
+}
 
-        function selectEreignis(id, text) {
-            const btn = document.getElementById(`notiz-btn-${id}`);
-            const input = document.getElementById(`notiz-input-${id}`);
-            btn.innerText = text;
-            btn.style.color = '#141518';
-            input.value = text;
-            toggleDropdown(`drop-${id}`);
-            updateSummaryCounters();
-            saveAllData();
-        }
+// 🚨 دالة إضافة بلاغ طوارئ سريع بضغطة واحدة من الشريط العلوي
+function addPanicRow(predefinedText) {
+    // نقوم بتغيير الحالة العامة للتقرير فوراً إلى "Vorfall aktiv"
+    if(statusOk) { toggleStatus(); }
+    
+    const now = new Date();
+    const currentTimeStr = now.toTimeString().split(' ')[0].substring(0, 5);
 
-        function addNewRow(savedData = null) {
-            globalRowId++;
-            const wrap = document.getElementById('rowsWrap');
-            
-            const row = document.createElement('div');
-            row.className = 'proto-row';
-            row.id = `row-${globalRowId}`;
-            
-            const currentKunde = savedData?.kunde || '— Standort —';
-            const currentStart = savedData?.start || '--:--';
-            const currentEnd = savedData?.end || '--:--';
-            const currentNotiz = savedData?.notiz || 'Notiz hinzufügen...';
-            
-            row.innerHTML = `
-                <div class="cell">
-                    <span class="row-num">#${String(globalRowId).padStart(2,'0')}</span>
-                    <select id="kunde-${globalRowId}" onchange="saveAllData(); updateSummaryCounters();">
-                        ${KUNDEN.map(x => `<option ${x === currentKunde ? 'selected' : ''}>${x}</option>`).join('')}
-                    </select>
-                </div>
+    addNewRow({
+        kunde: '— Standort —',
+        start: currentTimeStr,
+        end: '--:--',
+        notiz: predefinedText
+    });
+}
 
-                <div class="cell" onclick="setNowTime(${globalRowId}, 'start')">
-                    <span id="start-lbl-${globalRowId}" class="time-box-interactive ${currentStart !== '--:--' ? 'time-box-filled' : ''}">${currentStart}</span>
-                </div>
+function addNewRow(savedData = null) {
+    globalRowId++;
+    const wrap = document.getElementById('rowsWrap');
+    
+    const row = document.createElement('div');
+    row.className = 'proto-row';
+    row.id = `row-${globalRowId}`;
+    
+    const currentKunde = savedData?.kunde || '— Standort —';
+    const currentStart = savedData?.start || '--:--';
+    const currentEnd = savedData?.end || '--:--';
+    const currentNotiz = savedData?.notiz || 'Notiz hinzufügen...';
+    
+    row.innerHTML = `
+        <div class="cell">
+            <span class="row-num">#${String(globalRowId).padStart(2,'0')}</span>
+            <select id="kunde-${globalRowId}" onchange="triggerAutosave(); updateSummaryCounters();">
+                ${KUNDEN.map(x => `<option ${x === currentKunde ? 'selected' : ''}>${x}</option>`).join('')}
+            </select>
+        </div>
 
-                <div class="cell" onclick="setNowTime(${globalRowId}, 'end')">
-                    <span id="end-lbl-${globalRowId}" class="time-box-interactive ${currentEnd !== '--:--' ? 'time-box-filled' : ''}">${currentEnd}</span>
-                </div>
+        <div class="cell" onclick="setNowTime(${globalRowId}, 'start')">
+            <span id="start-lbl-${globalRowId}" class="time-box-interactive ${currentStart !== '--:--' ? 'time-box-filled' : ''}">${currentStart}</span>
+        </div>
 
-                <div class="cell">
-                    <div class="notiz-container">
-                        <div class="dropdown-wrapper">
-                            <button id="notiz-btn-${globalRowId}" onclick="event.stopPropagation(); toggleDropdown('drop-${globalRowId}')" style="background:none; border:none; text-align:left; font-size:13px; font-weight:600; color:${currentNotiz.includes('...') ? '#8890A0' : '#141518'}; cursor:pointer; width:100%; outline:none;">
-                                ${currentNotiz}
-                            </button>
-                            <input type="hidden" id="notiz-input-${globalRowId}" value="${currentNotiz.includes('...') ? '' : currentNotiz}">
-                            <div id="drop-${globalRowId}" class="dropdown-menu">
-                                ${EREIGNISSE.map(e => `<button onclick="event.stopPropagation(); selectEreignis(${globalRowId}, '${e}')" class="dropdown-item">${e}</button>`).join('')}
-                            </div>
-                        </div>
-                        <button onclick="deleteSpecificRow(${globalRowId})" class="delete-btn no-print" title="Zeile löschen">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
+        <div class="cell" onclick="setNowTime(${globalRowId}, 'end')">
+            <span id="end-lbl-${globalRowId}" class="time-box-interactive ${currentEnd !== '--:--' ? 'time-box-filled' : ''}">${currentEnd}</span>
+        </div>
+
+        <div class="cell">
+            <div class="notiz-container">
+                <div class="dropdown-wrapper">
+                    <button id="notiz-btn-${globalRowId}" onclick="event.stopPropagation(); toggleDropdown('drop-${globalRowId}')" style="background:none; border:none; text-align:left; font-size:13px; font-weight:600; color:${currentNotiz.includes('...') ? '#8890A0' : '#141518'}; cursor:pointer; width:100%; outline:none;">
+                        ${currentNotiz}
+                    </button>
+                    <input type="hidden" id="notiz-input-${globalRowId}" value="${currentNotiz.includes('...') ? '' : currentNotiz}">
+                    <div id="drop-${globalRowId}" class="dropdown-menu">
+                        ${EREIGNISSE.map(e => `<button onclick="event.stopPropagation(); selectEreignis(${globalRowId}, '${e}')" class="dropdown-item">${e}</button>`).join('')}
                     </div>
                 </div>
-            `;
-            
-            wrap.appendChild(row);
-            updateSummaryCounters();
-        }
+                <button onclick="event.stopPropagation(); optimizeText(${globalRowId})" class="magic-fix-btn no-print" title="Text optimieren (B2)">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </button>
+                <button onclick="deleteSpecificRow(${globalRowId})" class="delete-btn no-print" title="Zeile löschen">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    wrap.appendChild(row);
+    updateSummaryCounters();
+    triggerAutosave();
+}
 
-        function deleteSpecificRow(id) {
-            const el = document.getElementById(`row-${id}`);
-            if(el) el.remove();
-            updateSummaryCounters();
-            saveAllData();
-        }
+function deleteSpecificRow(id) {
+    const el = document.getElementById(`row-${id}`);
+    if(el) el.remove();
+    updateSummaryCounters();
+    triggerAutosave();
+}
 
-        function removeLastRow() {
-            const wrap = document.getElementById('rowsWrap');
-            if(wrap.lastChild) {
-                wrap.lastChild.remove();
-                updateSummaryCounters();
-                saveAllData();
-            }
-        }
+function removeLastRow() {
+    const wrap = document.getElementById('rowsWrap');
+    if(wrap.lastChild) {
+        wrap.lastChild.remove();
+        updateSummaryCounters();
+        triggerAutosave();
+    }
+}
 
-        function updateSummaryCounters() {
-            const rows = document.querySelectorAll('.proto-row');
-            document.getElementById('rowCount').innerText = `${rows.length} Zeilen`;
-            document.getElementById('chipR').innerText = `${rows.length} Zeilen`;
-            
-            let activeKunden = 0;
-            let activeVorfaelle = 0;
+function updateSummaryCounters() {
+    const rows = document.querySelectorAll('.proto-row');
+    document.getElementById('rowCount').innerText = `${rows.length} Zeilen`;
+    document.getElementById('chipR').innerText = `${rows.length} Zeilen`;
+    
+    let activeKunden = 0;
+    let activeVorfaelle = 0;
 
-            rows.forEach(r => {
-                const id = r.id.split('-')[1];
-                const kVal = document.getElementById(`kunde-${id}`).value;
-                const nVal = document.getElementById(`notiz-input-${id}`).value;
-                
-                if(kVal !== '— Standort —') activeKunden++;
-                if(nVal && nVal !== '') activeVorfaelle++;
-            });
+    rows.forEach(r => {
+        const id = r.id.split('-')[1];
+        const kVal = document.getElementById(`kunde-${id}`).value;
+        const nVal = document.getElementById(`notiz-input-${id}`).value;
+        
+        if(kVal !== '— Standort —') activeKunden++;
+        if(nVal && nVal !== '') activeVorfaelle++;
+    });
 
-            document.getElementById('chipK').innerText = `${activeKunden} Kunden`;
-            document.getElementById('chipV').innerText = `${activeVorfaelle} Vorfälle`;
-        }
+    document.getElementById('chipK').innerText = `${activeKunden} Kunden`;
+    document.getElementById('chipV').innerText = `${activeVorfaelle} Vorfälle`;
+}
 
-        function saveAllData() {
-            const rowsData = [];
-            document.querySelectorAll('.proto-row').forEach(r => {
-                const id = r.id.split('-')[1];
-                rowsData.push({
-                    kunde: document.getElementById(`kunde-${id}`).value,
-                    start: document.getElementById(`start-lbl-${id}`).innerText,
-                    end: document.getElementById(`end-lbl-${id}`).innerText,
-                    notiz: document.getElementById(`notiz-btn-${id}`).innerText
-                });
-            });
-
-            const state = {
-                day: document.getElementById('daySelect').value,
-                date: document.getElementById('dateInput').value,
-                statusOk: statusOk,
-                rows: rowsData
-            };
-            localStorage.setItem('denis_proto_final_storage', JSON.stringify(state));
-        }
-
-        function loadAllData() {
-            const raw = localStorage.getItem('denis_proto_final_storage');
-            const today = new Date();
-            
-            document.getElementById('dateInput').value = today.toISOString().split('T')[0];
-            const DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-            document.getElementById('daySelect').value = DAYS[today.getDay()];
-
-            if(!raw) {
-                for(let i=0; i<4; i++) addNewRow();
-                return;
-            }
-
-            const state = JSON.parse(raw);
-            document.getElementById('daySelect').value = state.day || DAYS[today.getDay()];
-            document.getElementById('dateInput').value = state.date || today.toISOString().split('T')[0];
-            statusOk = state.statusOk !== undefined ? state.statusOk : true;
-            
-            document.getElementById('statusBadge').className = 'status-badge' + (statusOk ? '' : ' incident');
-            document.getElementById('statusText').textContent = statusOk ? 'Regulär' : 'Vorfall active';
-
-            if(state.rows && state.rows.length > 0) {
-                state.rows.forEach(r => addNewRow(r));
-            } else {
-                for(let i=0; i<4; i++) addNewRow();
-            }
-            updateSummaryCounters();
-        }
-
-        function resetForm() {
-            if(confirm("Protokoll wirklich zurücksetzen?")) {
-                localStorage.removeItem('denis_proto_final_storage');
-                document.getElementById('rowsWrap').innerHTML = '';
-                globalRowId = 0;
-                loadAllData();
-            }
-        }
-
-        document.addEventListener('click', function() {
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+function saveAllDataDirectly() {
+    const rowsData = [];
+    document.querySelectorAll('.proto-row').forEach(r => {
+        const id = r.id.split('-')[1];
+        rowsData.push({
+            kunde: document.getElementById(`kunde-${id}`).value,
+            start: document.getElementById(`start-lbl-${id}`).innerText,
+            end: document.getElementById(`end-lbl-${id}`).innerText,
+            notiz: document.getElementById(`notiz-btn-${id}`).innerText
         });
+    });
 
-        window.onload = loadAllData;
-    </script>
+    const state = {
+        day: document.getElementById('daySelect').value,
+        date: document.getElementById('dateInput').value,
+        statusOk: statusOk,
+        rows: rowsData
+    };
+    localStorage.setItem('denis_proto_fixed_v3', JSON.stringify(state));
+}
+
+function loadAllData() {
+    const raw = localStorage.getItem('denis_proto_fixed_v3');
+    const today = new Date();
+    
+    document.getElementById('dateInput').value = today.toISOString().split('T')[0];
+    const DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    document.getElementById('daySelect').value = DAYS[today.getDay()];
+
+    if(!raw) {
+        for(let i=0; i<4; i++) addNewRow();
+        return;
+    }
+
+    const state = JSON.parse(raw);
+    document.getElementById('daySelect').value = state.day || DAYS[today.getDay()];
+    document.getElementById('dateInput').value = state.date || today.toISOString().split('T')[0];
+    statusOk = state.statusOk !== undefined ? state.statusOk : true;
+    
+    document.getElementById('statusBadge').className = 'status-badge' + (statusOk ? '' : ' incident');
+    document.getElementById('statusText').textContent = statusOk ? 'Regulär' : 'Vorfall aktiv';
+
+    if(state.rows && state.rows.length > 0) {
+        state.rows.forEach(r => addNewRow(r));
+    } else {
+        for(let i=0; i<4; i++) addNewRow();
+    }
+    updateSummaryCounters();
+}
+
+function resetForm() {
+    if(confirm("Protokoll wirklich zurücksetzen?")) {
+        localStorage.removeItem('denis_proto_fixed_v3');
+        document.getElementById('rowsWrap').innerHTML = '';
+        globalRowId = 0;
+        loadAllData();
+    }
+}
+
+document.addEventListener('click', function() {
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+});
+</script>
 </body>
 </html>
