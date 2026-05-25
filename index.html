@@ -8,30 +8,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background-color: #f4f3ef;
-            background-image: radial-gradient(#dbdad5 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-color: #f5f4f0;
+            background-image: radial-gradient(#e1e0db 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
         }
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; }
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; }
-            .main-container { max-w: 100% !important; border: none !important; box-shadow: none !important; box-sizing: border-box; }
-            input, select { border: none !important; background: transparent !important; }
+            .main-container { max-w: 100% !important; border: none !important; box-shadow: none !important; }
+            input { border: none !important; background: transparent !important; }
         }
     </style>
 </head>
-<body class="font-sans min-h-screen p-3 sm:p-6 text-slate-700">
+<body class="font-sans min-h-screen p-3 sm:p-5 text-slate-700">
 
-    <div class="main-container max-w-md mx-auto bg-[#faf9f5]/90 rounded-[40px] shadow-xl border border-stone-200/60 p-5 space-y-5">
+    <div class="main-container max-w-md mx-auto bg-[#faf9f5]/95 rounded-[40px] shadow-xl border border-stone-200/80 p-5 space-y-5">
         
-        <div class="text-center space-y-0.5 pt-2">
-            <h1 class="text-xl font-extrabold tracking-widest text-slate-500 uppercase font-mono">Denis Protokoll</h1>
+        <div class="text-center space-y-0.5 pt-1">
+            <h1 class="text-xl font-black tracking-widest text-slate-500 uppercase font-mono">Denis Protokoll</h1>
             <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-mono">Sicherheitsdienst</p>
         </div>
 
-        <div class="no-print flex items-center justify-between gap-1.5 px-1">
+        <div class="no-print flex items-center justify-between gap-1.5 px-0.5">
             <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-gear"></i></button>
             <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-pen-nib"></i></button>
             <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-moon"></i></button>
@@ -40,41 +40,41 @@
             <button class="flex-1 h-11 bg-[#2b61cd] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1 shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>
         </div>
 
-        <div class="no-print grid grid-cols-2 gap-3 px-1">
+        <div class="no-print grid grid-cols-2 gap-3 px-0.5">
             <button onclick="resetForm()" class="bg-white border border-stone-200 text-slate-600 rounded-2xl py-2.5 text-xs font-bold shadow-sm flex items-center justify-center gap-1"><i class="fa-solid fa-rotate-left text-[10px]"></i> Reset</button>
             <button onclick="window.print()" class="bg-[#dd5256] text-white rounded-2xl py-2.5 text-xs font-bold shadow-md flex items-center justify-center gap-1.5"><i class="fa-solid fa-print text-xs"></i> Drucken</button>
         </div>
 
-        <div class="bg-[#445674] text-white rounded-[32px] p-5 space-y-4 shadow-inner relative overflow-hidden">
-            <div class="text-center text-[10px] font-bold tracking-wider text-slate-300/80 uppercase font-mono">
+        <div class="bg-[#435673] text-white rounded-[32px] p-5 space-y-4 shadow-md relative overflow-hidden">
+            <div class="text-center text-[9px] font-bold tracking-wider text-slate-300/80 uppercase font-mono">
                 Tagesbericht · Vorfallprotokoll
             </div>
             <h2 class="text-2xl font-black tracking-wide text-center font-mono">Denis Protokoll</h2>
             
-            <div class="bg-white/10 rounded-full py-1.5 px-4 text-xs font-medium flex items-center justify-center gap-1.5 text-slate-200 border border-white/5 mx-2">
+            <div class="bg-white/10 rounded-xl py-2 px-3 text-xs font-medium flex items-center justify-center gap-1.5 text-slate-200 border border-white/5 mx-1">
                 <i class="fa-solid fa-calendar-days text-[#e98588] text-xs"></i>
                 <input type="text" id="shift-title" value="Nachtschicht von gestern (24.05.2026)" oninput="saveData()" class="bg-transparent focus:outline-none text-center w-full text-xs font-semibold">
             </div>
             
-            <div class="space-y-1.5 px-2">
+            <div class="space-y-1.5 px-1">
                 <div class="flex justify-between text-xs font-mono text-slate-300 font-bold items-center">
                     <div class="flex items-center gap-1">
                         <input type="text" id="shift-start" value="20:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">&rarr;
                         <input type="text" id="shift-end" value="07:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">
                     </div>
-                    <span id="progress-percent" class="font-black text-slate-200 text-sm">83%</span>
+                    <span id="progress-percent" class="font-black text-slate-200 text-sm">80%</span>
                 </div>
-                <div class="w-full bg-slate-600/60 h-2 rounded-full overflow-hidden p-[1px]">
-                    <div id="progress-fill" class="bg-[#e98588] h-full rounded-full transition-all duration-500" style="width: 83%"></div>
+                <div class="w-full bg-slate-600/50 h-2 rounded-full overflow-hidden p-[1px]">
+                    <div id="progress-fill" class="bg-[#e98588] h-full rounded-full transition-all duration-500" style="width: 80%"></div>
                 </div>
             </div>
 
-            <div class="flex flex-col items-end space-y-0.5 px-2">
+            <div class="flex flex-col items-end space-y-0.5 px-1">
                 <span class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Mitarbeiter</span>
-                <input type="text" id="employee-name" placeholder="Vorname Nachnam" oninput="saveData()" class="bg-white/10 border border-white/5 text-xs text-center rounded-xl px-3 py-1.5 w-48 text-white focus:outline-none font-medium placeholder-slate-400/70">
+                <input type="text" id="employee-name" placeholder="Vorname Nachnam" oninput="saveData()" class="bg-white/10 border border-white/5 text-xs text-center rounded-xl px-3 py-1.5 w-48 text-white focus:outline-none font-medium placeholder-slate-400/60">
             </div>
 
-            <div class="grid grid-cols-4 gap-1.5 px-1 pt-1 text-center">
+            <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
                 <input type="text" id="shift-day" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-xs font-bold text-white text-center focus:outline-none" placeholder="Tag">
                 <input type="text" id="shift-date" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-xs font-mono font-bold text-white text-center focus:outline-none" placeholder="Datum">
                 <input type="text" id="shift-status" value="🟢 Regulär" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-[10px] font-extrabold text-[#7be394] text-center focus:outline-none">
@@ -82,34 +82,34 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-12 gap-1 text-center text-[10px] font-extrabold uppercase tracking-wider pt-1">
-            <div class="col-span-4 bg-[#f0f2f5] py-1.5 rounded-xl text-slate-500">Kunde</div>
-            <div class="col-span-2 bg-[#e8f8ed] py-1.5 rounded-xl text-[#399653]">Beginn</div>
-            <div class="col-span-2 bg-[#fef4e3] py-1.5 rounded-xl text-[#c78622]">Ende</div>
-            <div class="col-span-4 bg-[#fdecee] py-1.5 rounded-xl text-[#ca4a5c]">Dienstnotiz</div>
+        <div class="grid grid-cols-12 gap-1.5 text-center text-[11px] font-black tracking-wider pt-2">
+            <div class="col-span-4 bg-[#e1e3e6] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Kunde</div>
+            <div class="col-span-2 bg-[#9ce59c] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Beginn</div>
+            <div class="col-span-2 bg-[#f9c676] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Ende</div>
+            <div class="col-span-4 bg-[#f8b2b5] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Dienstnotiz</div>
         </div>
 
-        <div id="rows-container" class="space-y-4">
+        <div id="rows-container" class="space-y-5">
             </div>
 
-        <div class="no-print grid grid-cols-3 gap-3 items-center pt-1 px-1">
+        <div class="no-print grid grid-cols-3 gap-3 items-center pt-1 px-0.5">
             <button onclick="removeRow()" class="bg-white border border-stone-200 text-slate-500 rounded-2xl py-2.5 text-xs font-bold shadow-sm hover:bg-stone-50">- Zeile</button>
             <div id="row-counter" class="text-center text-xs font-extrabold text-slate-500 font-mono">1 Zeilen</div>
             <button onclick="addRow()" class="bg-[#dd5256] text-white rounded-2xl py-2.5 text-xs font-bold shadow-md hover:bg-[#c94549]">+ Zeile</button>
         </div>
 
-        <div class="border-t border-stone-200/60 pt-4 grid grid-cols-4 gap-1 px-1 text-[9px] font-bold text-slate-500 text-center">
-            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm">
+        <div class="border-t border-stone-200 pt-4 grid grid-cols-4 gap-1.5 px-0.5 text-[9px] font-bold text-slate-500 text-center">
+            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm">
                 <span class="text-rose-500">🔴</span> <span id="status-kunden">0</span> Kunden
             </div>
-            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm">
+            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm">
                 <span class="text-rose-500">🔴</span> <span id="status-vorfaelle">0</span> Vorfälle
             </div>
-            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm">
+            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm">
                 <span class="text-rose-500">🔴</span> <span id="status-total-rows">1</span> Zeilen
             </div>
-            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm font-mono text-[#4482d8]">
-                <i class="fa-solid fa-floppy-disk"></i> <span id="save-time">05:11:41</span>
+            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm font-mono text-[#4482d8]">
+                <i class="fa-solid fa-floppy-disk"></i> <span id="save-time">04:48:40</span>
             </div>
         </div>
 
@@ -176,7 +176,7 @@
             const timeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
             const btn = document.getElementById(id);
             document.getElementById(labelId).innerText = timeStr;
-            btn.className = "w-full border border-stone-200 rounded-2xl py-2 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-sm text-xs";
+            btn.className = "w-full border-2 border-stone-300 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
             updateStatus();
             saveData();
         }
@@ -188,12 +188,15 @@
 
         function selectEreignis(idx, text) {
             const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
+            const noteInput = document.getElementById(`input-note-${idx}`);
             txtLabel.innerText = text;
             txtLabel.className = "ereignis-btn-txt text-slate-700 font-bold break-words";
             
             if(text.includes("Obdachlose") || text.includes("Fahrzeuge") || text.includes("Person")) {
                 document.getElementById(`count-val-${idx}`).innerText = "1";
-                txtLabel.innerText = `1 ${text}`;
+                noteInput.value = `1 ${text}`;
+            } else {
+                noteInput.value = text;
             }
             toggleDropdown(`drop-${idx}`);
             updateStatus();
@@ -203,6 +206,7 @@
         function changeRowCounter(idx, dir) {
             const valSpan = document.getElementById(`count-val-${idx}`);
             const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
+            const noteInput = document.getElementById(`input-note-${idx}`);
             let current = parseInt(valSpan.innerText || 0);
             
             current = dir === 'up' ? current + 1 : current - 1;
@@ -210,20 +214,18 @@
             
             valSpan.innerText = current;
             let clean = txtLabel.innerText.replace(/^[0-9]+\s/, '');
+            
+            if (clean === '+ Ereignis') clean = "Personen nach draußen gebracht";
+            
             txtLabel.innerText = current > 0 ? `${current} ${clean}` : clean;
+            noteInput.value = current > 0 ? `${current} ${clean}` : clean;
             saveData();
         }
 
         function triggerLineKI(idx) {
-            const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
-            if(txtLabel.innerText === '+ Ereignis') return;
-            if(!txtLabel.innerText.includes("Eine Person")) {
-                txtLabel.innerText = "Eine unbefugte Person wurde ordnungsgemäß des Geländes verwiesen.";
-                txtLabel.classList.add('text-indigo-600');
-            } else {
-                txtLabel.innerText = "Unbefugte Person entfernt";
-                txtLabel.classList.remove('text-indigo-600');
-            }
+            const noteInput = document.getElementById(`input-note-${idx}`);
+            if(!noteInput.value || noteInput.value.includes("+ Ereignis")) return;
+            noteInput.value = "Eine unbefugte Person wurde ordnungsgemäß des Geländes verwiesen.";
             saveData();
         }
 
@@ -231,48 +233,51 @@
             rowCount++;
             const container = document.getElementById('rows-container');
             
+            // هيكل السطر المطور: صناديق وحقول واضحة ومحددة ببرواز خارجي رمزي مستقل لكل حقل تمنع التداخل
             const html = `
-                <div id="row-card-${rowCount}" class="bg-white border border-stone-200/80 rounded-[28px] p-2.5 shadow-sm grid grid-cols-12 gap-1 items-start relative hover:shadow-md transition-all">
+                <div id="row-card-${rowCount}" class="grid grid-cols-12 gap-2 items-stretch relative bg-transparent">
                     
-                    <div class="col-span-4 border border-stone-200 rounded-2xl p-2 text-center bg-white shadow-inner min-h-[52px] flex flex-col justify-center">
-                        <span class="text-[9px] text-stone-400 block font-mono">#0${rowCount}</span>
-                        <input type="text" id="input-loc-${rowCount}" placeholder="— Standort —" oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-extrabold text-slate-700">
+                    <div class="col-span-4 border-2 border-stone-300 rounded-2xl p-2 text-center bg-white shadow-sm flex flex-col justify-center min-h-[58px]">
+                        <span class="text-[9px] text-stone-400 block font-mono text-left font-bold">#0${rowCount}</span>
+                        <input type="text" id="input-loc-${rowCount}" placeholder="— Standort —" oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-black text-slate-800">
                     </div>
 
-                    <div class="col-span-2">
-                        <button id="start-btn-${rowCount}" onclick="setNowTime('start-btn-${rowCount}', 'start-lbl-${rowCount}')" class="w-full border border-stone-200 border-dashed rounded-2xl py-2 bg-stone-50/50 text-slate-400 font-medium text-center flex flex-col items-center justify-center min-h-[52px] shadow-sm hover:bg-stone-50">
-                            <span id="start-lbl-${rowCount}" class="text-[11px] font-bold">⏱ Jetzt</span>
+                    <div class="col-span-2 flex items-stretch">
+                        <button id="start-btn-${rowCount}" onclick="setNowTime('start-btn-${rowCount}', 'start-lbl-${rowCount}')" class="w-full border-2 border-stone-300 border-dashed rounded-2xl py-2 bg-white text-slate-400 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
+                            <span id="start-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter">⏱ Jetzt</span>
                         </button>
                     </div>
 
-                    <div class="col-span-2">
-                        <button id="end-btn-${rowCount}" onclick="setNowTime('end-btn-${rowCount}', 'end-lbl-${rowCount}')" class="w-full border border-stone-200 border-dashed rounded-2xl py-2 bg-stone-50/50 text-slate-400 font-medium text-center flex flex-col items-center justify-center min-h-[52px] shadow-sm hover:bg-stone-50">
-                            <span id="end-lbl-${rowCount}" class="text-[11px] font-bold">⏱ Jetzt</span>
+                    <div class="col-span-2 flex items-stretch">
+                        <button id="end-btn-${rowCount}" onclick="setNowTime('end-btn-${rowCount}', 'end-lbl-${rowCount}')" class="w-full border-2 border-stone-300 border-dashed rounded-2xl py-2 bg-white text-slate-400 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
+                            <span id="end-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter">⏱ Jetzt</span>
                         </button>
                     </div>
 
-                    <div class="col-span-4 bg-stone-50/40 border border-stone-200/60 rounded-2xl p-1.5 space-y-2 text-center min-h-[52px] flex flex-col justify-center relative">
-                        <div class="no-print flex items-center justify-between px-0.5 text-slate-400 text-[11px]">
-                            <div class="flex items-center bg-white border border-stone-200 rounded-lg shadow-sm">
-                                <button onclick="changeRowCounter(${rowCount}, 'down')" class="px-1.5 font-bold hover:text-rose-500">-</button>
-                                <span id="count-val-${rowCount}" class="font-mono font-bold px-1 text-slate-700 text-[10px]">0</span>
-                                <button onclick="changeRowCounter(${rowCount}, 'up')" class="px-1.5 font-bold hover:text-emerald-500">+</button>
+                    <div class="col-span-4 border-2 border-stone-300 rounded-2xl p-1.5 space-y-1.5 text-center bg-white shadow-sm flex flex-col justify-between min-h-[58px] relative">
+                        
+                        <div class="no-print flex items-center justify-between px-0.5 text-slate-400">
+                            <div class="flex items-center bg-stone-50 border border-stone-200 rounded-md shadow-inner">
+                                <button onclick="changeRowCounter(${rowCount}, 'down')" class="px-1.5 font-bold text-slate-500 hover:text-rose-500 text-xs">-</button>
+                                <span id="count-val-${rowCount}" class="font-mono font-black px-1 text-slate-800 text-[10px]">0</span>
+                                <button onclick="changeRowCounter(${rowCount}, 'up')" class="px-1.5 font-bold text-slate-500 hover:text-emerald-500 text-xs">+</button>
                             </div>
-                            <button onclick="deleteRowCard(${rowCount})" class="w-5 h-5 bg-rose-50 text-rose-500 rounded-md border border-rose-100 flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                            <button onclick="deleteRowCard(${rowCount})" class="w-4 h-4 bg-rose-50 text-rose-500 rounded border border-rose-100 flex items-center justify-center"><i class="fa-solid fa-trash text-[8px]"></i></button>
                         </div>
 
-                        <div class="relative">
-                            <button onclick="toggleDropdown('drop-${rowCount}')" class="w-full text-center text-[10px] font-bold text-rose-400/90 hover:underline">
-                                <span id="ereignis-txt-${rowCount}" class="ereignis-btn-text">+ Ereignis</span>
+                        <div class="relative w-full">
+                            <input type="text" id="input-note-${rowCount}" placeholder="Dienstnotiz..." oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-[10px] font-bold text-slate-700 placeholder-stone-400 px-0.5">
+                            <button onclick="toggleDropdown('drop-${rowCount}')" class="no-print block w-full text-center text-[8px] font-bold text-rose-400 hover:underline mt-0.5">
+                                <span id="ereignis-txt-${rowCount}" class="ereignis-btn-txt">+ Ereignis</span>
                             </button>
-                            <div id="drop-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-1 w-48 bg-white border border-stone-200 rounded-xl shadow-xl z-50 p-1 text-left hidden">
-                                ${ereignisse.map(e => `<button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[10px] text-slate-600 hover:bg-stone-50 rounded-lg truncate block border-b border-stone-100 last:border-0">${e}</button>`).join('')}
+                            <div id="drop-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-1 w-44 bg-white border border-stone-300 rounded-xl shadow-xl z-50 p-1 text-left hidden">
+                                ${ereignisse.map(e => `<button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[9px] text-slate-600 hover:bg-stone-50 rounded-lg truncate block border-b border-stone-100 last:border-0 font-medium">${e}</button>`).join('')}
                             </div>
                         </div>
 
-                        <div class="no-print flex items-center justify-center gap-1.5 pt-0.5 text-[9px] font-bold">
-                            <button onclick="triggerLineKI(${rowCount})" class="bg-indigo-50 text-indigo-500 border border-indigo-100 rounded-md px-1.5 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-robot"></i> KI</button>
-                            <button class="bg-stone-100 text-stone-500 rounded-md px-1.5 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-paperclip"></i> Foto</button>
+                        <div class="no-print flex items-center justify-center gap-1.5 text-[8px] font-bold pt-0.5">
+                            <button onclick="triggerLineKI(${rowCount})" class="bg-indigo-50 text-indigo-500 border border-indigo-100 rounded px-1 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-robot"></i> KI</button>
+                            <button class="bg-stone-50 text-stone-500 border border-stone-200 rounded px-1 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-paperclip"></i> Foto</button>
                         </div>
                     </div>
 
@@ -282,20 +287,16 @@
 
             if(saved) {
                 document.getElementById(`input-loc-${rowCount}`).value = saved.loc || '';
+                if(saved.note) document.getElementById(`input-note-${rowCount}`).value = saved.note;
                 if(saved.start) {
-                    document.getElementById(`start-lbl-${rowCount}`).innerText = saved.start;
-                    document.getElementById(`start-btn-${rowCount}`).className = "w-full border border-stone-200 rounded-2xl py-2 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-sm text-xs";
+                    document.getElementById('start-lbl-' + rowCount).innerText = saved.start;
+                    document.getElementById('start-btn-' + rowCount).className = "w-full border-2 border-stone-300 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
                 }
                 if(saved.end) {
-                    document.getElementById(`end-lbl-${rowCount}`).innerText = saved.end;
-                    document.getElementById(`end-btn-${rowCount}`).className = "w-full border border-stone-200 rounded-2xl py-2 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-sm text-xs";
+                    document.getElementById('end-lbl-' + rowCount).innerText = saved.end;
+                    document.getElementById('end-btn-' + rowCount).className = "w-full border-2 border-stone-300 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
                 }
-                if(saved.ereignis) {
-                    const txt = document.getElementById(`ereignis-txt-${rowCount}`);
-                    txt.innerText = saved.ereignis;
-                    txt.className = "ereignis-btn-text text-slate-700 font-bold break-words";
-                    if(saved.count) document.getElementById(`count-val-${rowCount}`).innerText = saved.count;
-                }
+                if(saved.count) document.getElementById(`count-val-${rowCount}`).innerText = saved.count;
             }
             updateStatus();
         }
@@ -326,18 +327,18 @@
                 if(!locInput) continue;
                 data.rows.push({
                     loc: locInput.value,
+                    note: document.getElementById(`input-note-${i}`).value,
                     start: document.getElementById(`start-lbl-${i}`).innerText.includes("Jetzt") ? null : document.getElementById(`start-lbl-${i}`).innerText,
                     end: document.getElementById(`end-lbl-${i}`).innerText.includes("Jetzt") ? null : document.getElementById(`end-lbl-${i}`).innerText,
-                    ereignis: document.getElementById(`ereignis-txt-${i}`).innerText !== '+ Ereignis' ? document.getElementById(`ereignis-txt-${i}`).innerText : null,
                     count: document.getElementById(`count-val-${i}`).innerText
                 });
             }
-            localStorage.setItem('denis_dashboard_main', JSON.stringify(data));
+            localStorage.setItem('denis_dashboard_fixed', JSON.stringify(data));
             document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
         }
 
         function loadData() {
-            const raw = localStorage.getItem('denis_dashboard_main');
+            const raw = localStorage.getItem('denis_dashboard_fixed');
             if(!raw) { setAutomaticDateTime(); addRow(); return; }
             const parsed = JSON.parse(raw);
             document.getElementById('shift-title').value = parsed.title || '';
@@ -357,7 +358,7 @@
 
         function resetForm() {
             if(confirm("Protokoll zurücksetzen?")) {
-                localStorage.removeItem('denis_dashboard_main');
+                localStorage.removeItem('denis_dashboard_fixed');
                 document.getElementById('rows-container').innerHTML = '';
                 rowCount = 0;
                 document.getElementById('employee-name').value = '';
