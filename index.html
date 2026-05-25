@@ -30,6 +30,7 @@ body.dark-mode .notiz-select,body.dark-mode .time-input-direct,body.dark-mode .n
 body.dark-mode .autosave-bar{background:#1a2a1a!important;}
 body.dark-mode .chat-bubble.ai{background:#333;border-color:#555;}
 body.dark-mode .voice-result, body.dark-mode .ai-row-select {background:#2d2d2d!important; color:var(--text)!important;}
+body.dark-mode .obd-btn {background:#444!important; color:#fff!important; border-color:#555!important;}
 .proto-row.danger{border-left-color:var(--red)!important;}
 .proto-row.danger .cell{border-color:rgba(232,57,74,0.4)!important;background:#fff5f5!important;}
 body.dark-mode .proto-row.danger .cell{background:#3a1a1a!important;}
@@ -43,8 +44,18 @@ body.dark-mode .proto-row.danger .cell{background:#3a1a1a!important;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;padding:24px 16px 80px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 1px 1px,#d4cdc6 1px,transparent 0);background-size:28px 28px;opacity:0.5;pointer-events:none;z-index:0;}
 
-/* ===== CHECK-IN SCREEN ORIGINAL STYLE ===== */
-#checkinScreen{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#2d3f52 0%,#1a2535 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:20px;}
+#pinScreen{position:fixed;inset:0;z-index:999999;background:linear-gradient(135deg,#141518 0%,#070809 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.pin-box{background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.08);border-radius:28px;padding:32px 24px;width:100%;max-width:320px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.5);backdrop-filter:blur(20px);}
+.pin-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:white;letter-spacing:2px;margin-bottom:6px;}
+.pin-logo span{color:var(--red);}
+.pin-dots{display:flex;justify-content:center;gap:16px;margin:28px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,0.25);transition:all 0.15s;}
+.pin-dot.active{background:var(--red);border-color:var(--red);box-shadow:0 0 12px var(--red);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:240px;margin:0 auto;}
+.pin-btn{background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.08);color:white;font-family:'Syne',sans-serif;font-size:18px;font-weight:700;height:56px;border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;}
+.pin-btn:active{background:rgba(255,255,255,0.15);transform:scale(0.95);}
+
+#checkinScreen{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#2d3f52 0%,#1a2535 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:20px;display:none;}
 .ci-box{background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);border-radius:24px;padding:30px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3);backdrop-filter:blur(10px);}
 .ci-logo{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:white;margin-bottom:4px;letter-spacing:1px;}
 .ci-logo span{color:#ffb3b9;}
@@ -55,6 +66,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .ci-select option{background:#1a2535;color:white;}
 .ci-btn{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#4cba6b,#2e8b47);color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;box-shadow:0 4px 15px rgba(76,186,107,0.3);transition:all 0.2s;}
 .ci-btn:hover{transform:translateY(-1px);filter:brightness(1.1);}
+.ci-toast{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--red);color:white;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:100000;}
 
 .autosave-bar{position:fixed;bottom:0;left:0;right:0;z-index:999;background:#e8f5e9;border-top:2px solid #4cba6b;display:flex;align-items:center;justify-content:space-between;padding:6px 16px;font-size:11px;font-weight:700;color:#2e7d32;transition:all 0.3s;gap:10px;}
 .autosave-bar.saving{background:#fff3e0;border-color:var(--orange);color:#e65100;}
@@ -112,14 +124,17 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .notiz-free{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--text);border:1.5px solid var(--border);border-radius:7px;padding:6px;background:#fafafa;outline:none;width:100%;resize:none;min-height:38px;}
 .notiz-free:focus{border-color:var(--red);background:white;}
 
+.obd-btn{background:#f1f3f5; border:1px solid #ced4da; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; color:#495057; cursor:pointer; margin-right:4px; transition:all 0.1s;}
+.obd-btn:hover{background:#e9ecef;}
+
 .add-zone{padding:14px;display:flex;justify-content:center;align-items:center;}
 .add-row-btn{background:var(--red);color:white;border:none;border-radius:9px;padding:10px 24px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;box-shadow:0 3px 10px rgba(232,57,74,0.25);}
 
 .card-footer{background:#f8f9fc;border-top:1.5px solid var(--border);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
 .live-clock{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;}
 
-/* AI Styling */
-.smart-chat-wrap{display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto;margin-bottom:10px;padding:8px;background:#f8f9fc;border-radius:12px;border:1.5px solid var(--border);}
+/* AI & Smart Options Section Style */
+.smart-chat-wrap{display:flex;flex-direction:column;gap:8px;max-height:160px;overflow-y:auto;margin-bottom:10px;padding:8px;background:#f8f9fc;border-radius:12px;border:1.5px solid var(--border);}
 .chat-bubble{max-width:85%;padding:8px 12px;font-size:12px;line-height:1.4;}
 .chat-bubble.user{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;align-self:flex-end;border-radius:12px 12px 2px 12px;}
 .chat-bubble.ai{background:white;border:1.5px solid var(--border);color:var(--text);align-self:flex-start;border-radius:2px 12px 12px 12px;}
@@ -127,26 +142,41 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .ai-result-box{background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:10px 12px;font-size:12px;color:#4c1d95;line-height:1.6;margin-top:10px;display:none;}
 .ai-result-box.visible{display:block;animation:rowIn 0.25s ease;}
 .voice-btn.recording{background:linear-gradient(135deg,var(--red),#c8102e);animation:recpulse 1s infinite;}
-
-/* Dashboard Styles */
-.dashboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9996;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
-.dashboard-modal{background:var(--card);border-radius:20px;width:100%;max-width:480px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,0.4);animation:modalIn 0.3s ease;}
-.dash-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.dash-hdr-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text);}
-.dash-close{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);}
-.dash-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.dash-kpi{padding:12px;border-radius:12px;text-align:center;}
-.dash-kpi-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
-.dash-kpi-label{font-size:10px;font-weight:600;margin-top:2px;}
 </style>
 </head>
 <body class="dark-mode">
+
+<div id="pinScreen">
+  <div class="pin-box">
+    <div class="pin-logo">DENIS <span>PROTOKOLL</span></div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;">Sicherheitsdienst Login</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="dot0"></div>
+      <div class="pin-dot" id="dot1"></div>
+      <div class="pin-dot" id="dot2"></div>
+      <div class="pin-dot" id="dot3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-btn" onclick="pressPin('1')">1</button>
+      <button class="pin-btn" onclick="pressPin('2')">2</button>
+      <button class="pin-btn" onclick="pressPin('3')">3</button>
+      <button class="pin-btn" onclick="pressPin('4')">4</button>
+      <button class="pin-btn" onclick="pressPin('5')">5</button>
+      <button class="pin-btn" onclick="pressPin('6')">6</button>
+      <button class="pin-btn" onclick="pressPin('7')">7</button>
+      <button class="pin-btn" onclick="pressPin('8')">8</button>
+      <button class="pin-btn" onclick="pressPin('9')">9</button>
+      <button class="pin-btn" onclick="clearPin()" style="font-size:11px;color:var(--muted);">CLR</button>
+      <button class="pin-btn" onclick="pressPin('0')">0</button>
+      <button class="pin-btn" onclick="deleteLastPin()" style="font-size:11px;color:var(--red);">⌫</button>
+    </div>
+  </div>
+</div>
 
 <div id="checkinScreen">
   <div class="ci-box">
     <div class="ci-logo">DENIS <span>PROTOKOLL</span></div>
     <div class="ci-sub">Sicherheitsdienst Log-In</div>
-    
     <div class="ci-field">
       <label class="ci-label">Mitarbeiter wählen</label>
       <select class="ci-select" id="ciMitarbeiter">
@@ -154,12 +184,10 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
         <option value="Denis">Denis</option>
       </select>
     </div>
-    
     <div class="ci-field">
       <label class="ci-label">Objekt / Einsatzort</label>
       <input type="text" class="ci-input" id="ciObjekt" placeholder="Z.B. Werksschutz Lüneburg" value="Werksschutz">
     </div>
-
     <button class="ci-btn" onclick="executeCheckIn()">✓ Check-In Schicht beginnen</button>
   </div>
 </div>
@@ -184,7 +212,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     </div>
   </div>
 
-  <div style="padding: 14px; background: rgba(124, 58, 237, 0.06); border-bottom: 1px solid var(--border);">
+  <div id="aiAssistantPanel" style="padding: 14px; background: rgba(124, 58, 237, 0.06); border-bottom: 1px solid var(--border);">
     <div style="font-size: 11px; font-weight: 700; color: var(--purple); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display:flex; align-items:center; gap:6px;">
       <span>✨</span> KI Bericht-Assistent (AI Smart Optimization)
     </div>
@@ -225,6 +253,8 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 </div>
 
 <script>
+let currentPin = "";
+const targetPin = "1122"; 
 let rowsData = [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -238,11 +268,44 @@ function updateClock() {
   document.getElementById('liveClock').textContent = now.toLocaleTimeString('de-DE');
 }
 
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
+function pressPin(num) {
+  if(currentPin.length >= 4) return;
+  currentPin += num;
+  updatePinDots();
+  if(currentPin.length === 4) {
+    setTimeout(verifyPin, 150);
+  }
 }
 
-// Check-In Execution
+function updatePinDots() {
+  for(let i=0; i<4; i++) {
+    const dot = document.getElementById(`dot${i}`);
+    if(i < currentPin.length) dot.classList.add('active');
+    else dot.classList.remove('active');
+  }
+}
+
+function clearPin() { currentPin = ""; updatePinDots(); }
+function deleteLastPin() { currentPin = currentPin.slice(0, -1); updatePinDots(); }
+
+function verifyPin() {
+  if(currentPin === targetPin) {
+    document.getElementById('pinScreen').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('pinScreen').style.display = 'none';
+      const data = localStorage.getItem('denis_proto_logs');
+      if (data && JSON.parse(data).length > 0) {
+        // Skip checkin if active session exists
+      } else {
+        document.getElementById('checkinScreen').style.display = 'flex';
+      }
+    }, 200);
+  } else {
+    showGlobalToast("Falscher PIN. Bitte erneut versuchen.", "error");
+    clearPin();
+  }
+}
+
 function executeCheckIn() {
   const ma = document.getElementById('ciMitarbeiter').value;
   const obj = document.getElementById('ciObjekt').value;
@@ -250,7 +313,6 @@ function executeCheckIn() {
   document.getElementById('mitarbeiterName').value = ma;
   document.getElementById('checkinScreen').style.display = 'none';
   
-  // Auto create first row with check-in details
   addNewRow({
     kunde: obj,
     beginn: new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}),
@@ -258,9 +320,11 @@ function executeCheckIn() {
     notiz: "Dienstantritt und Übernahme der Objektkontrolle. Keine besonderen Vorkommnisse."
   });
   
-  showToast("Schicht erfolgreich gestartet!", "success");
+  showGlobalToast("Schicht erfolgreich gestartet!", "success");
   triggerAutosave();
 }
+
+function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
 
 function addNewRow(data = null) {
   const container = document.getElementById('protoRowsContainer');
@@ -279,15 +343,39 @@ function addNewRow(data = null) {
       </div>
       <div class="cell cell-notiz">
         <textarea class="notiz-free" placeholder="Bericht / Feststellung..." oninput="evaluateRowStatus('${rowId}'); triggerAutosave();">${data ? data.notiz : ''}</textarea>
-        <div style="display:flex; justify-content:space-between; width:100%; margin-top:4px;">
-          <span style="font-size:9px; font-weight:700; color:var(--muted);" class="row-status-lbl">Keine Vorkommnisse</span>
-          <button class="btn" onclick="deleteRow('${rowId}')" style="background:none; border:none; color:var(--red); padding:0; cursor:pointer; font-size:11px;">✕ Löschen</button>
+        <div style="display:flex; justify-content:space-between; width:100%; margin-top:5px; align-items:center;">
+          <div>
+            <button class="obd-btn" onclick="addObdachlose('${rowId}', 1)">+1 Obd.</button>
+            <button class="obd-btn" onclick="addObdachlose('${rowId}', 2)">+2 Obd.</button>
+            <button class="obd-btn" onclick="addObdachlose('${rowId}', 3)">+3 Obd.</button>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span style="font-size:9px; font-weight:700; color:var(--muted);" class="row-status-lbl">Leer</span>
+            <button class="btn" onclick="deleteRow('${rowId}')" style="background:none; border:none; color:var(--red); padding:0; cursor:pointer; font-size:11px;">✕ Löschen</button>
+          </div>
         </div>
       </div>
     </div>
   `;
   container.insertAdjacentHTML('beforeend', rowHtml);
   if(!data) triggerAutosave();
+  else evaluateRowStatus(rowId);
+}
+
+function addObdachlose(rowId, count) {
+  const textarea = document.getElementById(rowId).querySelector('.notiz-free');
+  const timestamp = new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+  const extraText = `[${timestamp}] ${count} Obdachlose nachgewiesen. Platzverweis erteilt.`;
+  
+  if (textarea.value.trim() === "" || textarea.value.includes("Keine besonderen Vorkommnisse")) {
+    textarea.value = extraText;
+  } else {
+    textarea.value += "\n" + extraText;
+  }
+  
+  evaluateRowStatus(rowId);
+  triggerAutosave();
+  showGlobalToast(`+${count} Obdachlose hinzugefügt`, "success");
 }
 
 function deleteRow(id) {
@@ -303,7 +391,8 @@ function evaluateRowStatus(id) {
   if (text.trim() === "") {
     row.className = "proto-row row-empty";
     statusLbl.textContent = "Leer";
-  } else if (text.includes("kaputt") || text.includes("einbruch") || text.includes("schaden") || text.includes("offen") || text.includes("alarm") || text.includes("vandalismus")) {
+    statusLbl.style.color = "var(--muted)";
+  } else if (text.includes("kaputt") || text.includes("einbruch") || text.includes("schaden") || text.includes("offen") || text.includes("alarm") || text.includes("obdachlose") || text.includes("vandalismus")) {
     row.className = "proto-row danger";
     statusLbl.textContent = "⚠️ Vorkommnis / Gefahr";
     statusLbl.style.color = "var(--red)";
@@ -314,7 +403,7 @@ function evaluateRowStatus(id) {
   }
 }
 
-// Smart AI Processing Logic
+// Smart AI Optimization Core Logic
 function processSmartAI() {
   const inputField = document.getElementById('aiInput');
   const query = inputField.value.trim();
@@ -327,7 +416,7 @@ function processSmartAI() {
 
   const aiBox = document.getElementById('aiResultBox');
   aiBox.className = "ai-result-box visible";
-  aiBox.textContent = "KI verarbeitet Text... Bitte warten...";
+  aiBox.textContent = "KI optimiert Formulierung... Bitte warten...";
 
   setTimeout(() => {
     let resultText = "";
@@ -340,12 +429,12 @@ function processSmartAI() {
     } else if (textLower.includes("tür") && textLower.includes("offen")) {
       resultText = "Es wurde eine unverschlossene Außentür am Objekt lokalisiert. Nach gründlicher Innenraumkontrolle auf Unregelmäßigkeiten wurde die Tür ordnungsgemäß verschlossen und gesichert.";
       riskLevel = "Mittel ⚡";
+    } else if (textLower.includes("obdachlose") || textLower.includes("personen")) {
+      resultText = "Unbefugter Aufenthalt von Personen ohne festen Wohnsitz im Objektbereich dokumentiert. Nach mündlicher Aufforderung und Durchsetzung des Hausrechts verließen die Personen das Areal.";
+      riskLevel = "Mittel ⚡";
     } else if (textLower.includes("licht") || textLower.includes("an")) {
       resultText = "Es wurde eine aktive Beleuchtung in den Büroräumen außerhalb der Arbeitszeit registriert. Keine unbefugten Personen vor Ort; Licht wurde manuell deaktiviert.";
       riskLevel = "Niedrig";
-    } else if (textLower.includes("ruhestörung") || textLower.includes("personen")) {
-      resultText = "Lärmbelästigung und unbefugter Aufenthalt von Personen im Außenbereich des Geländes dokumentiert. Nach mündlicher Aufforderung und Platzverweis verließen die Personen das Areal.";
-      riskLevel = "Mittel ⚡";
     } else {
       resultText = `Im Rahmen des Kontrollganges wurde folgendes Ereignis professionell dokumentiert: "${query}". Es wurden alle notwendigen Sicherungsmaßnahmen gemäß Dienstanweisung umgesetzt.`;
     }
@@ -368,15 +457,12 @@ function applyAIText(text) {
     ende: new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}),
     notiz: text
   });
-  const container = document.getElementById('protoRowsContainer');
-  evaluateRowStatus(container.lastElementChild.id);
-  document.getElementById('aiResultBox').className = "ai-result-box";
-  showToast("Text übernommen", "success");
+  showGlobalToast("Text übernommen", "success");
 }
 
 function startVoiceRecognition() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast("Spracherkennung nicht unterstützt", "error");
+    showGlobalToast("Spracherkennung nicht unterstützt", "error");
     return;
   }
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -386,14 +472,11 @@ function startVoiceRecognition() {
   const voiceBtn = document.getElementById('voiceBtn');
   voiceBtn.classList.add('recording');
   
-  recognition.onstart = () => { showToast("Mikrofon aktiv...", "success"); };
   recognition.onerror = () => { voiceBtn.classList.remove('recording'); };
   recognition.onend = () => { voiceBtn.classList.remove('recording'); };
-  
   recognition.onresult = (event) => {
     document.getElementById('aiInput').value = event.results[0][0].transcript;
   };
-  
   recognition.start();
 }
 
@@ -428,10 +511,9 @@ function loadFromStorage() {
   if (data) {
     const arr = JSON.parse(data);
     if(arr.length > 0) {
-      document.getElementById('checkinScreen').style.display = 'none'; // Skip if already check-in data exists
+      document.getElementById('pinScreen').style.display = 'none';
+      document.getElementById('checkinScreen').style.display = 'none';
       arr.forEach(item => addNewRow(item));
-      const container = document.getElementById('protoRowsContainer');
-      Array.from(container.children).forEach(row => evaluateRowStatus(row.id));
     }
   }
 }
@@ -471,7 +553,7 @@ function showDashboard() {
 
 function exportPDF() { window.print(); }
 
-function showToast(msg, type="success") {
+function showGlobalToast(msg, type="success") {
   const wrap = document.querySelector('.toast-wrap') || document.createElement('div');
   wrap.className = "toast-wrap";
   document.body.appendChild(wrap);
