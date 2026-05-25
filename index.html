@@ -16,61 +16,52 @@
         .dropdown-menu.show { display: block; }
 
         /* ======================================================= */
-        /* 🖨️ إعدادات الطباعة الاحترافية والذكية لمنع البهتان تماماً */
+        /* 🖨️ إعدادات الطباعة الاحترافية لمطابقة مشروعك الأول تماماً */
         /* ======================================================= */
         @media print {
-            /* إخفاء الأزرار وأي عناصر لا داعي لظهورها في الورقة */
             .no-print { display: none !important; }
-            
-            /* إلغاء الخلفية المنقطة وجعل الخلفية بيضاء سادة */
             body { 
                 background: white !important; 
                 padding: 0 !important; 
                 color: #000000 !important;
             }
-            
-            /* تمديد الحاوية لتملأ الورقة بالكامل */
             .main-container { 
                 max-w: 100% !important; 
                 border: none !important; 
                 box-shadow: none !important; 
                 padding: 0 !important;
             }
-
-            /* إجبار المتصفح على طباعة الألوان والخلفيات الملونة بدقتها الكاملة */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-
-            /* إجبار خطوط الحقول (البرواز) على الظهور بلون أسود/رمادي غامق حاد جداً */
-            .print-border-bold {
-                border: 2px solid #222222 !important; /* خط سميك وداكن جداً للطباعة */
+            /* جعل برواز الأسطر داكناً وواضحاً جداً في الطباعة */
+            .print-row-card {
+                border: 1.5px solid #a3a3a3 !important;
                 background-color: #ffffff !important;
+                border-radius: 12px !important;
+                box-shadow: none !important;
             }
+            /* المحافظة على الخطوط الفاصلة الداخلية بين الحقول */
+            .print-divider {
+                border-right: 1.5px solid #d4d4d8 !important;
+            }
+            /* ألوان الترويسة العلوية الفاقعة وثباتها عند الطباعة */
+            .print-header-kunde { background-color: #e5e7eb !important; color: #000000 !important; }
+            .print-header-beginn { background-color: #a3e635 !important; color: #000000 !important; }
+            .print-header-ende { background-color: #fde047 !important; color: #000000 !important; }
+            .print-header-notiz { background-color: #fca5a5 !important; color: #000000 !important; }
 
-            /* تحسين ترويسة الجدول لتظهر بألوان داكنة وواضحة جداً في الورقة */
-            .print-header-kunde { background-color: #d1d5db !important; color: #000000 !important; font-weight: 900 !important; }
-            .print-header-beginn { background-color: #4ade80 !important; color: #000000 !important; font-weight: 900 !important; }
-            .print-header-ende { background-color: #fbbf24 !important; color: #000000 !important; font-weight: 900 !important; }
-            .print-header-notiz { background-color: #fca5a5 !important; color: #000000 !important; font-weight: 900 !important; }
-
-            /* جعل جميع النصوص المدخلة سوداء داكنة تماماً وواضحة للقراءة */
-            input, select, textarea, span {
+            input {
                 color: #000000 !important;
                 font-weight: bold !important;
-            }
-            
-            /* إخفاء نصوص المساعدة الباهتة مثل "+ Ereignis" أو "KI" أثناء الطباعة */
-            .ereignis-btn-txt {
-                display: none !important;
             }
         }
     </style>
 </head>
 <body class="font-sans min-h-screen p-3 sm:p-5 text-slate-700">
 
-    <div class="main-container max-w-md mx-auto bg-[#faf9f5]/95 rounded-[40px] shadow-xl border border-stone-200/80 p-5 space-y-5">
+    <div class="main-container max-w-xl mx-auto bg-[#faf9f5]/95 rounded-[40px] shadow-xl border border-stone-200/80 p-5 space-y-5">
         
         <div class="text-center space-y-0.5 pt-1">
             <h1 class="text-xl font-black tracking-widest text-slate-500 uppercase font-mono">Denis Protokoll</h1>
@@ -108,10 +99,10 @@
                         <input type="text" id="shift-start" value="20:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">&rarr;
                         <input type="text" id="shift-end" value="07:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">
                     </div>
-                    <span id="progress-percent" class="font-black text-slate-200 text-sm">80%</span>
+                    <span id="progress-percent" class="font-black text-slate-200 text-sm">83%</span>
                 </div>
                 <div class="w-full bg-slate-600/50 h-2 rounded-full overflow-hidden p-[1px]">
-                    <div id="progress-fill" class="bg-[#e98588] h-full rounded-full transition-all duration-500" style="width: 80%"></div>
+                    <div id="progress-fill" class="bg-[#e98588] h-full rounded-full transition-all duration-500" style="width: 83%"></div>
                 </div>
             </div>
 
@@ -128,14 +119,14 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-12 gap-1.5 text-center text-[11px] font-black tracking-wider pt-2">
-            <div class="col-span-4 print-header-kunde bg-[#e1e3e6] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Kunde</div>
-            <div class="col-span-2 print-header-beginn bg-[#9ce59c] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Beginn</div>
-            <div class="col-span-2 print-header-ende bg-[#f9c676] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Ende</div>
-            <div class="col-span-4 print-header-notiz bg-[#f8b2b5] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Dienstnotiz</div>
+        <div class="grid grid-cols-12 gap-0 text-center text-[11px] font-black tracking-wider pt-2 px-1">
+            <div class="col-span-3 print-header-kunde bg-[#e5e7eb] text-slate-800 py-1.5 rounded-l-xl border border-r-0 border-stone-300">Kunde</div>
+            <div class="col-span-2 print-header-beginn bg-[#a3e635] text-slate-800 py-1.5 border border-r-0 border-stone-300">Beginn</div>
+            <div class="col-span-2 print-header-ende bg-[#fde047] text-slate-800 py-1.5 border border-r-0 border-stone-300">Ende</div>
+            <div class="col-span-5 print-header-notiz bg-[#fca5a5] text-slate-800 py-1.5 rounded-r-xl border border-stone-300">Dienstnotiz</div>
         </div>
 
-        <div id="rows-container" class="space-y-5">
+        <div id="rows-container" class="space-y-3 px-1">
             </div>
 
         <div class="no-print grid grid-cols-3 gap-3 items-center pt-1 px-0.5">
@@ -157,6 +148,10 @@
             <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm font-mono text-[#4482d8]">
                 <i class="fa-solid fa-floppy-disk"></i> <span id="save-time">04:48:40</span>
             </div>
+        </div>
+
+        <div class="text-center text-[10px] font-black tracking-widest text-stone-300 uppercase font-mono pt-2">
+            Denis Protokoll
         </div>
 
     </div>
@@ -211,67 +206,43 @@
             document.getElementById('status-kunden').innerText = rowCount;
             
             let vCount = 0;
-            document.querySelectorAll('.ereignis-btn-txt').forEach(t => {
-                if(t.innerText !== '+ Ereignis') vCount++;
+            document.querySelectorAll('.ereignis-select-btn').forEach(btn => {
+                if(btn.innerText && !btn.innerText.includes("Notiz hinzufügen")) vCount++;
             });
             document.getElementById('status-vorfaelle').innerText = vCount;
             document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
         }
 
-        function setNowTime(id, labelId) {
+        function setNowTime(idx, field) {
             const timeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
-            const btn = document.getElementById(id);
-            document.getElementById(labelId).innerText = timeStr;
-            btn.className = "w-full border-2 border-stone-400 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
+            const lbl = document.getElementById(`${field}-lbl-${idx}`);
+            const box = document.getElementById(`${field}-box-${idx}`);
+            lbl.innerText = timeStr;
+            
+            // تغيير ألوان الحدود عند اختيار الوقت تماثلاً مع لقطة شاشتك الأولى
+            if(field === 'start') {
+                box.className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-amber-400";
+            } else {
+                box.className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-purple-400";
+            }
             updateStatus();
             saveData();
         }
 
         function toggleDropdown(id) {
             document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== id) m.classList.remove('show'); });
-            document.getElementById(id).classList.toggle('show');
+            const drop = document.getElementById(id);
+            if(drop) drop.classList.toggle('show');
         }
 
         function selectEreignis(idx, text) {
-            const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
+            const btn = document.getElementById(`ereignis-btn-${idx}`);
             const noteInput = document.getElementById(`input-note-${idx}`);
-            txtLabel.innerText = text;
-            txtLabel.className = "ereignis-btn-txt text-slate-700 font-bold break-words";
-            
-            if(text.includes("Obdachlose") || text.includes("Fahrzeuge") || text.includes("Person")) {
-                document.getElementById(`count-val-${idx}`).innerText = "1";
-                noteInput.value = `1 ${text}`;
-            } else {
-                noteInput.value = text;
-            }
+            btn.innerText = text;
+            btn.className = "ereignis-select-btn text-[11px] font-bold text-slate-800 block text-center truncate w-full";
+            noteInput.value = text;
             toggleDropdown(`drop-${idx}`);
             updateStatus();
-            saveData();
-        }
-
-        function changeRowCounter(idx, dir) {
-            const valSpan = document.getElementById(`count-val-${idx}`);
-            const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
-            const noteInput = document.getElementById(`input-note-${idx}`);
-            let current = parseInt(valSpan.innerText || 0);
-            
-            current = dir === 'up' ? current + 1 : current - 1;
-            if(current < 0) current = 0;
-            
-            valSpan.innerText = current;
-            let clean = txtLabel.innerText.replace(/^[0-9]+\s/, '');
-            
-            if (clean === '+ Ereignis') clean = "Personen nach draußen gebracht";
-            
-            txtLabel.innerText = current > 0 ? `${current} ${clean}` : clean;
-            noteInput.value = current > 0 ? `${current} ${clean}` : clean;
-            saveData();
-        }
-
-        function triggerLineKI(idx) {
-            const noteInput = document.getElementById(`input-note-${idx}`);
-            if(!noteInput.value || noteInput.value.includes("+ Ereignis")) return;
-            noteInput.value = "Eine unbefugte Person wurde ordnungsgemäß des Geländes verwiesen.";
             saveData();
         }
 
@@ -279,51 +250,42 @@
             rowCount++;
             const container = document.getElementById('rows-container');
             
+            // الهيكل الجديد: سطر واحد متصل يحوي خطوط فاصلة داخلية ناعمة تطابق مشروعك القديم 100%
             const html = `
-                <div id="row-card-${rowCount}" class="grid grid-cols-12 gap-2 items-stretch relative bg-transparent">
+                <div id="row-card-${rowCount}" class="print-row-card grid grid-cols-12 gap-0 items-stretch bg-white border border-stone-200 shadow-sm rounded-xl overflow-visible relative min-h-[50px]">
                     
-                    <div class="col-span-4 print-border-bold border-2 border-stone-400 rounded-2xl p-2 text-center bg-white shadow-sm flex flex-col justify-center min-h-[58px]">
-                        <span class="text-[9px] text-stone-500 block font-mono text-left font-bold no-print">#0${rowCount}</span>
-                        <input type="text" id="input-loc-${rowCount}" placeholder="— Standort —" oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-black text-slate-900">
+                    <div class="col-span-3 print-divider border-r border-stone-200 p-2 flex flex-col justify-center bg-white rounded-l-xl">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[8px] font-mono text-stone-400 no-print">#0${rowCount}</span>
+                            <input type="text" id="input-loc-${rowCount}" placeholder="Standort..." oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-black text-slate-800 italic">
+                        </div>
                     </div>
 
-                    <div class="col-span-2 flex items-stretch">
-                        <button id="start-btn-${rowCount}" onclick="setNowTime('start-btn-${rowCount}', 'start-lbl-${rowCount}')" class="w-full print-border-bold border-2 border-stone-400 border-dashed rounded-2xl py-2 bg-white text-slate-500 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
-                            <span id="start-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter text-slate-800">⏱ Jetzt</span>
-                        </button>
+                    <div id="start-box-${rowCount}" onclick="setNowTime(${rowCount}, 'start')" class="col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white cursor-pointer hover:bg-stone-50 transition-colors">
+                        <span id="start-lbl-${rowCount}" class="text-[11px] font-black font-mono text-stone-400 tracking-tight">--:--</span>
                     </div>
 
-                    <div class="col-span-2 flex items-stretch">
-                        <button id="end-btn-${rowCount}" onclick="setNowTime('end-btn-${rowCount}', 'end-lbl-${rowCount}')" class="w-full print-border-bold border-2 border-stone-400 border-dashed rounded-2xl py-2 bg-white text-slate-500 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
-                            <span id="end-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter text-slate-800">⏱ Jetzt</span>
-                        </button>
+                    <div id="end-box-${rowCount}" onclick="setNowTime(${rowCount}, 'end')" class="col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white cursor-pointer hover:bg-stone-50 transition-colors">
+                        <span id="end-lbl-${rowCount}" class="text-[11px] font-black font-mono text-stone-400 tracking-tight">--:--</span>
                     </div>
 
-                    <div class="col-span-4 print-border-bold border-2 border-stone-400 rounded-2xl p-1.5 space-y-1.5 text-center bg-white shadow-sm flex flex-col justify-between min-h-[58px] relative">
+                    <div class="col-span-5 p-2 flex items-center justify-between bg-white rounded-r-xl relative group">
                         
-                        <div class="no-print flex items-center justify-between px-0.5 text-slate-400">
-                            <div class="flex items-center bg-stone-50 border border-stone-300 rounded-md shadow-inner">
-                                <button onclick="changeRowCounter(${rowCount}, 'down')" class="px-1.5 font-bold text-slate-500 hover:text-rose-500 text-xs">-</button>
-                                <span id="count-val-${rowCount}" class="font-mono font-black px-1 text-slate-800 text-[10px]">0</span>
-                                <button onclick="changeRowCounter(${rowCount}, 'up')" class="px-1.5 font-bold text-slate-500 hover:text-emerald-500 text-xs">+</button>
-                            </div>
-                            <button onclick="deleteRowCard(${rowCount})" class="w-4 h-4 bg-rose-50 text-rose-500 rounded border border-rose-100 flex items-center justify-center"><i class="fa-solid fa-trash text-[8px]"></i></button>
-                        </div>
-
-                        <div class="relative w-full">
-                            <input type="text" id="input-note-${rowCount}" placeholder="Dienstnotiz..." oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-[10px] font-black text-slate-900 placeholder-stone-500 px-0.5">
-                            <button onclick="toggleDropdown('drop-${rowCount}')" class="no-print block w-full text-center text-[8px] font-bold text-rose-400 hover:underline mt-0.5">
-                                <span id="ereignis-txt-${rowCount}" class="ereignis-btn-txt">+ Ereignis</span>
+                        <div class="w-full text-center relative px-1">
+                            <input type="hidden" id="input-note-${rowCount}" value="">
+                            
+                            <button id="ereignis-btn-${rowCount}" onclick="toggleDropdown('drop-${rowCount}')" class="ereignis-select-btn text-[10px] font-bold text-stone-400 hover:text-slate-800 transition-colors block text-center truncate w-full focus:outline-none">
+                                Notiz hinzufügen...
                             </button>
-                            <div id="drop-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-1 w-44 bg-white border border-stone-300 rounded-xl shadow-xl z-50 p-1 text-left hidden">
-                                ${ereignisse.map(e => `<button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[9px] text-slate-600 hover:bg-stone-50 rounded-lg truncate block border-b border-stone-100 last:border-0 font-medium">${e}</button>`).join('')}
+
+                            <div id="drop-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-2 w-52 bg-white border border-stone-300 rounded-xl shadow-xl z-50 p-1 text-left hidden">
+                                ${ereignisse.map(e => `<button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[10px] text-slate-700 hover:bg-stone-50 rounded-lg truncate block border-b border-stone-100 last:border-0 font-bold">${e}</button>`).join('')}
                             </div>
                         </div>
 
-                        <div class="no-print flex items-center justify-center gap-1.5 text-[8px] font-bold pt-0.5">
-                            <button onclick="triggerLineKI(${rowCount})" class="bg-indigo-50 text-indigo-500 border border-indigo-100 rounded px-1 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-robot"></i> KI</button>
-                            <button class="bg-stone-50 text-stone-500 border border-stone-200 rounded px-1 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-paperclip"></i> Foto</button>
-                        </div>
+                        <button onclick="deleteRowCard(${rowCount})" class="no-print opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 bg-stone-50 text-stone-400 hover:text-rose-500 hover:bg-rose-50 rounded flex items-center justify-center ml-1">
+                            <i class="fa-solid fa-trash text-[9px]"></i>
+                        </button>
                     </div>
 
                 </div>
@@ -331,17 +293,20 @@
             container.insertAdjacentHTML('beforeend', html);
 
             if(saved) {
-                document.getElementById(`input-loc-${rowCount}`).value = saved.loc || '';
-                if(saved.note) document.getElementById(`input-note-${rowCount}`).value = saved.note;
+                if(saved.loc) document.getElementById(`input-loc-${rowCount}`).value = saved.loc;
+                if(saved.note) {
+                    document.getElementById(`input-note-${rowCount}`).value = saved.note;
+                    document.getElementById(`ereignis-btn-${rowCount}`).innerText = saved.note;
+                    document.getElementById(`ereignis-btn-${rowCount}`).className = "ereignis-select-btn text-[11px] font-bold text-slate-800 block text-center truncate w-full";
+                }
                 if(saved.start) {
                     document.getElementById('start-lbl-' + rowCount).innerText = saved.start;
-                    document.getElementById('start-btn-' + rowCount).className = "w-full border-2 border-stone-400 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
+                    document.getElementById(`start-box-${rowCount}`).className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-amber-400";
                 }
                 if(saved.end) {
                     document.getElementById('end-lbl-' + rowCount).innerText = saved.end;
-                    document.getElementById('end-btn-' + rowCount).className = "w-full border-2 border-stone-400 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
+                    document.getElementById(`end-box-${rowCount}`).className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-purple-400";
                 }
-                if(saved.count) document.getElementById(`count-val-${rowCount}`).innerText = saved.count;
             }
             updateStatus();
         }
@@ -373,17 +338,16 @@
                 data.rows.push({
                     loc: locInput.value,
                     note: document.getElementById(`input-note-${i}`).value,
-                    start: document.getElementById(`start-lbl-${i}`).innerText.includes("Jetzt") ? null : document.getElementById(`start-lbl-${i}`).innerText,
-                    end: document.getElementById(`end-lbl-${i}`).innerText.includes("Jetzt") ? null : document.getElementById(`end-lbl-${i}`).innerText,
-                    count: document.getElementById(`count-val-${i}`).innerText
+                    start: document.getElementById(`start-lbl-${i}`).innerText.includes("--:--") ? null : document.getElementById(`start-lbl-${i}`).innerText,
+                    end: document.getElementById(`end-lbl-${i}`).innerText.includes("--:--") ? null : document.getElementById(`end-lbl-${i}`).innerText
                 });
             }
-            localStorage.setItem('denis_dashboard_fixed_print', JSON.stringify(data));
+            localStorage.setItem('denis_dashboard_v1_style', JSON.stringify(data));
             document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
         }
 
         function loadData() {
-            const raw = localStorage.getItem('denis_dashboard_fixed_print');
+            const raw = localStorage.getItem('denis_dashboard_v1_style');
             if(!raw) { setAutomaticDateTime(); addRow(); return; }
             const parsed = JSON.parse(raw);
             document.getElementById('shift-title').value = parsed.title || '';
@@ -403,7 +367,7 @@
 
         function resetForm() {
             if(confirm("Protokoll zurücksetzen?")) {
-                localStorage.removeItem('denis_dashboard_fixed_print');
+                localStorage.removeItem('denis_dashboard_v1_style');
                 document.getElementById('rows-container').innerHTML = '';
                 rowCount = 0;
                 document.getElementById('employee-name').value = '';
