@@ -3,298 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GuardX Pro - Intelligent Security</title>
+    <title>Denis Protokoll - Sicherheitsdienst</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
+        body {
+            background-color: #f4f3ef;
+            background-image: radial-gradient(#dbdad5 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; }
-        @media print { .no-print { display: none !important; } }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .main-container { max-w: 100% !important; border: none !important; box-shadow: none !important; box-sizing: border-box; }
+            input, select { border: none !important; background: transparent !important; }
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen p-2 sm:p-4">
+<body class="font-sans min-h-screen p-3 sm:p-6 text-slate-700">
 
-    <div class="max-w-md mx-auto bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 overflow-hidden p-4 space-y-4">
+    <div class="main-container max-w-md mx-auto bg-[#faf9f5]/90 rounded-[40px] shadow-xl border border-stone-200/60 p-5 space-y-5">
         
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <div>
-                <h1 class="text-lg font-black tracking-wider text-rose-500 uppercase flex items-center gap-1">
-                    <i class="fa-solid fa-shield-halved animate-pulse"></i> GuardX Pro
-                </h1>
-                <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Next-Gen Sicherheitsdienst</p>
+        <div class="text-center space-y-0.5 pt-2">
+            <h1 class="text-xl font-extrabold tracking-widest text-slate-500 uppercase font-mono">Denis Protokoll</h1>
+            <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-mono">Sicherheitsdienst</p>
+        </div>
+
+        <div class="no-print flex items-center justify-between gap-1.5 px-1">
+            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-gear"></i></button>
+            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-pen-nib"></i></button>
+            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-moon"></i></button>
+            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-bell"></i></button>
+            <button class="flex-1 h-11 bg-[#53d171] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1 shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp</button>
+            <button class="flex-1 h-11 bg-[#2b61cd] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1 shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        </div>
+
+        <div class="no-print grid grid-cols-2 gap-3 px-1">
+            <button onclick="resetForm()" class="bg-white border border-stone-200 text-slate-600 rounded-2xl py-2.5 text-xs font-bold shadow-sm flex items-center justify-center gap-1"><i class="fa-solid fa-rotate-left text-[10px]"></i> Reset</button>
+            <button onclick="window.print()" class="bg-[#dd5256] text-white rounded-2xl py-2.5 text-xs font-bold shadow-md flex items-center justify-center gap-1.5"><i class="fa-solid fa-print text-xs"></i> Drucken</button>
+        </div>
+
+        <div class="bg-[#445674] text-white rounded-[32px] p-5 space-y-4 shadow-inner relative overflow-hidden">
+            <div class="text-center text-[10px] font-bold tracking-wider text-slate-300/80 uppercase font-mono">
+                Tagesbericht · Vorfallprotokoll
             </div>
-            <div class="bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-1.5 text-center">
-                <span class="text-[9px] block text-slate-400 font-bold uppercase tracking-wider">Nächster Rundgang</span>
-                <span id="countdown-timer" class="text-sm font-mono font-bold text-amber-400">45:00</span>
+            <h2 class="text-2xl font-black tracking-wide text-center font-mono">Denis Protokoll</h2>
+            
+            <div class="bg-white/10 rounded-full py-1.5 px-4 text-xs font-medium flex items-center justify-center gap-1.5 text-slate-200 border border-white/5 mx-2">
+                <i class="fa-solid fa-calendar-days text-[#e98588] text-xs"></i>
+                <input type="text" id="shift-title" value="Nachtschicht von gestern (24.05.2026)" oninput="saveData()" class="bg-transparent focus:outline-none text-center w-full text-xs font-semibold">
             </div>
-        </div>
-
-        <div class="no-print grid grid-cols-3 gap-2">
-            <button onclick="startQRScannerAll()" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-2.5 font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg">
-                <i class="fa-solid fa-qrcode text-sm"></i> QR Scannen
-            </button>
-            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl py-2.5 font-bold text-xs flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-print"></i> Drucken
-            </button>
-            <button onclick="resetProtokoll()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 rounded-xl py-2.5 font-bold text-xs flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-trash-can"></i> Reset
-            </button>
-        </div>
-
-        <div id="qr-reader-container" class="hidden bg-slate-800 p-2 rounded-2xl border border-slate-700 space-y-2">
-            <div id="qr-reader" class="w-full overflow-hidden rounded-xl"></div>
-            <button onclick="stopQRScanner()" class="w-full bg-rose-500 text-white text-xs font-bold py-1.5 rounded-lg">Scanner schließen</button>
-        </div>
-
-        <div class="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700/60 rounded-2xl p-3.5 space-y-3">
-            <div class="grid grid-cols-2 gap-2">
-                <div class="space-y-0.5">
-                    <label class="text-[9px] uppercase tracking-wider font-bold text-slate-400">Dienstantritt</label>
-                    <input type="text" id="shift-start" value="18:00" class="bg-slate-900/60 border border-slate-700 rounded-lg px-2 py-1 text-xs w-full font-mono text-center focus:outline-none focus:border-indigo-500">
+            
+            <div class="space-y-1.5 px-2">
+                <div class="flex justify-between text-xs font-mono text-slate-300 font-bold items-center">
+                    <div class="flex items-center gap-1">
+                        <input type="text" id="shift-start" value="20:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">&rarr;
+                        <input type="text" id="shift-end" value="07:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">
+                    </div>
+                    <span id="progress-percent" class="font-black text-slate-200 text-sm">83%</span>
                 </div>
-                <div class="space-y-0.5">
-                    <label class="text-[9px] uppercase tracking-wider font-bold text-slate-400">Dienstende</label>
-                    <input type="text" id="shift-end" value="06:00" class="bg-slate-900/60 border border-slate-700 rounded-lg px-2 py-1 text-xs w-full font-mono text-center focus:outline-none focus:border-indigo-500">
+                <div class="w-full bg-slate-600/60 h-2 rounded-full overflow-hidden p-[1px]">
+                    <div id="progress-fill" class="bg-[#e98588] h-full rounded-full transition-all duration-500" style="width: 83%"></div>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-                <input type="text" id="shift-day" placeholder="Tag" class="bg-slate-900/40 border border-slate-700/50 rounded-lg py-1.5 text-xs text-center font-medium focus:outline-none">
-                <input type="text" id="shift-date" placeholder="Datum" class="bg-slate-900/40 border border-slate-700/50 rounded-lg py-1.5 text-xs font-mono text-center focus:outline-none">
+
+            <div class="flex flex-col items-end space-y-0.5 px-2">
+                <span class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Mitarbeiter</span>
+                <input type="text" id="employee-name" placeholder="Vorname Nachnam" oninput="saveData()" class="bg-white/10 border border-white/5 text-xs text-center rounded-xl px-3 py-1.5 w-48 text-white focus:outline-none font-medium placeholder-slate-400/70">
+            </div>
+
+            <div class="grid grid-cols-4 gap-1.5 px-1 pt-1 text-center">
+                <input type="text" id="shift-day" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-xs font-bold text-white text-center focus:outline-none" placeholder="Tag">
+                <input type="text" id="shift-date" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-xs font-mono font-bold text-white text-center focus:outline-none" placeholder="Datum">
+                <input type="text" id="shift-status" value="🟢 Regulär" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-[10px] font-extrabold text-[#7be394] text-center focus:outline-none">
+                <input type="text" id="shift-bell" value="🔔 Ton" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-[10px] font-extrabold text-[#f3ca76] text-center focus:outline-none">
             </div>
         </div>
 
-        <div id="guardx-rows" class="space-y-3">
+        <div class="grid grid-cols-12 gap-1 text-center text-[10px] font-extrabold uppercase tracking-wider pt-1">
+            <div class="col-span-4 bg-[#f0f2f5] py-1.5 rounded-xl text-slate-500">Kunde</div>
+            <div class="col-span-2 bg-[#e8f8ed] py-1.5 rounded-xl text-[#399653]">Beginn</div>
+            <div class="col-span-2 bg-[#fef4e3] py-1.5 rounded-xl text-[#c78622]">Ende</div>
+            <div class="col-span-4 bg-[#fdecee] py-1.5 rounded-xl text-[#ca4a5c]">Dienstnotiz</div>
+        </div>
+
+        <div id="rows-container" class="space-y-4">
             </div>
 
-        <button onclick="addNewGuardRow()" class="no-print w-full bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-750 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
-            <i class="fa-solid fa-plus text-rose-500"></i> Manueller Eintrag (+ Zeile)
-        </button>
+        <div class="no-print grid grid-cols-3 gap-3 items-center pt-1 px-1">
+            <button onclick="removeRow()" class="bg-white border border-stone-200 text-slate-500 rounded-2xl py-2.5 text-xs font-bold shadow-sm hover:bg-stone-50">- Zeile</button>
+            <div id="row-counter" class="text-center text-xs font-extrabold text-slate-500 font-mono">1 Zeilen</div>
+            <button onclick="addRow()" class="bg-[#dd5256] text-white rounded-2xl py-2.5 text-xs font-bold shadow-md hover:bg-[#c94549]">+ Zeile</button>
+        </div>
 
-        <div class="border-t border-slate-800 pt-3 flex justify-between items-center text-[10px] font-bold text-slate-400">
-            <div class="flex gap-2">
-                <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700"><span id="count-scans" class="text-indigo-400 font-mono">0</span> QR-Scans</span>
-                <span class="bg-slate-800 px-2 py-1 rounded-md border border-slate-700"><span id="count-events" class="text-rose-400 font-mono">0</span> Vorfälle</span>
+        <div class="border-t border-stone-200/60 pt-4 grid grid-cols-4 gap-1 px-1 text-[9px] font-bold text-slate-500 text-center">
+            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm">
+                <span class="text-rose-500">🔴</span> <span id="status-kunden">0</span> Kunden
             </div>
-            <span class="font-mono text-slate-500"><i class="fa-solid fa-cloud-arrow-up text-emerald-500 mr-0.5"></i> Auto-Save</span>
+            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm">
+                <span class="text-rose-500">🔴</span> <span id="status-vorfaelle">0</span> Vorfälle
+            </div>
+            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm">
+                <span class="text-rose-500">🔴</span> <span id="status-total-rows">1</span> Zeilen
+            </div>
+            <div class="bg-white border border-stone-200 rounded-full py-1 px-2 flex items-center justify-center gap-1 shadow-sm font-mono text-[#4482d8]">
+                <i class="fa-solid fa-floppy-disk"></i> <span id="save-time">05:11:41</span>
+            </div>
         </div>
 
     </div>
 
     <script>
         let rowCount = 0;
-        let html5QrCode = null;
-        let countdownSeconds = 45 * 60;
-
-        const standardEreignisse = [
-            "Kontrollgang ohne Vorkommnisse durchgeführt",
-            "Zustandskontrolle: Alles in Ordnung",
-            "Obdachlose Person vom Gelände verwiesen",
-            "Unbefugtes Fahrzeug dokumentiert",
-            "Sicherheitsrisiko festgestellt & behoben"
+        const ereignisse = [
+            "Obdachlose nach draußen gebracht",
+            "Fahrzeuge herausgelassen",
+            "Unbefugte Person entfernt",
+            "Fahrzeugschaden festgestellt",
+            "Parkverstoß dokumentiert",
+            "Sachschaden festgestellt - Dokumentiert"
         ];
 
-        // 1. نظام المؤقت التنازلي التلقائي للجولات
-        function startCountdown() {
-            setInterval(() => {
-                if(countdownSeconds <= 0) {
-                    countdownSeconds = 45 * 60; // إعادة التعيين لـ 45 دقيقة تلقائياً
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]); // اهتزاز الهاتف للتنبيه
-                }
-                countdownSeconds--;
-                let mins = Math.floor(countdownSeconds / 60);
-                let secs = countdownSeconds % 60;
-                document.getElementById('countdown-timer').innerText = 
-                    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            }, 1000);
-        }
-
-        function setAutomaticDate() {
+        function setAutomaticDateTime() {
             const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
             const now = new Date();
-            document.getElementById('shift-day').value = days[now.getDay()];
-            document.getElementById('shift-date').value = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()}`;
-        }
-
-        // 2. ميزة تشغيل ماسح الـ QR Code الفعلي عبر الكاميرا الخلفية
-        function startQRScannerAll() {
-            const container = document.getElementById('qr-reader-container');
-            container.classList.remove('hidden');
-            
-            html5QrCode = new Html5Qrcode("qr-reader");
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (qrText) => {
-                    // عند نجاح المسح: إنشاء سطر فوري وتعبئة اسم الموقع المكتوب داخل الـ QR
-                    addNewGuardRow(qrText);
-                    let scanNum = parseInt(document.getElementById('count-scans').innerText);
-                    document.getElementById('count-scans').innerText = scanNum + 1;
-                    stopQRScanner();
-                },
-                (errorMessage) => { /* جاري البحث */ }
-            ).catch(err => alert("Kamera-Fehler: " + err));
-        }
-
-        function stopQRScanner() {
-            if(html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('qr-reader-container').classList.add('hidden');
-                });
+            if(!document.getElementById('shift-day').value) document.getElementById('shift-day').value = days[now.getDay()];
+            if(!document.getElementById('shift-date').value) {
+                const d = String(now.getDate()).padStart(2, '0');
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                document.getElementById('shift-date').value = `${d}.${m}.${now.getFullYear()}`;
             }
         }
 
-        // 3. تحويل الصوت إلى كود مكتوب (Speech Recognition API باللغة الألمانية)
-        function startVoiceInput(id) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if(!SpeechRecognition) return alert("ميزه الصوت غير مدعومة في متصفحك الحالي.");
-            
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'de-DE';
-            
-            const micBtn = document.getElementById(`mic-btn-${id}`);
-            micBtn.classList.remove('text-slate-400');
-            micBtn.classList.add('text-rose-500', 'animate-bounce');
-
-            recognition.onresult = function(event) {
-                const text = event.results[0][0].transcript;
-                document.getElementById(`note-input-${id}`).value = text;
-                saveGuardData();
-            };
-
-            recognition.onend = function() {
-                micBtn.classList.remove('text-rose-500', 'animate-bounce');
-                micBtn.classList.add('text-slate-400');
-            };
-
-            recognition.start();
+        function calculateProgress() {
+            const start = document.getElementById('shift-start').value.split(':');
+            const end = document.getElementById('shift-end').value.split(':');
+            if(start.length === 2 && end.length === 2) {
+                let sMin = parseInt(start[0]) * 60 + parseInt(start[1]);
+                let eMin = parseInt(end[0]) * 60 + parseInt(end[1]);
+                if(eMin <= sMin) eMin += 24 * 60;
+                
+                const now = new Date();
+                let cMin = now.getHours() * 60 + now.getMinutes();
+                if(cMin < sMin) cMin += 24 * 60;
+                
+                let pct = 0;
+                if(cMin >= sMin && cMin <= eMin) pct = Math.round(((cMin - sMin) / (eMin - sMin)) * 100);
+                else if(cMin > eMin) pct = 100;
+                
+                document.getElementById('progress-fill').style.width = pct + '%';
+                document.getElementById('progress-percent').innerText = pct + '%';
+            }
+            saveData();
         }
 
-        function toggleDrop(id) {
-            document.querySelectorAll('.dropdown-menu').forEach(m => {
-                if(m.id !== id) m.classList.remove('show');
+        function updateStatus() {
+            document.getElementById('row-counter').innerText = `${rowCount} Zeilen`;
+            document.getElementById('status-total-rows').innerText = rowCount;
+            document.getElementById('status-kunden').innerText = rowCount;
+            
+            let vCount = 0;
+            document.querySelectorAll('.ereignis-btn-txt').forEach(t => {
+                if(t.innerText !== '+ Ereignis') vCount++;
             });
+            document.getElementById('status-vorfaelle').innerText = vCount;
+            document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
+        }
+
+        function setNowTime(id, labelId) {
+            const timeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
+            const btn = document.getElementById(id);
+            document.getElementById(labelId).innerText = timeStr;
+            btn.className = "w-full border border-stone-200 rounded-2xl py-2 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-sm text-xs";
+            updateStatus();
+            saveData();
+        }
+
+        function toggleDropdown(id) {
+            document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== id) m.classList.remove('show'); });
             document.getElementById(id).classList.toggle('show');
         }
 
-        function selectEventPro(id, val) {
-            const textInput = document.getElementById(`note-input-${id}`);
-            textInput.value = val;
+        function selectEreignis(idx, text) {
+            const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
+            txtLabel.innerText = text;
+            txtLabel.className = "ereignis-btn-txt text-slate-700 font-bold break-words";
             
-            if(!val.includes("ohne Vorkommnisse") && !val.includes("Ordnung")) {
-                let evNum = parseInt(document.getElementById('count-events').innerText);
-                document.getElementById('count-events').innerText = evNum + 1;
+            if(text.includes("Obdachlose") || text.includes("Fahrzeuge") || text.includes("Person")) {
+                document.getElementById(`count-val-${idx}`).innerText = "1";
+                txtLabel.innerText = `1 ${text}`;
             }
-            toggleDrop(`drop-${id}`);
-            saveGuardData();
+            toggleDropdown(`drop-${idx}`);
+            updateStatus();
+            saveData();
         }
 
-        // 4. توليد الأسطر المبتكرة والذكية
-        function addNewGuardRow(prefilledLocation = "") {
+        function changeRowCounter(idx, dir) {
+            const valSpan = document.getElementById(`count-val-${idx}`);
+            const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
+            let current = parseInt(valSpan.innerText || 0);
+            
+            current = dir === 'up' ? current + 1 : current - 1;
+            if(current < 0) current = 0;
+            
+            valSpan.innerText = current;
+            let clean = txtLabel.innerText.replace(/^[0-9]+\s/, '');
+            txtLabel.innerText = current > 0 ? `${current} ${clean}` : clean;
+            saveData();
+        }
+
+        function triggerLineKI(idx) {
+            const txtLabel = document.getElementById(`ereignis-txt-${idx}`);
+            if(txtLabel.innerText === '+ Ereignis') return;
+            if(!txtLabel.innerText.includes("Eine Person")) {
+                txtLabel.innerText = "Eine unbefugte Person wurde ordnungsgemäß des Geländes verwiesen.";
+                txtLabel.classList.add('text-indigo-600');
+            } else {
+                txtLabel.innerText = "Unbefugte Person entfernt";
+                txtLabel.classList.remove('text-indigo-600');
+            }
+            saveData();
+        }
+
+        function addRow(saved = null) {
             rowCount++;
-            const container = document.getElementById('guardx-rows');
-            const now = new Date();
-            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
-
+            const container = document.getElementById('rows-container');
+            
             const html = `
-                <div id="g-row-${rowCount}" class="bg-slate-800/40 border border-slate-800 rounded-2xl p-2.5 space-y-2 relative">
+                <div id="row-card-${rowCount}" class="bg-white border border-stone-200/80 rounded-[28px] p-2.5 shadow-sm grid grid-cols-12 gap-1 items-start relative hover:shadow-md transition-all">
                     
-                    <div class="grid grid-cols-12 gap-1.5 items-center">
-                        <div class="col-span-3 text-center bg-slate-800 rounded-xl py-1.5 border border-slate-700/60">
-                            <span class="text-[9px] text-rose-500 block font-mono font-bold">#0${rowCount}</span>
-                            <span class="text-xs font-mono font-black text-slate-200">${currentTime}</span>
-                        </div>
-
-                        <div class="col-span-5 bg-slate-900 border border-slate-700/80 rounded-xl px-2 py-2 flex items-center">
-                            <input type="text" id="loc-input-${rowCount}" value="${prefilledLocation}" placeholder="— Standort —" oninput="saveGuardData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-bold text-slate-200">
-                        </div>
-
-                        <div class="col-span-4 relative">
-                            <button onclick="toggleDrop('drop-${rowCount}')" class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2 text-[10px] font-bold text-rose-400 hover:bg-slate-750 truncate px-1">
-                                <i class="fa-solid fa-list-check mr-0.5"></i> Status / Event
-                            </button>
-                            <div id="drop-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-1 w-52 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1 text-left hidden">
-                                ${standardEreignisse.map(e => `
-                                    <button onclick="selectEventPro(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[10px] text-slate-300 hover:bg-slate-700 rounded-lg truncate block border-b border-slate-700/45 last:border-0">${e}</button>
-                                `).join('')}
-                            </div>
-                        </div>
+                    <div class="col-span-4 border border-stone-200 rounded-2xl p-2 text-center bg-white shadow-inner min-h-[52px] flex flex-col justify-center">
+                        <span class="text-[9px] text-stone-400 block font-mono">#0${rowCount}</span>
+                        <input type="text" id="input-loc-${rowCount}" placeholder="— Standort —" oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-extrabold text-slate-700">
                     </div>
 
-                    <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-1.5 flex items-center gap-2">
-                        <input type="text" id="note-input-${rowCount}" placeholder="Dienstnotiz eintragen oder Mikrofon nutzen..." oninput="saveGuardData()" class="w-full bg-transparent focus:outline-none text-xs text-slate-300 px-1 font-medium">
-                        
-                        <button id="mic-btn-${rowCount}" onclick="startVoiceInput(${rowCount})" class="text-slate-400 hover:text-white px-2 py-1 bg-slate-800 rounded-lg text-xs transition-all">
-                            <i class="fa-solid fa-microphone"></i>
+                    <div class="col-span-2">
+                        <button id="start-btn-${rowCount}" onclick="setNowTime('start-btn-${rowCount}', 'start-lbl-${rowCount}')" class="w-full border border-stone-200 border-dashed rounded-2xl py-2 bg-stone-50/50 text-slate-400 font-medium text-center flex flex-col items-center justify-center min-h-[52px] shadow-sm hover:bg-stone-50">
+                            <span id="start-lbl-${rowCount}" class="text-[11px] font-bold">⏱ Jetzt</span>
                         </button>
                     </div>
 
-                    <button onclick="deleteThisRow(${rowCount})" class="no-print absolute -top-1 -right-1 w-4 h-4 bg-rose-950/80 text-rose-400 text-[8px] rounded-full border border-rose-800 flex items-center justify-center font-bold">X</button>
+                    <div class="col-span-2">
+                        <button id="end-btn-${rowCount}" onclick="setNowTime('end-btn-${rowCount}', 'end-lbl-${rowCount}')" class="w-full border border-stone-200 border-dashed rounded-2xl py-2 bg-stone-50/50 text-slate-400 font-medium text-center flex flex-col items-center justify-center min-h-[52px] shadow-sm hover:bg-stone-50">
+                            <span id="end-lbl-${rowCount}" class="text-[11px] font-bold">⏱ Jetzt</span>
+                        </button>
+                    </div>
+
+                    <div class="col-span-4 bg-stone-50/40 border border-stone-200/60 rounded-2xl p-1.5 space-y-2 text-center min-h-[52px] flex flex-col justify-center relative">
+                        <div class="no-print flex items-center justify-between px-0.5 text-slate-400 text-[11px]">
+                            <div class="flex items-center bg-white border border-stone-200 rounded-lg shadow-sm">
+                                <button onclick="changeRowCounter(${rowCount}, 'down')" class="px-1.5 font-bold hover:text-rose-500">-</button>
+                                <span id="count-val-${rowCount}" class="font-mono font-bold px-1 text-slate-700 text-[10px]">0</span>
+                                <button onclick="changeRowCounter(${rowCount}, 'up')" class="px-1.5 font-bold hover:text-emerald-500">+</button>
+                            </div>
+                            <button onclick="deleteRowCard(${rowCount})" class="w-5 h-5 bg-rose-50 text-rose-500 rounded-md border border-rose-100 flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                        </div>
+
+                        <div class="relative">
+                            <button onclick="toggleDropdown('drop-${rowCount}')" class="w-full text-center text-[10px] font-bold text-rose-400/90 hover:underline">
+                                <span id="ereignis-txt-${rowCount}" class="ereignis-btn-text">+ Ereignis</span>
+                            </button>
+                            <div id="drop-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-1 w-48 bg-white border border-stone-200 rounded-xl shadow-xl z-50 p-1 text-left hidden">
+                                ${ereignisse.map(e => `<button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[10px] text-slate-600 hover:bg-stone-50 rounded-lg truncate block border-b border-stone-100 last:border-0">${e}</button>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="no-print flex items-center justify-center gap-1.5 pt-0.5 text-[9px] font-bold">
+                            <button onclick="triggerLineKI(${rowCount})" class="bg-indigo-50 text-indigo-500 border border-indigo-100 rounded-md px-1.5 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-robot"></i> KI</button>
+                            <button class="bg-stone-100 text-stone-500 rounded-md px-1.5 py-0.5 flex items-center gap-0.5"><i class="fa-solid fa-paperclip"></i> Foto</button>
+                        </div>
+                    </div>
+
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', html);
-            saveGuardData();
-        }
 
-        function deleteThisRow(id) {
-            const row = document.getElementById(`g-row-${id}`);
-            if(row) row.remove();
-            saveGuardData();
-        }
-
-        // الحفظ التلقائي في الذاكرة (Local Storage) لمنع ضياع التقارير
-        function saveGuardData() {
-            const rowsArr = [];
-            for(let i=1; i<=rowCount; i++) {
-                const loc = document.getElementById(`loc-input-${i}`);
-                if(!loc) continue;
-                rowsArr.push({
-                    location: loc.value,
-                    note: document.getElementById(`note-input-${i}`).value
-                });
+            if(saved) {
+                document.getElementById(`input-loc-${rowCount}`).value = saved.loc || '';
+                if(saved.start) {
+                    document.getElementById(`start-lbl-${rowCount}`).innerText = saved.start;
+                    document.getElementById(`start-btn-${rowCount}`).className = "w-full border border-stone-200 rounded-2xl py-2 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-sm text-xs";
+                }
+                if(saved.end) {
+                    document.getElementById(`end-lbl-${rowCount}`).innerText = saved.end;
+                    document.getElementById(`end-btn-${rowCount}`).className = "w-full border border-stone-200 rounded-2xl py-2 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-sm text-xs";
+                }
+                if(saved.ereignis) {
+                    const txt = document.getElementById(`ereignis-txt-${rowCount}`);
+                    txt.innerText = saved.ereignis;
+                    txt.className = "ereignis-btn-text text-slate-700 font-bold break-words";
+                    if(saved.count) document.getElementById(`count-val-${rowCount}`).innerText = saved.count;
+                }
             }
+            updateStatus();
+        }
+
+        function deleteRowCard(id) {
+            const card = document.getElementById(`row-card-${id}`);
+            if(card) card.remove();
+            updateStatus();
+            saveData();
+        }
+
+        function removeRow() {
+            if(rowCount > 0) { deleteRowCard(rowCount); rowCount--; }
+        }
+
+        function saveData() {
             const data = {
+                title: document.getElementById('shift-title').value,
+                start: document.getElementById('shift-start').value,
+                end: document.getElementById('shift-end').value,
+                emp: document.getElementById('employee-name').value,
                 day: document.getElementById('shift-day').value,
                 date: document.getElementById('shift-date').value,
-                rows: rowsArr
+                rows: []
             };
-            localStorage.setItem('guardx_pro_storage', JSON.stringify(data));
+            for(let i=1; i<=rowCount; i++) {
+                const locInput = document.getElementById(`input-loc-${i}`);
+                if(!locInput) continue;
+                data.rows.push({
+                    loc: locInput.value,
+                    start: document.getElementById(`start-lbl-${i}`).innerText.includes("Jetzt") ? null : document.getElementById(`start-lbl-${i}`).innerText,
+                    end: document.getElementById(`end-lbl-${i}`).innerText.includes("Jetzt") ? null : document.getElementById(`end-lbl-${i}`).innerText,
+                    ereignis: document.getElementById(`ereignis-txt-${i}`).innerText !== '+ Ereignis' ? document.getElementById(`ereignis-txt-${i}`).innerText : null,
+                    count: document.getElementById(`count-val-${i}`).innerText
+                });
+            }
+            localStorage.setItem('denis_dashboard_main', JSON.stringify(data));
+            document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
         }
 
-        function loadGuardData() {
-            const raw = localStorage.getItem('guardx_pro_storage');
-            if(!raw) {
-                setAutomaticDate();
-                addNewGuardRow();
-                return;
-            }
+        function loadData() {
+            const raw = localStorage.getItem('denis_dashboard_main');
+            if(!raw) { setAutomaticDateTime(); addRow(); return; }
             const parsed = JSON.parse(raw);
+            document.getElementById('shift-title').value = parsed.title || '';
+            document.getElementById('shift-start').value = parsed.start || '20:00';
+            document.getElementById('shift-end').value = parsed.end || '07:00';
+            document.getElementById('employee-name').value = parsed.emp || '';
             document.getElementById('shift-day').value = parsed.day || '';
             document.getElementById('shift-date').value = parsed.date || '';
             if(parsed.rows && parsed.rows.length > 0) {
-                parsed.rows.forEach(r => {
-                    addNewGuardRow(r.location);
-                    document.getElementById(`note-input-${rowCount}`).value = r.note || '';
-                });
+                parsed.rows.forEach(r => addRow(r));
             } else {
-                addNewGuardRow();
+                addRow();
             }
-            setAutomaticDate();
+            setAutomaticDateTime();
+            calculateProgress();
         }
 
-        function resetProtokoll() {
-            if(confirm("Protokoll komplett löschen?")) {
-                localStorage.removeItem('guardx_pro_storage');
-                document.getElementById('guardx-rows').innerHTML = '';
+        function resetForm() {
+            if(confirm("Protokoll zurücksetzen?")) {
+                localStorage.removeItem('denis_dashboard_main');
+                document.getElementById('rows-container').innerHTML = '';
                 rowCount = 0;
-                setAutomaticDate();
-                addNewGuardRow();
+                document.getElementById('employee-name').value = '';
+                document.getElementById('shift-day').value = '';
+                document.getElementById('shift-date').value = '';
+                setAutomaticDateTime();
+                addRow();
+                calculateProgress();
             }
         }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.relative')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            }
+        });
 
         window.onload = function() {
-            loadGuardData();
-            startCountdown();
+            loadData();
+            setInterval(calculateProgress, 60000);
         };
     </script>
 </body>
