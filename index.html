@@ -3,392 +3,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Denis Protokoll - Sicherheitsdienst</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Denis Protokoll</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background-color: #f5f4f0;
-            background-image: radial-gradient(#e1e0db 1.2px, transparent 1.2px);
-            background-size: 24px 24px;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --red: #E8394A; 
+            --red2: #ff6b7a; 
+            --green: #4cba6b;
+            --bg: #ECEEF2; 
+            --card: #ffffff; 
+            --border: #E2E5EC;
+            --text: #141518; 
+            --muted: #8890A0; 
+            --row-hover: #fff8f8;
         }
-        .dropdown-menu { display: none; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg); 
+            min-height: 100vh;
+            padding: 24px 16px 60px;
+        }
+        body::before {
+            content:''; position:fixed; inset:0;
+            background-image: radial-gradient(circle at 1px 1px, #c8cdd8 1px, transparent 0);
+            background-size: 28px 28px; opacity: 0.35;
+            pointer-events: none; z-index: 0;
+        }
+        .toolbar {
+            position: relative; z-index: 2;
+            max-width: 900px; margin: 0 auto 18px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .toolbar-brand { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+        .toolbar-brand span { color: var(--red); }
+        .toolbar-right { display: flex; gap: 8px; }
+        .btn { padding: 9px 20px; border-radius: 10px; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.18s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-red { background: var(--red); color: white; box-shadow: 0 4px 12px rgba(232,57,74,0.35); }
+        .btn-red:hover { background: #c8102e; transform: translateY(-1px); }
+        .btn-ghost { background: white; color: #555; border: 1.5px solid var(--border); }
+        .btn-ghost:hover { background: #f8f8f8; }
+
+        .card { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; background: var(--card); border-radius: 24px; box-shadow: 0 2px 0 #d0d4dc, 0 8px 40px rgba(0,0,0,0.09); overflow: hidden; }
+        .card-header { background: linear-gradient(135deg, #4a6080 0%, #3d5268 100%); padding: 22px 28px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; }
+        .header-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,200,200,0.85); margin-bottom: 2px; }
+        .header-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: white; line-height: 1; letter-spacing: -0.5px; }
+        .header-title span { color: #ffb3b9; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .day-select { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: white; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 6px 12px; cursor: pointer; outline: none; }
+        .date-input { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 6px 12px; outline: none; }
+        
+        .status-badge { display: flex; align-items: center; gap: 7px; background: rgba(76,186,107,0.12); border: 1px solid rgba(76,186,107,0.3); border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #4cba6b; cursor: pointer; transition: all 0.2s; user-select: none; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4cba6b; }
+        .status-badge.incident { background: rgba(232,57,74,0.12); border-color: rgba(232,57,74,0.3); color: var(--red); }
+        .status-badge.incident .status-dot { background: var(--red); }
+
+        .col-headers { display: grid; grid-template-columns: 160px 100px 100px 1fr; gap: 0; padding: 14px 20px 6px; border-bottom: 1px solid var(--border); background: #fdfdfd; }
+        .col-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 4px; }
+        .tag-kunde { color: #555; }
+        .tag-beginn { color: #2e7d32; }
+        .tag-ende { color: #b78103; }
+        .tag-notiz { color: #c62828; }
+
+        .rows-wrap { padding: 10px 0; background: #ffffff; }
+        .proto-row { display: grid; grid-template-columns: 160px 100px 100px 1fr; gap: 0; border-bottom: 1px solid #f1f3f7; transition: background 0.15s; align-items: stretch; }
+        .proto-row:hover { background: var(--row-hover); }
+        .proto-row:last-child { border-bottom: none; }
+        
+        .cell { padding: 12px 15px; display: flex; align-items: center; border-right: 1px solid #edf0f5; position: relative; }
+        .cell:last-child { border-right: none; }
+        
+        .row-num { font-size: 10px; font-weight: 700; color: #ccd2de; margin-right: 6px; font-family: 'Syne', sans-serif; }
+        
+        select, input[type="text"] {
+            width: 100%; border: none; background: transparent; outline: none;
+            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--text);
+        }
+        select { cursor: pointer; color: #334155; font-weight: 700; }
+        
+        .time-box-interactive { font-weight: 700; color: #64748b; font-family: monospace; cursor: pointer; font-size: 13px; text-align: center; width: 100%; user-select: none; }
+        .time-box-filled { color: var(--text); font-weight: 800; }
+
+        .notiz-container { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .dropdown-wrapper { position: relative; flex-grow: 1; }
+        .dropdown-menu {
+            display: none; position: absolute; left: 0; top: 100%; margin-top: 4px; 
+            width: 260px; background: white; border: 1px solid #dcdfe6; 
+            border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100; padding: 4px;
+        }
         .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            width: 100%; text-align: left; padding: 8px 12px; background: none; border: none;
+            font-size: 11px; font-weight: 600; color: #475569; cursor: pointer; border-radius: 8px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .dropdown-item:hover { background: #f1f5f9; color: var(--text); }
+
+        .add-zone { padding: 20px; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid var(--border); background: #fcfdfe; }
+        .rm-row-btn, .add-row-btn2 { padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--border); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; cursor: pointer; background: white; color: #666; transition: all 0.15s; }
+        .add-row-btn2 { border-color: var(--red); color: var(--red); }
+        .add-row-btn2:hover { background: var(--red); color: white; }
+        .rm-row-btn:hover { background: #f8f8f8; }
+
+        .card-footer { background: #f8fafc; padding: 16px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .chips { display: flex; gap: 12px; }
+        .chip { display: flex; align-items: center; gap: 6px; background: white; border: 1.5px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; color: #555; }
+        .chip-dot { width: 5px; height: 5px; border-radius: 50%; background: #94a3b8; }
+        .footer-brand { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+        .footer-brand span { color: var(--red); }
+
+        .delete-btn { background: none; border: none; color: #cbd5e1; cursor: pointer; opacity: 0; transition: opacity 0.2s, color 0.2s; padding: 4px; }
+        .proto-row:hover .delete-btn { opacity: 1; }
+        .delete-btn:hover { color: var(--red); }
 
         /* ======================================================= */
-        /* 🖨️ إعدادات الطباعة الاحترافية لمطابقة مشروعك الأول تماماً */
+        /* 🖨️ إعدادات الطباعة الصارمة والذكية لمنع البهتان تماماً */
         /* ======================================================= */
         @media print {
-            .no-print { display: none !important; }
-            body { 
-                background: white !important; 
-                padding: 0 !important; 
-                color: #000000 !important;
-            }
-            .main-container { 
-                max-w: 100% !important; 
-                border: none !important; 
+            .no-print, .btn, .add-zone, .delete-btn { display: none !important; }
+            body { background: white !important; padding: 0 !important; color: #000000 !important; }
+            body::before { display: none !important; }
+            
+            .card { 
                 box-shadow: none !important; 
-                padding: 0 !important;
+                border: 1.5px solid #141518 !important; 
+                max-w: 100% !important; 
+                margin: 0 !important; 
+                border-radius: 0 !important; 
             }
-            * {
-                -webkit-print-color-adjust: exact !important;
+            .card-header { 
+                background: #3d5268 !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            .col-headers {
+                background: #f1f3f7 !important;
+                border-bottom: 1.5px solid #141518 !important;
+                -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important;
             }
-            /* جعل برواز الأسطر داكناً وواضحاً جداً في الطباعة */
-            .print-row-card {
-                border: 1.5px solid #a3a3a3 !important;
-                background-color: #ffffff !important;
-                border-radius: 12px !important;
-                box-shadow: none !important;
+            .proto-row { 
+                border-bottom: 1.5px solid #141518 !important; 
+                page-break-inside: avoid; 
+                background: white !important;
             }
-            /* المحافظة على الخطوط الفاصلة الداخلية بين الحقول */
-            .print-divider {
-                border-right: 1.5px solid #d4d4d8 !important;
+            .cell { 
+                border-right: 1.5px solid #141518 !important; 
             }
-            /* ألوان الترويسة العلوية الفاقعة وثباتها عند الطباعة */
-            .print-header-kunde { background-color: #e5e7eb !important; color: #000000 !important; }
-            .print-header-beginn { background-color: #a3e635 !important; color: #000000 !important; }
-            .print-header-ende { background-color: #fde047 !important; color: #000000 !important; }
-            .print-header-notiz { background-color: #fca5a5 !important; color: #000000 !important; }
-
-            input {
+            .cell:last-child { 
+                border-right: none !important; 
+            }
+            .col-tag, .row-num, select, .time-box-interactive, button {
                 color: #000000 !important;
                 font-weight: bold !important;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
             }
+            select { appearance: none; -webkit-appearance: none; }
         }
     </style>
 </head>
-<body class="font-sans min-h-screen p-3 sm:p-5 text-slate-700">
+<body>
 
-    <div class="main-container max-w-xl mx-auto bg-[#faf9f5]/95 rounded-[40px] shadow-xl border border-stone-200/80 p-5 space-y-5">
-        
-        <div class="text-center space-y-0.5 pt-1">
-            <h1 class="text-xl font-black tracking-widest text-slate-500 uppercase font-mono">Denis Protokoll</h1>
-            <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-mono">Sicherheitsdienst</p>
+    <div class="toolbar no-print">
+        <div class="toolbar-brand">Denis <span>Protokoll</span></div>
+        <div class="toolbar-right">
+            <button onclick="resetForm()" class="btn btn-ghost"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            <button onclick="window.print()" class="btn btn-red"><i class="fa-solid fa-print"></i> Drucken</button>
         </div>
+    </div>
 
-        <div class="no-print flex items-center justify-between gap-1.5 px-0.5">
-            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-gear"></i></button>
-            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-pen-nib"></i></button>
-            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-moon"></i></button>
-            <button class="w-11 h-11 bg-white border border-stone-200 rounded-2xl text-slate-400 hover:bg-stone-50 shadow-sm flex items-center justify-center text-sm"><i class="fa-solid fa-bell"></i></button>
-            <button class="flex-1 h-11 bg-[#53d171] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1 shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp</button>
-            <button class="flex-1 h-11 bg-[#2b61cd] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1 shadow-sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-        </div>
-
-        <div class="no-print grid grid-cols-2 gap-3 px-0.5">
-            <button onclick="resetForm()" class="bg-white border border-stone-200 text-slate-600 rounded-2xl py-2.5 text-xs font-bold shadow-sm flex items-center justify-center gap-1"><i class="fa-solid fa-rotate-left text-[10px]"></i> Reset</button>
-            <button onclick="window.print()" class="bg-[#dd5256] text-white rounded-2xl py-2.5 text-xs font-bold shadow-md flex items-center justify-center gap-1.5"><i class="fa-solid fa-print text-xs"></i> Drucken</button>
-        </div>
-
-        <div class="bg-[#435673] text-white rounded-[32px] p-5 space-y-4 shadow-md relative overflow-hidden">
-            <div class="text-center text-[9px] font-bold tracking-wider text-slate-300/80 uppercase font-mono">
-                Tagesbericht · Vorfallprotokoll
+    <div class="card">
+        <div class="card-header">
+            <div class="header-left">
+                <div class="header-eyebrow">Sicherheitsdienst · Vorfallprotokoll</div>
+                <div class="header-title">Denis <span>Protokoll</span></div>
             </div>
-            <h2 class="text-2xl font-black tracking-wide text-center font-mono">Denis Protokoll</h2>
-            
-            <div class="bg-white/10 rounded-xl py-2 px-3 text-xs font-medium flex items-center justify-center gap-1.5 text-slate-200 border border-white/5 mx-1">
-                <i class="fa-solid fa-calendar-days text-[#e98588] text-xs"></i>
-                <input type="text" id="shift-title" value="Nachtschicht von gestern (24.05.2026)" oninput="saveData()" class="bg-transparent focus:outline-none text-center w-full text-xs font-semibold">
-            </div>
-            
-            <div class="space-y-1.5 px-1">
-                <div class="flex justify-between text-xs font-mono text-slate-300 font-bold items-center">
-                    <div class="flex items-center gap-1">
-                        <input type="text" id="shift-start" value="20:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">&rarr;
-                        <input type="text" id="shift-end" value="07:00" oninput="calculateProgress()" class="bg-transparent focus:outline-none w-10 text-center font-bold text-white">
-                    </div>
-                    <span id="progress-percent" class="font-black text-slate-200 text-sm">83%</span>
-                </div>
-                <div class="w-full bg-slate-600/50 h-2 rounded-full overflow-hidden p-[1px]">
-                    <div id="progress-fill" class="bg-[#e98588] h-full rounded-full transition-all duration-500" style="width: 83%"></div>
+            <div class="header-right">
+                <select class="day-select" id="daySelect" onchange="saveAllData()">
+                    <option>Montag</option><option>Dienstag</option><option>Mittwoch</option>
+                    <option>Donnerstag</option><option>Freitag</option><option>Samstag</option><option>Sonntag</option>
+                </select>
+                <input class="date-input" type="date" id="dateInput" onchange="saveAllData()">
+                <div class="status-badge" id="statusBadge" onclick="toggleStatus()">
+                    <span class="status-dot"></span>
+                    <span id="statusText">Regulär</span>
                 </div>
             </div>
-
-            <div class="flex flex-col items-end space-y-0.5 px-1">
-                <span class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Mitarbeiter</span>
-                <input type="text" id="employee-name" placeholder="Vorname Nachnam" oninput="saveData()" class="bg-white/10 border border-white/5 text-xs text-center rounded-xl px-3 py-1.5 w-48 text-white focus:outline-none font-medium placeholder-slate-400/60">
-            </div>
-
-            <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
-                <input type="text" id="shift-day" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-xs font-bold text-white text-center focus:outline-none" placeholder="Tag">
-                <input type="text" id="shift-date" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-xs font-mono font-bold text-white text-center focus:outline-none" placeholder="Datum">
-                <input type="text" id="shift-status" value="🟢 Regulär" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-[10px] font-extrabold text-[#7be394] text-center focus:outline-none">
-                <input type="text" id="shift-bell" value="🔔 Ton" oninput="saveData()" class="bg-white/10 border border-white/5 rounded-xl py-1.5 text-[10px] font-extrabold text-[#f3ca76] text-center focus:outline-none">
-            </div>
         </div>
 
-        <div class="grid grid-cols-12 gap-0 text-center text-[11px] font-black tracking-wider pt-2 px-1">
-            <div class="col-span-3 print-header-kunde bg-[#e5e7eb] text-slate-800 py-1.5 rounded-l-xl border border-r-0 border-stone-300">Kunde</div>
-            <div class="col-span-2 print-header-beginn bg-[#a3e635] text-slate-800 py-1.5 border border-r-0 border-stone-300">Beginn</div>
-            <div class="col-span-2 print-header-ende bg-[#fde047] text-slate-800 py-1.5 border border-r-0 border-stone-300">Ende</div>
-            <div class="col-span-5 print-header-notiz bg-[#fca5a5] text-slate-800 py-1.5 rounded-r-xl border border-stone-300">Dienstnotiz</div>
+        <div class="col-headers">
+            <div class="col-tag tag-kunde">Kunde</div>
+            <div class="col-tag tag-beginn">Beginn</div>
+            <div class="col-tag tag-ende">Ende</div>
+            <div class="col-tag tag-notiz">Dienstnotiz</div>
         </div>
 
-        <div id="rows-container" class="space-y-3 px-1">
+        <div class="rows-wrap" id="rowsWrap">
             </div>
 
-        <div class="no-print grid grid-cols-3 gap-3 items-center pt-1 px-0.5">
-            <button onclick="removeRow()" class="bg-white border border-stone-200 text-slate-500 rounded-2xl py-2.5 text-xs font-bold shadow-sm hover:bg-stone-50">- Zeile</button>
-            <div id="row-counter" class="text-center text-xs font-extrabold text-slate-500 font-mono">1 Zeilen</div>
-            <button onclick="addRow()" class="bg-[#dd5256] text-white rounded-2xl py-2.5 text-xs font-bold shadow-md hover:bg-[#c94549]">+ Zeile</button>
+        <div class="add-zone no-print">
+            <button class="rm-row-btn" onclick="removeLastRow()">− Zeile</button>
+            <span id="rowCount">0 Zeilen</span>
+            <button class="add-row-btn2" onclick="addNewRow()">＋ Zeile</button>
         </div>
 
-        <div class="border-t border-stone-200 pt-4 grid grid-cols-4 gap-1.5 px-0.5 text-[9px] font-bold text-slate-500 text-center">
-            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm">
-                <span class="text-rose-500">🔴</span> <span id="status-kunden">0</span> Kunden
+        <div class="card-footer">
+            <div class="chips">
+                <div class="chip"><span class="chip-dot" style="background:#4cba6b"></span><span id="chipK">0 Kunden</span></div>
+                <div class="chip"><span class="chip-dot" style="background:var(--red)"></span><span id="chipV">0 Vorfälle</span></div>
+                <div class="chip"><span class="chip-dot" style="background:#2b61cd"></span><span id="chipR">0 Zeilen</span></div>
             </div>
-            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm">
-                <span class="text-rose-500">🔴</span> <span id="status-vorfaelle">0</span> Vorfälle
-            </div>
-            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm">
-                <span class="text-rose-500">🔴</span> <span id="status-total-rows">1</span> Zeilen
-            </div>
-            <div class="bg-white border border-stone-200 rounded-full py-1.5 px-1 flex items-center justify-center gap-1 shadow-sm font-mono text-[#4482d8]">
-                <i class="fa-solid fa-floppy-disk"></i> <span id="save-time">04:48:40</span>
-            </div>
+            <div class="footer-brand">Denis <span>Protokoll</span></div>
         </div>
-
-        <div class="text-center text-[10px] font-black tracking-widest text-stone-300 uppercase font-mono pt-2">
-            Denis Protokoll
-        </div>
-
     </div>
 
     <script>
-        let rowCount = 0;
-        const ereignisse = [
-            "Obdachlose nach draußen gebracht",
-            "Fahrzeuge herausgelassen",
-            "Unbefugte Person entfernt",
-            "Fahrzeugschaden festgestellt",
-            "Parkverstoß dokumentiert",
-            "Sachschaden festgestellt - Dokumentiert"
+        const KUNDEN = ['— Standort —','Galerie','Lüneburg Parkhaus','Fuhle','Parking Millerntorplatz','Parkhaus My Falkenried'];
+        const EREIGNISSE = [
+            'Obdachlose nach draußen gebracht',
+            'Fahrzeuge herausgelassen',
+            'Unbefugte Person entfernt',
+            'Vandalismus gemeldet',
+            'Fahrzeugschaden festgestellt',
+            'Parkverstoß dokumentiert',
+            'Technischer Defekt gemeldet',
+            'Streit geschlichtet'
         ];
 
-        function setAutomaticDateTime() {
-            const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+        let globalRowId = 0;
+        let statusOk = true;
+
+        function toggleStatus() {
+            statusOk = !statusOk;
+            document.getElementById('statusBadge').className = 'status-badge' + (statusOk ? '' : ' incident');
+            document.getElementById('statusText').textContent = statusOk ? 'Regulär' : 'Vorfall active';
+            saveAllData();
+        }
+
+        function setNowTime(id, field) {
             const now = new Date();
-            if(!document.getElementById('shift-day').value) document.getElementById('shift-day').value = days[now.getDay()];
-            if(!document.getElementById('shift-date').value) {
-                const d = String(now.getDate()).padStart(2, '0');
-                const m = String(now.getMonth() + 1).padStart(2, '0');
-                document.getElementById('shift-date').value = `${d}.${m}.${now.getFullYear()}`;
-            }
-        }
-
-        function calculateProgress() {
-            const start = document.getElementById('shift-start').value.split(':');
-            const end = document.getElementById('shift-end').value.split(':');
-            if(start.length === 2 && end.length === 2) {
-                let sMin = parseInt(start[0]) * 60 + parseInt(start[1]);
-                let eMin = parseInt(end[0]) * 60 + parseInt(end[1]);
-                if(eMin <= sMin) eMin += 24 * 60;
-                
-                const now = new Date();
-                let cMin = now.getHours() * 60 + now.getMinutes();
-                if(cMin < sMin) cMin += 24 * 60;
-                
-                let pct = 0;
-                if(cMin >= sMin && cMin <= eMin) pct = Math.round(((cMin - sMin) / (eMin - sMin)) * 100);
-                else if(cMin > eMin) pct = 100;
-                
-                document.getElementById('progress-fill').style.width = pct + '%';
-                document.getElementById('progress-percent').innerText = pct + '%';
-            }
-            saveData();
-        }
-
-        function updateStatus() {
-            document.getElementById('row-counter').innerText = `${rowCount} Zeilen`;
-            document.getElementById('status-total-rows').innerText = rowCount;
-            document.getElementById('status-kunden').innerText = rowCount;
+            const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+            const span = document.getElementById(`${field}-lbl-${id}`);
+            span.innerText = timeStr;
+            span.className = "time-box-interactive window-time time-box-filled";
             
-            let vCount = 0;
-            document.querySelectorAll('.ereignis-select-btn').forEach(btn => {
-                if(btn.innerText && !btn.innerText.includes("Notiz hinzufügen")) vCount++;
-            });
-            document.getElementById('status-vorfaelle').innerText = vCount;
-            document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
-        }
-
-        function setNowTime(idx, field) {
-            const timeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
-            const lbl = document.getElementById(`${field}-lbl-${idx}`);
-            const box = document.getElementById(`${field}-box-${idx}`);
-            lbl.innerText = timeStr;
-            
-            // تغيير ألوان الحدود عند اختيار الوقت تماثلاً مع لقطة شاشتك الأولى
             if(field === 'start') {
-                box.className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-amber-400";
+                span.style.color = '#2e7d32';
             } else {
-                box.className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-purple-400";
+                span.style.color = '#b78103';
             }
-            updateStatus();
-            saveData();
+            
+            updateSummaryCounters();
+            saveAllData();
         }
 
         function toggleDropdown(id) {
             document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== id) m.classList.remove('show'); });
-            const drop = document.getElementById(id);
-            if(drop) drop.classList.toggle('show');
+            const menu = document.getElementById(id);
+            if(menu) menu.classList.toggle('show');
         }
 
-        function selectEreignis(idx, text) {
-            const btn = document.getElementById(`ereignis-btn-${idx}`);
-            const noteInput = document.getElementById(`input-note-${idx}`);
+        function selectEreignis(id, text) {
+            const btn = document.getElementById(`notiz-btn-${id}`);
+            const input = document.getElementById(`notiz-input-${id}`);
             btn.innerText = text;
-            btn.className = "ereignis-select-btn text-[11px] font-bold text-slate-800 block text-center truncate w-full";
-            noteInput.value = text;
-            toggleDropdown(`drop-${idx}`);
-            updateStatus();
-            saveData();
+            btn.style.color = '#141518';
+            input.value = text;
+            toggleDropdown(`drop-${id}`);
+            updateSummaryCounters();
+            saveAllData();
         }
 
-        function addRow(saved = null) {
-            rowCount++;
-            const container = document.getElementById('rows-container');
+        function addNewRow(savedData = null) {
+            globalRowId++;
+            const wrap = document.getElementById('rowsWrap');
             
-            // الهيكل الجديد: سطر واحد متصل يحوي خطوط فاصلة داخلية ناعمة تطابق مشروعك القديم 100%
-            const html = `
-                <div id="row-card-${rowCount}" class="print-row-card grid grid-cols-12 gap-0 items-stretch bg-white border border-stone-200 shadow-sm rounded-xl overflow-visible relative min-h-[50px]">
-                    
-                    <div class="col-span-3 print-divider border-r border-stone-200 p-2 flex flex-col justify-center bg-white rounded-l-xl">
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-mono text-stone-400 no-print">#0${rowCount}</span>
-                            <input type="text" id="input-loc-${rowCount}" placeholder="Standort..." oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-black text-slate-800 italic">
-                        </div>
-                    </div>
+            const row = document.createElement('div');
+            row.className = 'proto-row';
+            row.id = `row-${globalRowId}`;
+            
+            const currentKunde = savedData?.kunde || '— Standort —';
+            const currentStart = savedData?.start || '--:--';
+            const currentEnd = savedData?.end || '--:--';
+            const currentNotiz = savedData?.notiz || 'Notiz hinzufügen...';
+            
+            row.innerHTML = `
+                <div class="cell">
+                    <span class="row-num">#${String(globalRowId).padStart(2,'0')}</span>
+                    <select id="kunde-${globalRowId}" onchange="saveAllData(); updateSummaryCounters();">
+                        ${KUNDEN.map(x => `<option ${x === currentKunde ? 'selected' : ''}>${x}</option>`).join('')}
+                    </select>
+                </div>
 
-                    <div id="start-box-${rowCount}" onclick="setNowTime(${rowCount}, 'start')" class="col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white cursor-pointer hover:bg-stone-50 transition-colors">
-                        <span id="start-lbl-${rowCount}" class="text-[11px] font-black font-mono text-stone-400 tracking-tight">--:--</span>
-                    </div>
+                <div class="cell" onclick="setNowTime(${globalRowId}, 'start')">
+                    <span id="start-lbl-${globalRowId}" class="time-box-interactive ${currentStart !== '--:--' ? 'time-box-filled' : ''}">${currentStart}</span>
+                </div>
 
-                    <div id="end-box-${rowCount}" onclick="setNowTime(${rowCount}, 'end')" class="col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white cursor-pointer hover:bg-stone-50 transition-colors">
-                        <span id="end-lbl-${rowCount}" class="text-[11px] font-black font-mono text-stone-400 tracking-tight">--:--</span>
-                    </div>
+                <div class="cell" onclick="setNowTime(${globalRowId}, 'end')">
+                    <span id="end-lbl-${globalRowId}" class="time-box-interactive ${currentEnd !== '--:--' ? 'time-box-filled' : ''}">${currentEnd}</span>
+                </div>
 
-                    <div class="col-span-5 p-2 flex items-center justify-between bg-white rounded-r-xl relative group">
-                        
-                        <div class="w-full text-center relative px-1">
-                            <input type="hidden" id="input-note-${rowCount}" value="">
-                            
-                            <button id="ereignis-btn-${rowCount}" onclick="toggleDropdown('drop-${rowCount}')" class="ereignis-select-btn text-[10px] font-bold text-stone-400 hover:text-slate-800 transition-colors block text-center truncate w-full focus:outline-none">
-                                Notiz hinzufügen...
+                <div class="cell">
+                    <div class="notiz-container">
+                        <div class="dropdown-wrapper">
+                            <button id="notiz-btn-${globalRowId}" onclick="event.stopPropagation(); toggleDropdown('drop-${globalRowId}')" style="background:none; border:none; text-align:left; font-size:13px; font-weight:600; color:${currentNotiz.includes('...') ? '#8890A0' : '#141518'}; cursor:pointer; width:100%; outline:none;">
+                                ${currentNotiz}
                             </button>
-
-                            <div id="drop-${rowCount}" class="dropdown-menu absolute right-0 top-full mt-2 w-52 bg-white border border-stone-300 rounded-xl shadow-xl z-50 p-1 text-left hidden">
-                                ${ereignisse.map(e => `<button onclick="selectEreignis(${rowCount}, '${e}')" class="w-full text-left px-2 py-1.5 text-[10px] text-slate-700 hover:bg-stone-50 rounded-lg truncate block border-b border-stone-100 last:border-0 font-bold">${e}</button>`).join('')}
+                            <input type="hidden" id="notiz-input-${globalRowId}" value="${currentNotiz.includes('...') ? '' : currentNotiz}">
+                            <div id="drop-${globalRowId}" class="dropdown-menu">
+                                ${EREIGNISSE.map(e => `<button onclick="event.stopPropagation(); selectEreignis(${globalRowId}, '${e}')" class="dropdown-item">${e}</button>`).join('')}
                             </div>
                         </div>
-
-                        <button onclick="deleteRowCard(${rowCount})" class="no-print opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 bg-stone-50 text-stone-400 hover:text-rose-500 hover:bg-rose-50 rounded flex items-center justify-center ml-1">
-                            <i class="fa-solid fa-trash text-[9px]"></i>
+                        <button onclick="deleteSpecificRow(${globalRowId})" class="delete-btn no-print" title="Zeile löschen">
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
-
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', html);
+            
+            wrap.appendChild(row);
+            updateSummaryCounters();
+        }
 
-            if(saved) {
-                if(saved.loc) document.getElementById(`input-loc-${rowCount}`).value = saved.loc;
-                if(saved.note) {
-                    document.getElementById(`input-note-${rowCount}`).value = saved.note;
-                    document.getElementById(`ereignis-btn-${rowCount}`).innerText = saved.note;
-                    document.getElementById(`ereignis-btn-${rowCount}`).className = "ereignis-select-btn text-[11px] font-bold text-slate-800 block text-center truncate w-full";
-                }
-                if(saved.start) {
-                    document.getElementById('start-lbl-' + rowCount).innerText = saved.start;
-                    document.getElementById(`start-box-${rowCount}`).className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-amber-400";
-                }
-                if(saved.end) {
-                    document.getElementById('end-lbl-' + rowCount).innerText = saved.end;
-                    document.getElementById(`end-box-${rowCount}`).className = "col-span-2 print-divider border-r border-stone-200 p-2 flex items-center justify-center bg-white border-2 border-purple-400";
-                }
+        function deleteSpecificRow(id) {
+            const el = document.getElementById(`row-${id}`);
+            if(el) el.remove();
+            updateSummaryCounters();
+            saveAllData();
+        }
+
+        function removeLastRow() {
+            const wrap = document.getElementById('rowsWrap');
+            if(wrap.lastChild) {
+                wrap.lastChild.remove();
+                updateSummaryCounters();
+                saveAllData();
             }
-            updateStatus();
         }
 
-        function deleteRowCard(id) {
-            const card = document.getElementById(`row-card-${id}`);
-            if(card) card.remove();
-            updateStatus();
-            saveData();
+        function updateSummaryCounters() {
+            const rows = document.querySelectorAll('.proto-row');
+            document.getElementById('rowCount').innerText = `${rows.length} Zeilen`;
+            document.getElementById('chipR').innerText = `${rows.length} Zeilen`;
+            
+            let activeKunden = 0;
+            let activeVorfaelle = 0;
+
+            rows.forEach(r => {
+                const id = r.id.split('-')[1];
+                const kVal = document.getElementById(`kunde-${id}`).value;
+                const nVal = document.getElementById(`notiz-input-${id}`).value;
+                
+                if(kVal !== '— Standort —') activeKunden++;
+                if(nVal && nVal !== '') activeVorfaelle++;
+            });
+
+            document.getElementById('chipK').innerText = `${activeKunden} Kunden`;
+            document.getElementById('chipV').innerText = `${activeVorfaelle} Vorfälle`;
         }
 
-        function removeRow() {
-            if(rowCount > 0) { deleteRowCard(rowCount); rowCount--; }
-        }
-
-        function saveData() {
-            const data = {
-                title: document.getElementById('shift-title').value,
-                start: document.getElementById('shift-start').value,
-                end: document.getElementById('shift-end').value,
-                emp: document.getElementById('employee-name').value,
-                day: document.getElementById('shift-day').value,
-                date: document.getElementById('shift-date').value,
-                rows: []
-            };
-            for(let i=1; i<=rowCount; i++) {
-                const locInput = document.getElementById(`input-loc-${i}`);
-                if(!locInput) continue;
-                data.rows.push({
-                    loc: locInput.value,
-                    note: document.getElementById(`input-note-${i}`).value,
-                    start: document.getElementById(`start-lbl-${i}`).innerText.includes("--:--") ? null : document.getElementById(`start-lbl-${i}`).innerText,
-                    end: document.getElementById(`end-lbl-${i}`).innerText.includes("--:--") ? null : document.getElementById(`end-lbl-${i}`).innerText
+        function saveAllData() {
+            const rowsData = [];
+            document.querySelectorAll('.proto-row').forEach(r => {
+                const id = r.id.split('-')[1];
+                rowsData.push({
+                    kunde: document.getElementById(`kunde-${id}`).value,
+                    start: document.getElementById(`start-lbl-${id}`).innerText,
+                    end: document.getElementById(`end-lbl-${id}`).innerText,
+                    notiz: document.getElementById(`notiz-btn-${id}`).innerText
                 });
-            }
-            localStorage.setItem('denis_dashboard_v1_style', JSON.stringify(data));
-            document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
+            });
+
+            const state = {
+                day: document.getElementById('daySelect').value,
+                date: document.getElementById('dateInput').value,
+                statusOk: statusOk,
+                rows: rowsData
+            };
+            localStorage.setItem('denis_proto_final_storage', JSON.stringify(state));
         }
 
-        function loadData() {
-            const raw = localStorage.getItem('denis_dashboard_v1_style');
-            if(!raw) { setAutomaticDateTime(); addRow(); return; }
-            const parsed = JSON.parse(raw);
-            document.getElementById('shift-title').value = parsed.title || '';
-            document.getElementById('shift-start').value = parsed.start || '20:00';
-            document.getElementById('shift-end').value = parsed.end || '07:00';
-            document.getElementById('employee-name').value = parsed.emp || '';
-            document.getElementById('shift-day').value = parsed.day || '';
-            document.getElementById('shift-date').value = parsed.date || '';
-            if(parsed.rows && parsed.rows.length > 0) {
-                parsed.rows.forEach(r => addRow(r));
-            } else {
-                addRow();
+        function loadAllData() {
+            const raw = localStorage.getItem('denis_proto_final_storage');
+            const today = new Date();
+            
+            document.getElementById('dateInput').value = today.toISOString().split('T')[0];
+            const DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+            document.getElementById('daySelect').value = DAYS[today.getDay()];
+
+            if(!raw) {
+                for(let i=0; i<4; i++) addNewRow();
+                return;
             }
-            setAutomaticDateTime();
-            calculateProgress();
+
+            const state = JSON.parse(raw);
+            document.getElementById('daySelect').value = state.day || DAYS[today.getDay()];
+            document.getElementById('dateInput').value = state.date || today.toISOString().split('T')[0];
+            statusOk = state.statusOk !== undefined ? state.statusOk : true;
+            
+            document.getElementById('statusBadge').className = 'status-badge' + (statusOk ? '' : ' incident');
+            document.getElementById('statusText').textContent = statusOk ? 'Regulär' : 'Vorfall active';
+
+            if(state.rows && state.rows.length > 0) {
+                state.rows.forEach(r => addNewRow(r));
+            } else {
+                for(let i=0; i<4; i++) addNewRow();
+            }
+            updateSummaryCounters();
         }
 
         function resetForm() {
-            if(confirm("Protokoll zurücksetzen?")) {
-                localStorage.removeItem('denis_dashboard_v1_style');
-                document.getElementById('rows-container').innerHTML = '';
-                rowCount = 0;
-                document.getElementById('employee-name').value = '';
-                document.getElementById('shift-day').value = '';
-                document.getElementById('shift-date').value = '';
-                setAutomaticDateTime();
-                addRow();
-                calculateProgress();
+            if(confirm("Protokoll wirklich zurücksetzen?")) {
+                localStorage.removeItem('denis_proto_final_storage');
+                document.getElementById('rowsWrap').innerHTML = '';
+                globalRowId = 0;
+                loadAllData();
             }
         }
 
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.relative')) {
-                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
-            }
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
         });
 
-        window.onload = function() {
-            loadData();
-            setInterval(calculateProgress, 60000);
-        };
+        window.onload = loadAllData;
     </script>
 </body>
 </html>
