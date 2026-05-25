@@ -14,11 +14,57 @@
         }
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; }
+
+        /* ======================================================= */
+        /* 🖨️ إعدادات الطباعة الاحترافية والذكية لمنع البهتان تماماً */
+        /* ======================================================= */
         @media print {
+            /* إخفاء الأزرار وأي عناصر لا داعي لظهورها في الورقة */
             .no-print { display: none !important; }
-            body { background: white; padding: 0; }
-            .main-container { max-w: 100% !important; border: none !important; box-shadow: none !important; }
-            input { border: none !important; background: transparent !important; }
+            
+            /* إلغاء الخلفية المنقطة وجعل الخلفية بيضاء سادة */
+            body { 
+                background: white !important; 
+                padding: 0 !important; 
+                color: #000000 !important;
+            }
+            
+            /* تمديد الحاوية لتملأ الورقة بالكامل */
+            .main-container { 
+                max-w: 100% !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+                padding: 0 !important;
+            }
+
+            /* إجبار المتصفح على طباعة الألوان والخلفيات الملونة بدقتها الكاملة */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* إجبار خطوط الحقول (البرواز) على الظهور بلون أسود/رمادي غامق حاد جداً */
+            .print-border-bold {
+                border: 2px solid #222222 !important; /* خط سميك وداكن جداً للطباعة */
+                background-color: #ffffff !important;
+            }
+
+            /* تحسين ترويسة الجدول لتظهر بألوان داكنة وواضحة جداً في الورقة */
+            .print-header-kunde { background-color: #d1d5db !important; color: #000000 !important; font-weight: 900 !important; }
+            .print-header-beginn { background-color: #4ade80 !important; color: #000000 !important; font-weight: 900 !important; }
+            .print-header-ende { background-color: #fbbf24 !important; color: #000000 !important; font-weight: 900 !important; }
+            .print-header-notiz { background-color: #fca5a5 !important; color: #000000 !important; font-weight: 900 !important; }
+
+            /* جعل جميع النصوص المدخلة سوداء داكنة تماماً وواضحة للقراءة */
+            input, select, textarea, span {
+                color: #000000 !important;
+                font-weight: bold !important;
+            }
+            
+            /* إخفاء نصوص المساعدة الباهتة مثل "+ Ereignis" أو "KI" أثناء الطباعة */
+            .ereignis-btn-txt {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -83,10 +129,10 @@
         </div>
 
         <div class="grid grid-cols-12 gap-1.5 text-center text-[11px] font-black tracking-wider pt-2">
-            <div class="col-span-4 bg-[#e1e3e6] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Kunde</div>
-            <div class="col-span-2 bg-[#9ce59c] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Beginn</div>
-            <div class="col-span-2 bg-[#f9c676] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Ende</div>
-            <div class="col-span-4 bg-[#f8b2b5] text-slate-800 py-2 rounded-2xl border border-stone-200/40 shadow-sm">Dienstnotiz</div>
+            <div class="col-span-4 print-header-kunde bg-[#e1e3e6] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Kunde</div>
+            <div class="col-span-2 print-header-beginn bg-[#9ce59c] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Beginn</div>
+            <div class="col-span-2 print-header-ende bg-[#f9c676] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Ende</div>
+            <div class="col-span-4 print-header-notiz bg-[#f8b2b5] text-slate-800 py-2 rounded-2xl border border-stone-200/60 shadow-sm">Dienstnotiz</div>
         </div>
 
         <div id="rows-container" class="space-y-5">
@@ -176,7 +222,7 @@
             const timeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
             const btn = document.getElementById(id);
             document.getElementById(labelId).innerText = timeStr;
-            btn.className = "w-full border-2 border-stone-300 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
+            btn.className = "w-full border-2 border-stone-400 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
             updateStatus();
             saveData();
         }
@@ -233,31 +279,30 @@
             rowCount++;
             const container = document.getElementById('rows-container');
             
-            // هيكل السطر المطور: صناديق وحقول واضحة ومحددة ببرواز خارجي رمزي مستقل لكل حقل تمنع التداخل
             const html = `
                 <div id="row-card-${rowCount}" class="grid grid-cols-12 gap-2 items-stretch relative bg-transparent">
                     
-                    <div class="col-span-4 border-2 border-stone-300 rounded-2xl p-2 text-center bg-white shadow-sm flex flex-col justify-center min-h-[58px]">
-                        <span class="text-[9px] text-stone-400 block font-mono text-left font-bold">#0${rowCount}</span>
-                        <input type="text" id="input-loc-${rowCount}" placeholder="— Standort —" oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-black text-slate-800">
+                    <div class="col-span-4 print-border-bold border-2 border-stone-400 rounded-2xl p-2 text-center bg-white shadow-sm flex flex-col justify-center min-h-[58px]">
+                        <span class="text-[9px] text-stone-500 block font-mono text-left font-bold no-print">#0${rowCount}</span>
+                        <input type="text" id="input-loc-${rowCount}" placeholder="— Standort —" oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-xs font-black text-slate-900">
                     </div>
 
                     <div class="col-span-2 flex items-stretch">
-                        <button id="start-btn-${rowCount}" onclick="setNowTime('start-btn-${rowCount}', 'start-lbl-${rowCount}')" class="w-full border-2 border-stone-300 border-dashed rounded-2xl py-2 bg-white text-slate-400 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
-                            <span id="start-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter">⏱ Jetzt</span>
+                        <button id="start-btn-${rowCount}" onclick="setNowTime('start-btn-${rowCount}', 'start-lbl-${rowCount}')" class="w-full print-border-bold border-2 border-stone-400 border-dashed rounded-2xl py-2 bg-white text-slate-500 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
+                            <span id="start-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter text-slate-800">⏱ Jetzt</span>
                         </button>
                     </div>
 
                     <div class="col-span-2 flex items-stretch">
-                        <button id="end-btn-${rowCount}" onclick="setNowTime('end-btn-${rowCount}', 'end-lbl-${rowCount}')" class="w-full border-2 border-stone-300 border-dashed rounded-2xl py-2 bg-white text-slate-400 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
-                            <span id="end-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter">⏱ Jetzt</span>
+                        <button id="end-btn-${rowCount}" onclick="setNowTime('end-btn-${rowCount}', 'end-lbl-${rowCount}')" class="w-full print-border-bold border-2 border-stone-400 border-dashed rounded-2xl py-2 bg-white text-slate-500 font-bold text-center flex flex-col items-center justify-center min-h-[58px] shadow-sm hover:bg-stone-50">
+                            <span id="end-lbl-${rowCount}" class="text-[10px] font-black tracking-tighter text-slate-800">⏱ Jetzt</span>
                         </button>
                     </div>
 
-                    <div class="col-span-4 border-2 border-stone-300 rounded-2xl p-1.5 space-y-1.5 text-center bg-white shadow-sm flex flex-col justify-between min-h-[58px] relative">
+                    <div class="col-span-4 print-border-bold border-2 border-stone-400 rounded-2xl p-1.5 space-y-1.5 text-center bg-white shadow-sm flex flex-col justify-between min-h-[58px] relative">
                         
                         <div class="no-print flex items-center justify-between px-0.5 text-slate-400">
-                            <div class="flex items-center bg-stone-50 border border-stone-200 rounded-md shadow-inner">
+                            <div class="flex items-center bg-stone-50 border border-stone-300 rounded-md shadow-inner">
                                 <button onclick="changeRowCounter(${rowCount}, 'down')" class="px-1.5 font-bold text-slate-500 hover:text-rose-500 text-xs">-</button>
                                 <span id="count-val-${rowCount}" class="font-mono font-black px-1 text-slate-800 text-[10px]">0</span>
                                 <button onclick="changeRowCounter(${rowCount}, 'up')" class="px-1.5 font-bold text-slate-500 hover:text-emerald-500 text-xs">+</button>
@@ -266,7 +311,7 @@
                         </div>
 
                         <div class="relative w-full">
-                            <input type="text" id="input-note-${rowCount}" placeholder="Dienstnotiz..." oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-[10px] font-bold text-slate-700 placeholder-stone-400 px-0.5">
+                            <input type="text" id="input-note-${rowCount}" placeholder="Dienstnotiz..." oninput="saveData()" class="w-full text-center bg-transparent focus:outline-none text-[10px] font-black text-slate-900 placeholder-stone-500 px-0.5">
                             <button onclick="toggleDropdown('drop-${rowCount}')" class="no-print block w-full text-center text-[8px] font-bold text-rose-400 hover:underline mt-0.5">
                                 <span id="ereignis-txt-${rowCount}" class="ereignis-btn-txt">+ Ereignis</span>
                             </button>
@@ -290,11 +335,11 @@
                 if(saved.note) document.getElementById(`input-note-${rowCount}`).value = saved.note;
                 if(saved.start) {
                     document.getElementById('start-lbl-' + rowCount).innerText = saved.start;
-                    document.getElementById('start-btn-' + rowCount).className = "w-full border-2 border-stone-300 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
+                    document.getElementById('start-btn-' + rowCount).className = "w-full border-2 border-stone-400 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
                 }
                 if(saved.end) {
                     document.getElementById('end-lbl-' + rowCount).innerText = saved.end;
-                    document.getElementById('end-btn-' + rowCount).className = "w-full border-2 border-stone-300 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
+                    document.getElementById('end-btn-' + rowCount).className = "w-full border-2 border-stone-400 rounded-2xl py-3 bg-slate-700 text-white font-mono text-center flex flex-col items-center justify-center shadow-inner text-xs font-bold";
                 }
                 if(saved.count) document.getElementById(`count-val-${rowCount}`).innerText = saved.count;
             }
@@ -333,12 +378,12 @@
                     count: document.getElementById(`count-val-${i}`).innerText
                 });
             }
-            localStorage.setItem('denis_dashboard_fixed', JSON.stringify(data));
+            localStorage.setItem('denis_dashboard_fixed_print', JSON.stringify(data));
             document.getElementById('save-time').innerText = new Date().toTimeString().split(' ')[0];
         }
 
         function loadData() {
-            const raw = localStorage.getItem('denis_dashboard_fixed');
+            const raw = localStorage.getItem('denis_dashboard_fixed_print');
             if(!raw) { setAutomaticDateTime(); addRow(); return; }
             const parsed = JSON.parse(raw);
             document.getElementById('shift-title').value = parsed.title || '';
@@ -358,7 +403,7 @@
 
         function resetForm() {
             if(confirm("Protokoll zurücksetzen?")) {
-                localStorage.removeItem('denis_dashboard_fixed');
+                localStorage.removeItem('denis_dashboard_fixed_print');
                 document.getElementById('rows-container').innerHTML = '';
                 rowCount = 0;
                 document.getElementById('employee-name').value = '';
