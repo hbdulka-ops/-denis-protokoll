@@ -298,11 +298,11 @@ body.app-ready::before{opacity:0.5;}
 .print-sig-area{display:none;margin-top:20px;border-top:1px solid #ddd;padding-top:16px;}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  html,body{background:white!important;margin:0!important;padding:0!important;width:100%!important;font-size:8pt!important;}
+  html,body{background:white!important;padding:0!important;margin:0!important;width:100%!important;font-size:8pt!important;}
   body::before{display:none!important;}
   .no-print,.toolbar,.add-zone,.time-now-btn,.bottom-actions,.kunde-back,
-  .progress-wrap,.autosave-bar,.toast-wrap,.pdf-loading,
-  #pinScreen,#settingsOverlay,#sigOverlay,#dashOverlay,#offlineBanner{display:none!important;}
+  .progress-wrap,.autosave-bar,
+  .toast-wrap,.pdf-loading,.report-overlay,.overlay-base,#pinScreen,#homeScreen,#checkinScreen,#fabCheckin{display:none!important;}
   .card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;width:100%!important;margin:0!important;padding:2px!important;}
   .proto-table{width:100%!important;font-size:7.5pt!important;border-collapse:collapse!important;}
   .proto-row{page-break-inside:avoid!important;}
@@ -317,6 +317,15 @@ body.app-ready::before{opacity:0.5;}
   .rows-wrap{margin:0!important;}
   @page{size:A4 portrait;margin:5mm;}
 }
+
+/* ===== ARCHIVE ===== */
+.archive-card:hover { border-color: var(--red) !important; background: rgba(232,57,74,0.04) !important; }
+#archiveList::-webkit-scrollbar { width: 4px; }
+#archiveList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+#printSelectList::-webkit-scrollbar { width: 4px; }
+#printSelectList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+#archiveDetailBody::-webkit-scrollbar { width: 4px; }
+#archiveDetailBody::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -324,6 +333,7 @@ body.app-ready::before{opacity:0.5;}
   <span style="font-size:16px;">📵</span>
   <span>Offline-Modus — Alle Daten lokal gespeichert</span>
 </div>
+
 
 <!-- SPLASH -->
 <div id="splashScreen" style="position:fixed;inset:0;z-index:999999;background:#0f1923;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:opacity 0.5s ease;">
@@ -412,6 +422,13 @@ body.app-ready::before{opacity:0.5;}
         </div>
       </div>
       <div class="settings-section">
+        <div class="settings-section-title">👤 Mitarbeiter</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Name</div></div>
+          <input type="text" class="settings-input" id="settingsMitarbeiter" placeholder="Dein Name…" style="text-align:left;">
+        </div>
+      </div>
+      <div class="settings-section">
         <div class="settings-section-title">Schichtzeiten</div>
         <div class="settings-row"><div><div class="settings-row-label">Schichtbeginn</div></div><input type="time" class="settings-input" id="settingsShiftStart" value="19:45"></div>
         <div class="settings-row"><div><div class="settings-row-label">Schichtende</div></div><input type="time" class="settings-input" id="settingsShiftEnd" value="07:00"></div>
@@ -426,23 +443,25 @@ body.app-ready::before{opacity:0.5;}
           <button class="settings-btn settings-btn-red" onclick="settingsAddKunde()">+</button>
         </div>
       </div>
-      <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
-      <div id="snapshotInfo" style="font-size:11px;color:var(--muted);margin-bottom:8px;min-height:14px;"></div>
-      <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;margin-bottom:6px;">🔄 Letzte Sicherung wiederherstellen</button>
-    </div>
-    <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
-        <label style="flex:1;display:block;">
-          <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
-          <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
-        </label>
+      <button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;"><div style="margin-bottom:10px;padding:12px;background:#fff3cd;border-radius:12px;border:1.5px solid #ffc107;">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:#856404;margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
+        <div id="snapshotInfo" style="font-size:11px;color:#856404;margin-bottom:8px;min-height:14px;"></div>
+        <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">🔄 Letzte Sicherung wiederherstellen</button>
       </div>
-      <div id="importStatus" style="margin-top:5px;font-size:11px;color:var(--muted);text-align:center;min-height:14px;"></div>
-    </div>
-    <button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Einstellungen speichern</button>
+      <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
+          <label style="flex:1;display:block;">
+            <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+            <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
+          </label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button onclick="closeSettings();openArchive()" style="flex:1;background:rgba(61,82,104,0.15);color:var(--text);font-weight:700;padding:9px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-size:12px;">🗄️ Archiv öffnen</button>
+        </div></div>
+      </div>
+      💾 Einstellungen speichern</button>
     </div>
   </div>
 </div>
@@ -491,6 +510,64 @@ body.app-ready::before{opacity:0.5;}
   </div>
 </div>
 
+<!-- ARCHIVE -->
+<div class="overlay-base" id="archiveOverlay">
+  <div class="modal-base" style="max-width:560px;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title">🗄️ Archiv</div>
+      <button class="modal-close" onclick="closeArchive()">✕</button>
+    </div>
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input id="archiveSearch" type="text" placeholder="🔍 Datum oder Mitarbeiter suchen…"
+        oninput="renderArchiveList()"
+        style="flex:1;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;outline:none;min-width:160px;">
+      <button onclick="archiveDeleteSelected()" id="archiveDelBtn" style="display:none;padding:7px 12px;border-radius:10px;border:none;background:rgba(232,57,74,0.12);color:var(--red);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🗑 Löschen</button>
+      <button onclick="archivePrintSelected()" id="archivePrintBtn" style="display:none;padding:7px 12px;border-radius:10px;border:none;background:rgba(61,82,104,0.12);color:#3d5268;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🖨 Drucken</button>
+    </div>
+    <div id="archiveList" style="flex:1;overflow-y:auto;padding:10px 14px;"></div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="archiveSelectAll()" style="padding:7px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);">Alle wählen</button>
+      <button onclick="closeArchive()" style="padding:7px 14px;border-radius:10px;border:none;background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHIVE DETAIL -->
+<div class="overlay-base" id="archiveDetailOverlay">
+  <div class="modal-base" style="max-width:560px;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" id="archiveDetailTitle">📋 Archiv-Eintrag</div>
+      <button class="modal-close" onclick="closeArchiveDetail()">✕</button>
+    </div>
+    <div id="archiveDetailBody" style="flex:1;overflow-y:auto;padding:14px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--text);"></div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+      <button onclick="archiveDetailLoad()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(76,186,107,0.15);color:var(--green);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📂 Laden</button>
+      <button onclick="archiveDetailPDF()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(61,82,104,0.12);color:#3d5268;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📄 PDF</button>
+      <button onclick="archiveDetailWA()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(37,211,102,0.12);color:#25d366;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📲 WhatsApp</button>
+      <button onclick="closeArchiveDetail()" style="padding:8px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">✕ Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT SELECTION -->
+<div class="overlay-base" id="printSelectOverlay">
+  <div class="modal-base" style="max-width:500px;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title">🖨 Drucken – Auswahl</div>
+      <button class="modal-close" onclick="closePrintSelect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Was möchten Sie drucken?</div>
+      <div id="printSelectList" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;"></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="printSelectAll()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">Alle wählen</button>
+        <button onclick="printSelectNone()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);">Keine</button>
+        <button onclick="executePrintSelected()" style="flex:2;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🖨 Drucken</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CHECKIN SCREEN -->
 <div id="checkinScreen">
   <div class="ci-alert-banner" id="ciAlertBanner">
@@ -504,11 +581,7 @@ body.app-ready::before{opacity:0.5;}
       <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;" id="ciGreetDate">—</div>
       <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:white;margin-top:2px;" id="ciGreetMsg">Guten Abend</div>
     </div>
-    <div style="text-align:right;">
-        <div class="ci-clock" id="ciClock">00:00:00</div>
-        <div class="ci-date" id="ciDate">--</div>
-        <div id="shiftCountdown" style="display:none;font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:0.5px;margin-top:2px;transition:color 0.3s;"></div>
-      </div>
+    <div style="text-align:right;"><div class="ci-clock" id="ciClock">00:00:00</div><div class="ci-date" id="ciDate">--</div></div>
   </div>
   <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 16px;background:rgba(0,0,0,0.2);">
     <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#4cba6b;" id="ciCountIn">0</div><div style="font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);">Eingang</div></div>
@@ -546,7 +619,10 @@ body.app-ready::before{opacity:0.5;}
       <div class="ci-log-actions-bar"><button class="ci-log-act" onclick="ciClearLog()">🗑 Alle löschen</button></div>
     </div>
     <!-- زر نهاية الشيفت -->
-    <button class="ci-back-btn" onclick="hideCheckin()">📋 Protokoll anzeigen</button>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="ci-back-btn" onclick="hideCheckin()">📋 Protokoll anzeigen</button>
+      <button class="ci-back-btn" onclick="openArchive()" style="flex-shrink:0;width:auto;padding:11px 16px;">🗄️ Archiv</button>
+    </div>
   </div>
 </div>
 
@@ -554,6 +630,7 @@ body.app-ready::before{opacity:0.5;}
 <div class="toolbar no-print">
   <div class="toolbar-brand">Denis <span>Protokoll</span></div>
   <div class="toolbar-right">
+    <button class="btn btn-ghost" onclick="openArchive()">🗄️</button>
     <button class="btn btn-ghost" onclick="openSettings()">⚙️</button>
     <button class="btn btn-ghost" onclick="openSigModal()">✍️</button>
     <button class="btn btn-ghost" onclick="openDashboard()">📊</button>
@@ -563,7 +640,7 @@ body.app-ready::before{opacity:0.5;}
     <button class="btn btn-green" onclick="openReportPreview()">📲 WhatsApp</button>
     <button class="btn btn-blue" onclick="generatePDFAndSave()">📄 PDF</button>
     <button class="btn btn-ghost" onclick="resetForm()">↺</button>
-    <button class="btn btn-red" onclick="sortRowsByTime();window.print()">🖨</button>
+    <button class="btn btn-red" onclick="openPrintSelect()">🖨</button>
   </div>
 </div>
 
@@ -646,13 +723,6 @@ body.app-ready::before{opacity:0.5;}
 </div>
 </div>
 
-
-<!-- ARCHIVE -->
-
-
-
-<div id="printContent" style="display:none;"></div>
-</body>
 <script>
 'use strict';
 // ===== CONSTANTS =====
@@ -808,14 +878,11 @@ document.addEventListener('keydown',function(e){
     return;
   }
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();manualSave();}
-  if(e.key==='Escape'){closeReportModal();closeSigModal();closeDashboard();closeArchive();closeSettings();}
+  if(e.key==='Escape'){closeReportModal();closeSigModal();closeDashboard();closeSettings();}
 });
 
 // ===== INIT =====
 function initApp(){
-  // استعادة حالة الوردية
-  var existingLog=localStorage.getItem('denis_checkin_log');
-  if(existingLog){try{var l=JSON.parse(existingLog);if(l&&l.length>0)shiftStarted=true;}catch(e){}}
   if(localStorage.getItem('denis_dark')==='1')document.body.classList.add('dark-mode');
   if(!soundEnabled)document.getElementById('soundBtn').textContent='🔕';
   var sd=getShiftDate(),now=new Date();
@@ -861,69 +928,13 @@ function getShiftTimes(){
 }
 function updateClock(){
   var now=new Date();var st=getShiftTimes();
+  var total=st.se>st.ss?st.se-st.ss:(24*60-st.ss)+st.se;
   var nm=now.getHours()*60+now.getMinutes();
-  var fill=document.getElementById('progressFill');
-  var pctEl=document.getElementById('progressPct');
-  var lbl=document.querySelector('.progress-label');
-
-  if(!shiftStarted){
-    // قبل أول زيارة: شريط مجمد عند 0%
-    if(fill){fill.style.width='0%';fill.style.background='rgba(255,255,255,0.15)';}
-    if(pctEl){pctEl.textContent='—';}
-    if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
-  } else {
-    // بعد أول زيارة: احسب من وقت أول زيارة
-    var firstVisitMin=getFirstVisitMin();
-    var startMin = firstVisitMin>=0 ? firstVisitMin : st.ss;
-    // إجمالي من أول زيارة حتى نهاية الوردية
-    var total=st.se>startMin ? st.se-startMin : (24*60-startMin)+st.se;
-    // المنقضي من أول زيارة حتى الآن
-    var elapsed=nm>=startMin ? nm-startMin : (24*60-startMin)+nm;
-    var pct=Math.min(100,Math.round((elapsed/total)*100));
-    if(fill){
-      fill.style.width=pct+'%';
-      // لون يتغير حسب التقدم
-      if(pct>=90)fill.style.background='var(--red,#E8394A)';
-      else if(pct>=70)fill.style.background='var(--orange,#f5a623)';
-      else fill.style.background='';
-    }
-    if(pctEl)pctEl.textContent=pct+'%';
-    if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
-  }
-  updateShiftCountdown(now, st);
-}
-
-function getFirstVisitMin(){
-  try{
-    var log=ciGetLog();
-    if(!log||!log.length)return -1;
-    // ابحث عن أول إدخال من نوع 'in'
-    for(var i=0;i<log.length;i++){
-      if(log[i].type==='in'&&log[i].time){
-        var parts=log[i].time.split(':');
-        if(parts.length>=2)return parseInt(parts[0])*60+parseInt(parts[1]);
-      }
-    }
-  }catch(e){}
-  return -1;
-}
-
-function updateShiftCountdown(now, st){
-  var el=document.getElementById('shiftCountdown');
-  if(!el)return;
-  // أظهر فقط إذا بدأت الوردية (أول زيارة)
-  if(!shiftStarted)return;
-  el.style.display='block';
-  var nm=now.getHours()*60+now.getMinutes();
-  // حساب الوقت المتبقي حتى نهاية الوردية
-  var rem=st.se>=nm ? st.se-nm : (24*60-nm)+st.se;
-  var h=Math.floor(rem/60);
-  var m=rem%60;
-  var txt=h>0 ? h+'h '+p2(m)+'m' : m+'min';
-  // تلوين حسب الوقت المتبقي
-  if(rem<=15){el.style.color='#E8394A';el.textContent='⏰ '+txt+' noch';}
-  else if(rem<=30){el.style.color='#f5a623';el.textContent='⏱ '+txt+' noch';}
-  else{el.style.color='rgba(255,255,255,0.45)';el.textContent='⏱ '+txt+' noch';}
+  var el=nm>=st.ss?nm-st.ss:nm<=st.se?(24*60-st.ss)+nm:0;
+  var pct=Math.min(100,Math.round((el/total)*100));
+  var fill=document.getElementById('progressFill');if(fill)fill.style.width=pct+'%';
+  var pctEl=document.getElementById('progressPct');if(pctEl)pctEl.textContent=pct+'%';
+  var lbl=document.querySelector('.progress-label');if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
 }
 
 // ===== SHIFT KEY =====
@@ -932,7 +943,15 @@ function checkNewShift(){
   try{
     var ck=getShiftKey(),lk=localStorage.getItem('denis_last_shift_key');
     if(lk&&lk!==ck){
-      try{var od=localStorage.getItem('denis_protokoll');if(od){var p=JSON.parse(od);if(p.rows&&p.rows.some(function(r){return r.k&&r.k!=='— Standort —';}))localStorage.setItem('denis_archive_'+Date.now(),od);}}catch(e){}
+      
+      // حفظ snapshot قبل مسح الوردية القديمة
+      try{
+        var snap=localStorage.getItem('denis_protokoll');
+        var snapLog=localStorage.getItem('denis_checkin_log');
+        if(snap)localStorage.setItem('denis_snapshot_proto',snap);
+        if(snapLog)localStorage.setItem('denis_snapshot_log',snapLog);
+        localStorage.setItem('denis_snapshot_time',new Date().toISOString());
+      }catch(e){}
       localStorage.removeItem('denis_protokoll');localStorage.removeItem('denis_checkin_log');
       localStorage.setItem('denis_last_shift_key',ck);return true;
     }
@@ -1118,7 +1137,7 @@ function collectData(){
   });
   return data;
 }
-var autoArchiveTimer=null;
+
 function saveData(){
   try{
     var data=collectData();
@@ -1127,44 +1146,16 @@ function saveData(){
     var now=new Date(),ts=p2(now.getHours())+':'+p2(now.getMinutes())+':'+p2(now.getSeconds());
     if(bar)bar.className='autosave-bar no-print';if(txt)txt.textContent='💾 Gespeichert um '+ts;if(chip)chip.textContent='💾 '+ts;
     playBeep('save');
-    clearTimeout(autoArchiveTimer);
-    autoArchiveTimer=setTimeout(function(){
-      try{
-        var dateEl=document.getElementById('dateInput');
-        var protoDate=dateEl?dateEl.value:'';
-        var refDate=new Date();
-        if(protoDate){var parts=protoDate.split('.');if(parts.length===3)refDate=new Date(parts[2],parts[1]-1,parts[0]);}
-        var dk=refDate.getFullYear()+'_'+String(refDate.getMonth()+1).padStart(2,'0')+'_'+String(refDate.getDate()).padStart(2,'0');
-        data.savedAt=new Date().toISOString();
-        localStorage.setItem('arc_'+dk,JSON.stringify(data));
-      }catch(e){}
-    },2000);
+
   }catch(e){var bar2=document.getElementById('autosaveBar');if(bar2)bar2.className='autosave-bar error no-print';}
 }
 
 
-function archivePrint(d){
-  var ov=document.getElementById('arcPrev');if(ov)ov.style.display='none';
-  var orig=localStorage.getItem('denis_protokoll');
-  localStorage.setItem('denis_protokoll',JSON.stringify(d));
-  document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
-  loadData();updateSummary();
-  setTimeout(function(){window.print();setTimeout(function(){
-    if(ov)ov.style.display='flex';
-    if(orig)localStorage.setItem('denis_protokoll',orig);
-    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
-  },1000);},300);
-}
-function archivePDF(d){
-  var orig=localStorage.getItem('denis_protokoll');
-  localStorage.setItem('denis_protokoll',JSON.stringify(d));
-  document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
-  loadData();updateSummary();
-  setTimeout(function(){generatePDFAndSave();setTimeout(function(){
-    if(orig)localStorage.setItem('denis_protokoll',orig);
-    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
-  },1000);},300);
-}
+
+
+
+
+
 function manualSave(){saveData();showToast('💾 Gespeichert!','success');}
 function loadData(){
   try{
@@ -1200,7 +1191,7 @@ function sortRowsByTime(){
   rows.forEach(function(r){wrap.appendChild(r);});showToast('Zeilen sortiert','success');
 }
 
-// ===== ARCHIVE =====
+
 function buildWaText(data,lang){
   var t='';
   if(lang==='en')t='🛡 *Denis Security Report*\n📋 Nr: '+(data.protokollNr||'—')+'\n👤 '+(data.mitarbeiter||'—')+'\n📅 '+(data.day||'')+', '+(data.date||'')+'\n\n';
@@ -1386,6 +1377,7 @@ function closeDashboard(){document.getElementById('dashOverlay').classList.remov
 
 // ===== SETTINGS =====
 function openSettings(){
+  var mitEl=document.getElementById('settingsMitarbeiter');if(mitEl)mitEl.value=localStorage.getItem('denis_mitarbeiter')||'';
   document.getElementById('settingsShiftStart').value=localStorage.getItem('denis_shift_start')||'19:45';
   document.getElementById('settingsShiftEnd').value=localStorage.getItem('denis_shift_end')||'07:00';
   document.getElementById('settingsWeekStart').value=localStorage.getItem('denis_week_start')||'1';
@@ -1398,6 +1390,8 @@ function saveSettings(){
   localStorage.setItem('denis_shift_end',document.getElementById('settingsShiftEnd').value||'07:00');
   localStorage.setItem('denis_week_start',document.getElementById('settingsWeekStart').value||'1');
   localStorage.setItem('denis_alarm_min',document.getElementById('settingsAlarmMin').value||'120');
+  var mit=document.getElementById('settingsMitarbeiter');
+  if(mit)localStorage.setItem('denis_mitarbeiter',mit.value.trim());
   closeSettings();showToast('Gespeichert','success');playBeep('success');
 }
 function startPinChange(){var a=document.getElementById('pinChangeArea');a.style.display=a.style.display==='none'?'block':'none';settingsPinEntry='';settingsPinStep='new';settingsPinFirst='';settingsUpdateDots();document.getElementById('pinChangeLabel').textContent='Neuen PIN eingeben:';}
@@ -1683,12 +1677,6 @@ function updateQuickBar(){
 function ciIn(){
   if(!ciSelected)return;var time=nowHM();
   localStorage.setItem('denis_last_kunde',ciSelected);
-  // تفعيل العداد عند أول زيارة
-  if(!shiftStarted){
-    shiftStarted=true;
-    var cdEl=document.getElementById('shiftCountdown');
-    if(cdEl)cdEl.style.display='block';
-  }
   var log=ciGetLog();
   var snapshot=JSON.stringify(log);
   var rowsBefore=document.getElementById('rowsWrap').innerHTML;
@@ -1986,7 +1974,17 @@ function ciSyncTimeToProtocol(kunde,type,newTime,oldTime){
 }
 function ciToggleType(idx){var log=ciGetLog();log[idx].type=log[idx].type==='in'?'out':'in';ciSaveLog(log);ciRenderLog();updateQuickBar();updateDayCounter();showToast(log[idx].type==='in'?'✅ Eingang':'🚪 Ausgang','info');}
 function ciDeleteEntry(idx){var log=ciGetLog();log.splice(idx,1);ciSaveLog(log);ciRenderLog();updateDayCounter();updateQuickBar();ciShowToast('🗑 Gelöscht');}
-function ciClearLog(){showConfirmDialog('🗑 Alle Einträge löschen?',function(){localStorage.removeItem('denis_checkin_log');ciRenderLog();updateDayCounter();updateQuickBar();});}
+function ciClearLog(){
+  showConfirmDialog('🗑 Alle Einträge löschen?',function(){
+    // snapshot قبل الحذف
+    var snap=localStorage.getItem('denis_checkin_log');
+    if(snap)localStorage.setItem('denis_snapshot_log',snap);
+    localStorage.setItem('denis_snapshot_time',new Date().toISOString());
+    localStorage.removeItem('denis_checkin_log');
+    ciRenderLog();updateDayCounter();updateQuickBar();
+    showToast('🗑 Gelöscht — <span onclick="restoreSnapshot()" style="text-decoration:underline;cursor:pointer;color:#fff;">Wiederherstellen</span>');
+  });
+}
 function ciFinish(){
   var log=ciGetLog();var rows=document.querySelectorAll('.proto-row');
   var ks=new Set();rows.forEach(function(row){var id=row.id.replace('row-','');var ksel=document.getElementById('ksel-'+id);var kcust=document.getElementById('kcust-'+id);var isC=kcust&&kcust.style.display!=='none';var k=isC?kcust.value:(ksel?ksel.value:'');if(k&&k!=='— Standort —')ks.add(k);});
@@ -2271,48 +2269,7 @@ function ciShowToast(msg){
   setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){t.remove();},300);},2200);
 }
 
-// ===== OFFLINE + CACHE =====
-(function(){
-  function cachePageResources(){
-    if(!('caches' in window))return;
-    caches.open('denis-v1').then(function(cache){
-      cache.add(window.location.href).catch(function(){});
-      cache.add('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap').catch(function(){});
-      cache.add('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').catch(function(){});
-    });
-  }
 
-  function updateOnlineStatus(){
-    var banner=document.getElementById('offlineBanner');
-    if(!banner)return;
-    if(!navigator.onLine){
-      banner.style.display='flex';
-      setTimeout(function(){banner.style.opacity='1';},10);
-    } else {
-      banner.style.opacity='0';
-      setTimeout(function(){banner.style.display='none';},600);
-    }
-  }
-
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-
-  document.addEventListener('DOMContentLoaded', function(){
-    updateOnlineStatus();
-    if(!('caches' in window))return;
-    caches.open('denis-v1').then(function(c){return c.keys();}).then(function(keys){
-      if(!keys.length){cachePageResources();setTimeout(function(){typeof showToast==='function'&&showToast('📥 Offline gespeichert ✅');},3000);}
-    }).catch(function(){});
-  });
-
-  // PWA Manifest
-  document.addEventListener('DOMContentLoaded', function(){
-    var manifest={name:"Denis Protokoll",short_name:"Check-in",start_url:"./",display:"standalone",background_color:"#1a2535",theme_color:"#3d5268",orientation:"portrait",icons:[]};
-    var blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    var link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
-    document.head.appendChild(link);
-  });
-})();
 
 // ===== EXPORT / IMPORT =====
 function exportData(){
@@ -2359,11 +2316,429 @@ function importData(event){
 }
 
 
-window.addEventListener('beforeunload',function(){try{saveData();}catch(e){}});
+// ================================================================
+// ===== ARCHIV =====
+// ================================================================
+var archiveSelectedKeys = [];
+var archiveCurrentKey = null;
+var archiveCurrentData = null;
+
+function getArchiveKeys() {
+  var keys = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (k && k.match(/^denis_\d{4}_\d{2}_\d{2}$/)) keys.push(k);
+  }
+  keys.sort().reverse();
+  return keys;
+}
+
+function openArchive() {
+  archiveSelectedKeys = [];
+  document.getElementById('archiveSearch').value = '';
+  renderArchiveList();
+  document.getElementById('archiveOverlay').classList.add('open');
+}
+function closeArchive() { document.getElementById('archiveOverlay').classList.remove('open'); }
+
+function renderArchiveList() {
+  var list = document.getElementById('archiveList');
+  var query = (document.getElementById('archiveSearch').value || '').toLowerCase().trim();
+  var keys = getArchiveKeys();
+  if (!keys.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">📭 Kein Archiv vorhanden.<br><small>Beende eine Schicht mit „Schicht beenden" um Einträge zu speichern.</small></div>';
+    updateArchiveActionBtns();
+    return;
+  }
+  var html = '';
+  keys.forEach(function(k) {
+    try {
+      var d = JSON.parse(localStorage.getItem(k) || '{}');
+      var label = (k.replace('denis_','').replace(/_/g,'.'));
+      var mitarb = d.mitarbeiter || '—';
+      var rows = (d.rows || []).length;
+      var protoNr = d.protokollNr || '—';
+      // filter
+      var search = label + ' ' + mitarb + ' ' + protoNr;
+      if (query && search.toLowerCase().indexOf(query) < 0) return;
+      var isSel = archiveSelectedKeys.indexOf(k) >= 0;
+      html += '<div class="archive-card" id="arc-card-'+k+'" onclick="toggleArchiveSelect(\''+k+'\')" style="'
+        + 'border-radius:12px;border:1.5px solid '+(isSel?'var(--red)':'var(--border)')+';background:'+(isSel?'rgba(232,57,74,0.06)':'var(--surface)')+';'
+        + 'padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:6px;transition:all 0.15s;">'
+        + '<div style="width:20px;height:20px;border-radius:6px;border:2px solid '+(isSel?'var(--red)':'var(--border)')+';background:'+(isSel?'var(--red)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;">'
+        + (isSel ? '<span style="color:white;font-size:12px;font-weight:800;">✓</span>' : '')
+        + '</div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:800;color:var(--text);">📅 ' + label + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">👤 ' + mitarb + ' &nbsp;·&nbsp; 📋 ' + protoNr + ' &nbsp;·&nbsp; ' + rows + ' Einträge</div>'
+        + '</div>'
+        + '<button onclick="event.stopPropagation();openArchiveDetail(\''+k+'\')" style="padding:6px 11px;border-radius:9px;border:none;background:rgba(61,82,104,0.1);color:#3d5268;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">Details</button>'
+        + '</div>';
+    } catch(e) {}
+  });
+  list.innerHTML = html || '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">Keine Treffer</div>';
+  updateArchiveActionBtns();
+}
+
+function toggleArchiveSelect(key) {
+  var idx = archiveSelectedKeys.indexOf(key);
+  if (idx >= 0) archiveSelectedKeys.splice(idx, 1);
+  else archiveSelectedKeys.push(key);
+  renderArchiveList();
+}
+
+function archiveSelectAll() {
+  var query = (document.getElementById('archiveSearch').value || '').toLowerCase().trim();
+  var keys = getArchiveKeys();
+  archiveSelectedKeys = keys.filter(function(k) {
+    if (!query) return true;
+    try {
+      var d = JSON.parse(localStorage.getItem(k) || '{}');
+      var label = k.replace('denis_','').replace(/_/g,'.');
+      return (label + ' ' + (d.mitarbeiter||'') + ' ' + (d.protokollNr||'')).toLowerCase().indexOf(query) >= 0;
+    } catch(e) { return true; }
+  });
+  renderArchiveList();
+}
+
+function updateArchiveActionBtns() {
+  var hasSel = archiveSelectedKeys.length > 0;
+  var delBtn = document.getElementById('archiveDelBtn');
+  var prBtn = document.getElementById('archivePrintBtn');
+  if (delBtn) delBtn.style.display = hasSel ? 'block' : 'none';
+  if (prBtn) prBtn.style.display = hasSel ? 'block' : 'none';
+}
+
+function archiveDeleteSelected() {
+  if (!archiveSelectedKeys.length) return;
+  showConfirmDialog('🗑 ' + archiveSelectedKeys.length + ' Einträge löschen?', function() {
+    archiveSelectedKeys.forEach(function(k) { localStorage.removeItem(k); });
+    archiveSelectedKeys = [];
+    renderArchiveList();
+    showToast('🗑 Gelöscht', 'success');
+  }, 'Löschen', 'var(--red)');
+}
+
+function archivePrintSelected() {
+  if (!archiveSelectedKeys.length) return;
+  openArchivePrint(archiveSelectedKeys);
+}
+
+// Archive Detail
+function openArchiveDetail(key) {
+  try {
+    var d = JSON.parse(localStorage.getItem(key) || '{}');
+    archiveCurrentKey = key;
+    archiveCurrentData = d;
+    var label = key.replace('denis_','').replace(/_/g,'.');
+    document.getElementById('archiveDetailTitle').textContent = '📋 ' + label + ' – ' + (d.mitarbeiter || '—');
+    var html = '<div style="background:var(--surface);border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid var(--border);">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Protokoll-Nr.</div><div style="font-weight:800;color:var(--text);">' + (d.protokollNr||'—') + '</div></div>'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Mitarbeiter</div><div style="font-weight:700;color:var(--text);">' + (d.mitarbeiter||'—') + '</div></div>'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Datum</div><div style="font-weight:700;color:var(--text);">' + (d.day||'') + ' ' + (d.date||'—') + '</div></div>'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Gespeichert</div><div style="font-weight:700;color:var(--text);font-size:11px;">' + (d.savedAt ? new Date(d.savedAt).toLocaleString('de-DE') : '—') + '</div></div>'
+      + '</div></div>';
+    (d.rows || []).forEach(function(row, i) {
+      var k = row.k === '— Standort —' ? '—' : (row.k || '—');
+      var notizen = (row.n || []).filter(function(n){ return n.ev && n.ev !== '— Ereignis —'; });
+      html += '<div style="background:var(--surface);border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(notizen.length?'8px':'0')+'px;">'
+        + '<div style="font-weight:800;color:var(--text);">📍 ' + k + '</div>'
+        + '<div style="font-size:12px;color:var(--muted);font-weight:600;">' + (row.b||'—') + ' → ' + (row.e||'—') + '</div>'
+        + '</div>';
+      if (notizen.length) {
+        notizen.forEach(function(n) {
+          html += '<div style="font-size:12px;color:var(--text);padding:2px 0;">• ' + (n.c > 1 ? '['+n.c+'×] ' : '') + (n.ev||'') + '</div>';
+        });
+      }
+      html += '</div>';
+    });
+    if (!d.rows || !d.rows.length) html += '<div style="text-align:center;padding:20px;color:var(--muted);">Keine Einträge</div>';
+    document.getElementById('archiveDetailBody').innerHTML = html;
+    document.getElementById('archiveDetailOverlay').classList.add('open');
+  } catch(e) { showToast('Fehler: ' + e.message, 'error'); }
+}
+
+function closeArchiveDetail() { document.getElementById('archiveDetailOverlay').classList.remove('open'); }
+
+function archiveDetailLoad() {
+  if (!archiveCurrentData) return;
+  showConfirmDialog('📂 Diesen Eintrag laden? Aktuelle Daten werden überschrieben.', function() {
+    localStorage.setItem('denis_protokoll', JSON.stringify(archiveCurrentData));
+    showToast('📂 Geladen – Seite wird neu geladen…');
+    closeArchiveDetail();
+    closeArchive();
+    setTimeout(function(){ window.location.reload(); }, 1200);
+  }, 'Laden', 'var(--green)');
+}
+
+function archiveDetailPDF() {
+  if (!archiveCurrentData) return;
+  generatePDFFromData(archiveCurrentData);
+  closeArchiveDetail();
+}
+
+function archiveDetailWA() {
+  if (!archiveCurrentData) return;
+  var text = buildWaText(archiveCurrentData, 'de');
+  window.open('https://wa.me/?text=' + encodeURIComponent(text));
+}
+
+// Archive multi-print
+function openArchivePrint(keys) {
+  var list = document.getElementById('printSelectList');
+  list.innerHTML = '';
+  keys.forEach(function(k) {
+    try {
+      var d = JSON.parse(localStorage.getItem(k) || '{}');
+      var label = k.replace('denis_','').replace(/_/g,'.');
+      var item = document.createElement('label');
+      item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+      item.innerHTML = '<input type="checkbox" checked data-key="'+k+'" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
+        + '<div><div style="font-weight:700;font-size:13px;color:var(--text);">📅 '+label+'</div>'
+        + '<div style="font-size:11px;color:var(--muted);">'+(d.mitarbeiter||'—')+'&nbsp;·&nbsp;'+(d.protokollNr||'—')+'</div></div>';
+      list.appendChild(item);
+    } catch(e) {}
+  });
+  document.getElementById('printSelectOverlay').classList.add('open');
+}
+
+function closePrintSelect() { document.getElementById('printSelectOverlay').classList.remove('open'); }
+function printSelectAll() { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked = true; }); }
+function printSelectNone() { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked = false; }); }
+
+// ================================================================
+// ===== DRUCKEN – AUSWAHL =====
+// ================================================================
+function openPrintSelect() {
+  // Aktueller Bericht + Archiv
+  var list = document.getElementById('printSelectList');
+  list.innerHTML = '';
+
+  // 1. Aktueller Bericht
+  var cur = document.createElement('label');
+  cur.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:2px solid var(--red);cursor:pointer;font-family:\'DM Sans\',sans-serif;background:rgba(232,57,74,0.04);';
+  cur.innerHTML = '<input type="checkbox" checked data-type="current" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
+    + '<div><div style="font-weight:800;font-size:13px;color:var(--text);">📋 Aktueller Bericht</div>'
+    + '<div style="font-size:11px;color:var(--muted);">' + (document.getElementById('mitarbeiterName') ? document.getElementById('mitarbeiterName').value || '—' : '—') + '</div></div>';
+  list.appendChild(cur);
+
+  // 2. Archiv-Einträge
+  var keys = getArchiveKeys();
+  if (keys.length) {
+    var sep = document.createElement('div');
+    sep.style.cssText = 'font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 0 4px;';
+    sep.textContent = '— Archiv —';
+    list.appendChild(sep);
+    keys.forEach(function(k) {
+      try {
+        var d = JSON.parse(localStorage.getItem(k) || '{}');
+        var label = k.replace('denis_','').replace(/_/g,'.');
+        var item = document.createElement('label');
+        item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+        item.innerHTML = '<input type="checkbox" data-type="archive" data-key="'+k+'" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
+          + '<div><div style="font-weight:700;font-size:13px;color:var(--text);">📅 '+label+'</div>'
+          + '<div style="font-size:11px;color:var(--muted);">'+(d.mitarbeiter||'—')+'&nbsp;·&nbsp;'+(d.protokollNr||'—')+'</div></div>';
+        list.appendChild(item);
+      } catch(e) {}
+    });
+  }
+  document.getElementById('printSelectOverlay').classList.add('open');
+}
+
+function executePrintSelected() {
+  var checkboxes = document.querySelectorAll('#printSelectList input[type=checkbox]:checked');
+  if (!checkboxes.length) { showToast('Nichts ausgewählt', 'error'); return; }
+
+  var hasCurrent = false;
+  var archiveKeys = [];
+  checkboxes.forEach(function(cb) {
+    if (cb.dataset.type === 'current') hasCurrent = true;
+    else if (cb.dataset.type === 'archive' && cb.dataset.key) archiveKeys.push(cb.dataset.key);
+  });
+
+  closePrintSelect();
+
+  // Nur aktueller Bericht → normaler Druck
+  if (hasCurrent && !archiveKeys.length) {
+    sortRowsByTime();
+    setTimeout(function(){ window.print(); }, 200);
+    return;
+  }
+
+  // Mehrere Berichte → PDF
+  showPdfLoader(true);
+  try {
+    var lib = window.jspdf;
+    if (!lib) { showToast('jsPDF lädt noch…', 'error'); showPdfLoader(false); return; }
+    var doc = new lib.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var first = true;
+
+    function addDataToDoc(data) {
+      if (!first) doc.addPage();
+      first = false;
+      buildPDFPage(doc, data);
+    }
+
+    if (hasCurrent) addDataToDoc(collectData());
+    archiveKeys.forEach(function(k) {
+      try { addDataToDoc(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
+    });
+
+    var fileName = 'denis-protokoll-sammlung-' + new Date().toISOString().slice(0,10) + '.pdf';
+    doc.save(fileName);
+    showToast('📄 PDF (' + (hasCurrent ? 1 : 0) + (archiveKeys.length ? ' + ' + archiveKeys.length + ' Archiv' : '') + ') gespeichert!', 'success');
+    playBeep && playBeep('success');
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+  showPdfLoader(false);
+}
+
+// Hilfsfunktion: PDF aus beliebigen Daten bauen
+function buildPDFPage(doc, data) {
+  var pageW = 210, margin = 10, cW = pageW - 2 * margin;
+  var y = margin;
+  doc.setFillColor(61, 82, 104); doc.rect(0, 0, pageW, 28, 'F');
+  doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.text('Denis Protokoll', margin, 12);
+  doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.text('Tagesbericht · Vorfallprotokoll', margin, 18);
+  doc.setFontSize(9); doc.text('Mitarbeiter: ' + (data.mitarbeiter || '—'), margin, 23); doc.text((data.day || '') + ' ' + (data.date || ''), 160, 23); y = 33;
+  doc.setFillColor(240, 241, 244); doc.rect(margin, y, cW, 7, 'F'); doc.setTextColor(80, 80, 80); doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+  doc.text('Kunde', margin + 2, y + 5); doc.text('Beginn', margin + 38, y + 5); doc.text('Ende', margin + 60, y + 5); doc.text('Dienstnotiz', margin + 82, y + 5); y += 9;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  (data.rows || []).forEach(function(row, i) {
+    if (y > 270) { doc.addPage(); y = margin; }
+    var notizen = (row.n ? row.n.filter(function(n) { return n.ev && n.ev !== '— Ereignis —'; }) : []);
+    var hasPhotos = row.photos && row.photos.length > 0;
+    var notizLines = notizen.length || 1;
+    var photoRowH = hasPhotos ? 12 : 0;
+    var rH = Math.max(9, notizLines * 6 + 6) + photoRowH;
+    if (y + rH > 275) { doc.addPage(); y = margin; }
+    if (i % 2 === 0) { doc.setFillColor(252, 252, 252); doc.rect(margin, y, cW, rH, 'F'); }
+    doc.setDrawColor(220, 220, 220); doc.rect(margin, y, cW, rH);
+    doc.setTextColor(20, 21, 24); doc.setFont('helvetica', 'bold');
+    doc.text(stripEmoji(row.k === '— Standort —' ? '' : row.k), margin + 2, y + 5, { maxWidth: 34 });
+    doc.setFont('helvetica', 'normal'); doc.text(stripEmoji(row.b || ''), margin + 38, y + 5); doc.text(stripEmoji(row.e || ''), margin + 60, y + 5);
+    var ny = y + 4;
+    if (notizen.length) {
+      notizen.forEach(function(n) {
+        doc.setFontSize(7.5);
+        var isDanger = typeof DANGER_EVENTS !== 'undefined' && DANGER_EVENTS.indexOf(n.ev) >= 0;
+        doc.setTextColor(isDanger ? 180 : 20, isDanger ? 30 : 21, isDanger ? 30 : 24);
+        doc.setFont('helvetica', isDanger ? 'bold' : 'normal');
+        doc.text('• ' + (n.c > 0 ? '[' + n.c + 'x] ' + stripEmoji(n.ev) : stripEmoji(n.ev)), margin + 82, ny, { maxWidth: cW - 84 });
+        ny += 5.5;
+        doc.setFont('helvetica', 'normal');
+      });
+    } else { doc.setFontSize(8); doc.setTextColor(160, 160, 160); doc.text('—', margin + 82, y + 5); }
+    y += rH + 1;
+  });
+  var sig = localStorage.getItem('denis_signature');
+  if (sig && y < 240) { try { doc.addImage(sig, 'PNG', margin, y, 60, 18); } catch(e) {} }
+  doc.setFontSize(7); doc.setTextColor(180, 180, 180); doc.text('Denis Protokoll · ' + new Date().toLocaleString('de-DE'), margin, 292);
+}
+
+// generatePDFFromData – für Archiv-Einzel-PDF
+function generatePDFFromData(data) {
+  showPdfLoader(true);
+  try {
+    var lib = window.jspdf;
+    if (!lib) { showToast('jsPDF lädt noch…', 'error'); showPdfLoader(false); return; }
+    var doc = new lib.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    buildPDFPage(doc, data);
+    doc.save('denis-protokoll-' + (data.date || 'archiv') + '.pdf');
+    showToast('📄 PDF gespeichert!', 'success');
+    playBeep && playBeep('success');
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+  showPdfLoader(false);
+}
+
+// ================================================================
+// ===== OFFLINE – Cache API (ohne Service Worker) =====
+// ================================================================
+(function() {
+  var CACHE_NAME = 'denis-v2';
+  var ASSETS = [
+    'https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap',
+    'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  ];
+
+  // Online/Offline Banner
+  function updateOnlineBanner() {
+    var banner = document.getElementById('offlineBanner');
+    if (!banner) return;
+    if (!navigator.onLine) {
+      banner.style.display = 'flex';
+      setTimeout(function(){ banner.style.opacity = '1'; }, 10);
+    } else {
+      banner.style.opacity = '0';
+      setTimeout(function(){ banner.style.display = 'none'; }, 600);
+    }
+  }
+  window.addEventListener('online',  updateOnlineBanner);
+  window.addEventListener('offline', updateOnlineBanner);
+
+  // Assets im Cache-Speicher vorhalten
+  function warmCache() {
+    if (!('caches' in window)) return;
+    caches.open(CACHE_NAME).then(function(cache) {
+      ASSETS.forEach(function(url) {
+        cache.match(url).then(function(hit) {
+          if (!hit) cache.add(url).catch(function(){});
+        });
+      });
+      // Aktuelle Seite selbst cachen
+      cache.add(window.location.href).catch(function(){});
+    });
+  }
+
+  // Alte Cache-Versionen aufräumen
+  function pruneOldCaches() {
+    if (!('caches' in window)) return;
+    caches.keys().then(function(keys) {
+      keys.forEach(function(k) {
+        if (k !== CACHE_NAME) caches.delete(k);
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    updateOnlineBanner();
+    pruneOldCaches();
+    // Erst cachen wenn Seite vollständig geladen
+    window.addEventListener('load', function() {
+      warmCache();
+      setTimeout(function() {
+        if ('caches' in window) {
+          typeof showToast === 'function' && showToast('📥 Offline-Daten gespeichert ✅');
+        }
+      }, 3500);
+    });
+  });
+
+  // PWA Manifest
+  document.addEventListener('DOMContentLoaded', function() {
+    var manifest = {
+      name: 'Denis Protokoll',
+      short_name: 'Protokoll',
+      start_url: './',
+      display: 'standalone',
+      background_color: '#1a2535',
+      theme_color: '#3d5268',
+      orientation: 'portrait',
+      icons: []
+    };
+    var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    var link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  });
+})();
+
+
 
 // ===== تنبيه نهاية الوردية =====
 var shiftEndAlertFired = false;
-var shiftStarted = false; // يُفعَّل عند أول زيارة
 function checkShiftEndAlert(){
   try{
     var endStr = localStorage.getItem('denis_shift_end');
@@ -2436,4 +2811,7 @@ openSettings=function(){
 };
 
 </script>
+
+
+</body>
 </html>
