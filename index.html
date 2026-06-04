@@ -300,18 +300,24 @@ body.app-ready::before{opacity:0.5;}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   html,body{background:white!important;padding:0!important;margin:0!important;width:100%!important;font-size:8pt!important;transform:none!important;}
   body::before{display:none!important;}
-  /* إخفاء كل شيء ما عدا printContent */
-  body > *:not(#printContent){display:none!important;}
-  #printContent{
+  /* طباعة أرشيف: إخفاء كل شيء وإظهار printContent فقط */
+  body.printing-archive > *:not(#printContent){display:none!important;}
+  body.printing-archive #printContent{
     display:block!important;
-    position:fixed!important;
-    top:0!important;left:0!important;right:0!important;bottom:0!important;
-    width:100%!important;height:auto!important;
+    position:static!important;
+    width:100%!important;
     background:white!important;color:black!important;
-    z-index:999999!important;
-    overflow:visible!important;
     padding:0!important;margin:0!important;
   }
+  /* طباعة عادية: إخفاء العناصر غير المطلوبة */
+  body:not(.printing-archive) #pinScreen,
+  body:not(.printing-archive) #splashScreen,
+  body:not(.printing-archive) #archivePanel,
+  body:not(.printing-archive) #archiveBg,
+  body:not(.printing-archive) #arcPrev,
+  body:not(.printing-archive) .toast-wrap,
+  body:not(.printing-archive) .pdf-loading,
+  body:not(.printing-archive) #printContent{display:none!important;}
   #printContent *{max-width:100%!important;box-sizing:border-box!important;}
   #printContent table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;}
   #printContent td,#printContent th{word-wrap:break-word!important;overflow-wrap:break-word!important;}
@@ -332,6 +338,11 @@ body.app-ready::before{opacity:0.5;}
   .rows-wrap{margin:0!important;}
   @page{size:A4 portrait;margin:5mm;}
 }
+</style>
+<style>
+/* منع وميض الشاشات عند التحميل */
+#checkinScreen{visibility:hidden;}
+body.app-ready #checkinScreen{visibility:visible;}
 </style>
 </head>
 <body>
@@ -519,7 +530,7 @@ body.app-ready::before{opacity:0.5;}
 </div>
 
 <!-- CHECKIN SCREEN -->
-<div id="checkinScreen">
+<div id="checkinScreen" style="display:none;">
   <div class="ci-alert-banner" id="ciAlertBanner">
     <span style="font-size:18px;">⚠️</span>
     <span class="ci-alert-text" id="ciAlertText">Vergessen auszuchecken?</span>
@@ -814,6 +825,7 @@ function unlockApp(){
   document.body.classList.add('app-ready');
   document.getElementById('pinScreen').style.display='none';
   document.getElementById('appContent').style.display='block';
+  var ci=document.getElementById('checkinScreen');if(ci)ci.style.display='block';
   initApp();
   setTimeout(function(){showCheckin();},300);
 }
@@ -2573,10 +2585,12 @@ function doPrint(dataArr){
   var el=document.getElementById('printContent');
   if(!el){el=document.createElement('div');el.id='printContent';document.body.appendChild(el);}
   el.innerHTML=buildPrintHTML(dataArr);
-  el.style.cssText='display:block;position:fixed;top:0;left:0;width:100%;height:auto;background:white;z-index:9999999;';
+  el.style.cssText='display:block;';
+  document.body.classList.add('printing-archive');
   setTimeout(function(){
     window.print();
     setTimeout(function(){
+      document.body.classList.remove('printing-archive');
       el.style.display='none';
       el.innerHTML='';
     },1500);
