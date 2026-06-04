@@ -623,6 +623,7 @@ body.app-ready::before{opacity:0.5;}
       <button class="ci-back-btn" onclick="hideCheckin()">📋 Protokoll anzeigen</button>
       <button class="ci-back-btn" onclick="openArchive()" style="flex-shrink:0;width:auto;padding:11px 16px;">🗄️ Archiv</button>
     </div>
+    <button onclick="ciFinish()" style="width:100%;margin-top:10px;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#4cba6b,#2e8b47);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.5px;">✅ Schicht beenden</button>
   </div>
 </div>
 
@@ -866,7 +867,13 @@ function showPinGreeting(){
 function unlockApp(){
   document.body.classList.add('app-ready');
   document.getElementById('pinScreen').style.display='none';
-  document.getElementById('appContent').style.display='block';
+  // إخفاء toolbar و mainCard أثناء رسالة الترحيب
+  var toolbar=document.querySelector('.toolbar');
+  var mainCard=document.getElementById('mainCard');
+  var appContent=document.getElementById('appContent');
+  if(toolbar)toolbar.style.visibility='hidden';
+  if(mainCard)mainCard.style.visibility='hidden';
+  appContent.style.display='block';
   initApp();
   setTimeout(function(){showCheckin();},300);
 }
@@ -930,8 +937,17 @@ function updateClock(){
   var now=new Date();var st=getShiftTimes();
   var total=st.se>st.ss?st.se-st.ss:(24*60-st.ss)+st.se;
   var nm=now.getHours()*60+now.getMinutes();
-  var el=nm>=st.ss?nm-st.ss:nm<=st.se?(24*60-st.ss)+nm:0;
-  var pct=Math.min(100,Math.round((el/total)*100));
+  // حساب المنقضي: دائماً نسبة إلى وقت الشيفت بغض النظر عن الوقت الحالي
+  var elapsed;
+  if(nm>=st.ss){elapsed=nm-st.ss;}
+  else if(nm<=st.se){elapsed=(24*60-st.ss)+nm;}
+  else{
+    // خارج وقت الشيفت تماماً — أظهر نسبة بناءً على أقرب نقطة
+    var toStart=nm<st.ss?(st.ss-nm):(24*60-nm+st.ss);
+    var pctIdle=Math.max(0,Math.min(100,Math.round((1-(toStart/total))*100)));
+    elapsed=0;
+  }
+  var pct=Math.min(100,Math.max(0,Math.round((elapsed/total)*100)));
   var fill=document.getElementById('progressFill');if(fill)fill.style.width=pct+'%';
   var pctEl=document.getElementById('progressPct');if(pctEl)pctEl.textContent=pct+'%';
   var lbl=document.querySelector('.progress-label');if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
@@ -1444,6 +1460,11 @@ function hideCheckin(){
   document.getElementById('checkinScreen').style.display='none';document.body.style.overflow='';
   if(ciClockInterval)clearInterval(ciClockInterval);
   var fc=document.getElementById('fabCheckin');if(fc)fc.style.display='flex';
+  // أظهر toolbar و mainCard بعد إغلاق شاشة الترحيب
+  var toolbar=document.querySelector('.toolbar');
+  var mainCard=document.getElementById('mainCard');
+  if(toolbar)toolbar.style.visibility='';
+  if(mainCard)mainCard.style.visibility='';
 }
 // ===== VISIT HISTORY =====
 function saveVisitDuration(kunde,mins){
@@ -2346,7 +2367,8 @@ function renderArchiveList() {
   var query = (document.getElementById('archiveSearch').value || '').toLowerCase().trim();
   var keys = getArchiveKeys();
   if (!keys.length) {
-    list.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">📭 Kein Archiv vorhanden.<br><small>Beende eine Schicht mit „Schicht beenden" um Einträge zu speichern.</small></div>';
+    list.innerHTML = '<div style="text-align:center;padding:32px 0 16px;color:var(--muted);font-size:13px;">📭 Kein Archiv vorhanden.<br><small style="font-size:11px;">Beende eine Schicht mit „Schicht beenden" um Einträge zu speichern.</small></div>'
+      + '<div style="padding:0 4px 8px;"><button onclick="importOldArchiveData()" style="width:100%;padding:11px;border-radius:12px;border:1.5px dashed var(--border);background:transparent;color:var(--muted);font-family:DM Sans,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📦 Alte Daten aus Browser importieren</button></div>';
     updateArchiveActionBtns();
     return;
   }
@@ -2652,8 +2674,86 @@ function generatePDFFromData(data) {
   showPdfLoader(false);
 }
 
+
 // ================================================================
-// ===== OFFLINE – Cache API (ohne Service Worker) =====
+// ===== استيراد البيانات القديمة إلى الأرشيف =====
+// ================================================================
+function importOldArchiveData() {
+  var found = [];
+
+  // 1. البروتوكول الحالي المحفوظ
+  var proto = localStorage.getItem('denis_protokoll');
+  if (proto) {
+    try {
+      var d = JSON.parse(proto);
+      if (d && (d.rows && d.rows.length || d.date)) {
+        found.push({ source: 'denis_protokoll', data: d, label: 'Aktuelles Protokoll (' + (d.date || '?') + ' – ' + (d.mitarbeiter || '?') + ')' });
+      }
+    } catch(e) {}
+  }
+
+  // 2. Alte Archiv-Schlüssel mit anderen Präfixen (arc_, denis_archive_)
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (!k) continue;
+    if (k.startsWith('arc_') || k.startsWith('denis_archive_')) {
+      try {
+        var d2 = JSON.parse(localStorage.getItem(k) || '{}');
+        if (d2 && (d2.rows || d2.date)) {
+          found.push({ source: k, data: d2, label: k + ' (' + (d2.date || '?') + ' – ' + (d2.mitarbeiter || '?') + ')' });
+        }
+      } catch(e) {}
+    }
+  }
+
+  if (!found.length) {
+    showToast('⚠️ Keine alten Daten im Browser gefunden', 'error');
+    return;
+  }
+
+  // نافذة تأكيد مع قائمة ما سيُستورد
+  var itemList = found.map(function(f) { return '• ' + f.label; }).join('\n');
+  showConfirmDialog(
+    '📦 ' + found.length + ' Einträge gefunden:\n\n' + itemList + '\n\nIns Archiv importieren?',
+    function() {
+      var imported = 0;
+      found.forEach(function(f) {
+        var d = f.data;
+        // استخرج أو اصنع مفتاح تاريخ
+        var dk = null;
+        if (d.archiveKey) {
+          dk = 'denis_' + d.archiveKey;
+        } else if (d.date) {
+          // تنسيق DD.MM.YYYY أو YYYY-MM-DD
+          var parts = d.date.indexOf('.') >= 0 ? d.date.split('.') : null;
+          if (parts && parts.length === 3) {
+            dk = 'denis_' + parts[2] + '_' + parts[1].padStart(2,'0') + '_' + parts[0].padStart(2,'0');
+          } else if (d.date.indexOf('-') >= 0) {
+            dk = 'denis_' + d.date.replace(/-/g,'_');
+          }
+        }
+        if (!dk) {
+          // مفتاح بناءً على وقت الحفظ أو الآن
+          var now = new Date();
+          dk = 'denis_' + now.getFullYear() + '_' + String(now.getMonth()+1).padStart(2,'0') + '_' + String(now.getDate()).padStart(2,'0') + '_imp' + imported;
+        }
+        // لا تستبدل إذا كان موجوداً بالفعل
+        if (!localStorage.getItem(dk)) {
+          d.savedAt = d.savedAt || new Date().toISOString();
+          d.archiveKey = dk.replace('denis_','');
+          localStorage.setItem(dk, JSON.stringify(d));
+          imported++;
+        }
+      });
+      showToast('✅ ' + imported + ' Einträge ins Archiv importiert!', 'success');
+      renderArchiveList();
+    },
+    'Importieren',
+    'var(--green)'
+  );
+}
+
+
 // ================================================================
 (function() {
   var CACHE_NAME = 'denis-v2';
