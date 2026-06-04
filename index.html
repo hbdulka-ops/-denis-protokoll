@@ -326,6 +326,9 @@ body.app-ready::before{opacity:0.5;}
 #printSelectList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 #archiveDetailBody::-webkit-scrollbar { width: 4px; }
 #archiveDetailBody::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+/* ===== PRINT SELECT ===== */
+.ps-period-btn{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);transition:all 0.15s;}
+.ps-period-btn.active{background:var(--red);border-color:var(--red);color:white;}
 </style>
 </head>
 <body>
@@ -551,19 +554,38 @@ body.app-ready::before{opacity:0.5;}
 
 <!-- PRINT SELECTION -->
 <div class="overlay-base" id="printSelectOverlay">
-  <div class="modal-base" style="max-width:500px;">
+  <div class="modal-base" style="max-width:520px;max-height:92vh;display:flex;flex-direction:column;">
     <div class="modal-hdr">
-      <div class="modal-hdr-title">🖨 Drucken – Auswahl</div>
+      <div class="modal-hdr-title">🖨 Drucken / PDF – Auswahl</div>
       <button class="modal-close" onclick="closePrintSelect()">✕</button>
     </div>
-    <div class="modal-body">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Was möchten Sie drucken?</div>
-      <div id="printSelectList" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;"></div>
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
-        <button onclick="printSelectAll()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">Alle wählen</button>
-        <button onclick="printSelectNone()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);">Keine</button>
-        <button onclick="executePrintSelected()" style="flex:2;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🖨 Drucken</button>
+    <div class="modal-body" style="flex:1;overflow-y:auto;padding-bottom:0;">
+
+      <!-- فلتر المدة -->
+      <div style="margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📅 Zeitraum-Filter</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="ps-period-btn active" data-period="all" onclick="setPrintPeriod('all',this)">Alle</button>
+          <button class="ps-period-btn" data-period="week" onclick="setPrintPeriod('week',this)">Diese Woche</button>
+          <button class="ps-period-btn" data-period="month" onclick="setPrintPeriod('month',this)">Dieser Monat</button>
+          <button class="ps-period-btn" data-period="custom" onclick="setPrintPeriod('custom',this)">Benutzerdefiniert</button>
+        </div>
+        <div id="psCustomRange" style="display:none;margin-top:8px;display:none;gap:8px;align-items:center;">
+          <input type="date" id="psDateFrom" style="flex:1;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:6px 10px;outline:none;" onchange="renderPrintList()">
+          <span style="color:var(--muted);font-size:11px;">bis</span>
+          <input type="date" id="psDateTo" style="flex:1;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:6px 10px;outline:none;" onchange="renderPrintList()">
+        </div>
       </div>
+
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📋 Berichte wählen</div>
+      <div id="printSelectList" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;padding-right:4px;"></div>
+    </div>
+
+    <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
+      <button onclick="printSelectAll()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">✓ Alle</button>
+      <button onclick="printSelectNone()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);">✗ Keine</button>
+      <button onclick="executePrint()" style="flex:2;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🖨 Drucken</button>
+      <button onclick="executePDF()" style="flex:2;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#E8394A,#c8102e);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📄 PDF</button>
     </div>
   </div>
 </div>
@@ -2526,95 +2548,295 @@ function openArchivePrint(keys) {
   document.getElementById('printSelectOverlay').classList.add('open');
 }
 
-function closePrintSelect() { document.getElementById('printSelectOverlay').classList.remove('open'); }
-function printSelectAll() { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked = true; }); }
-function printSelectNone() { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked = false; }); }
 
 // ================================================================
-// ===== DRUCKEN – AUSWAHL =====
+// ===== DRUCKEN / PDF – NEUES SYSTEM =====
 // ================================================================
+var currentPrintPeriod = 'all';
+
 function openPrintSelect() {
-  // Aktueller Bericht + Archiv
+  currentPrintPeriod = 'all';
+  // Reset period buttons
+  document.querySelectorAll('.ps-period-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.period==='all'); });
+  document.getElementById('psCustomRange').style.display = 'none';
+  renderPrintList();
+  document.getElementById('printSelectOverlay').classList.add('open');
+}
+
+function closePrintSelect() { document.getElementById('printSelectOverlay').classList.remove('open'); }
+
+function setPrintPeriod(period, btn) {
+  currentPrintPeriod = period;
+  document.querySelectorAll('.ps-period-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var cr = document.getElementById('psCustomRange');
+  cr.style.display = period === 'custom' ? 'flex' : 'none';
+  if (period !== 'custom') renderPrintList();
+}
+
+function keyToDate(k) {
+  // 'denis_2025_06_03' → Date
+  var parts = k.replace('denis_','').split('_');
+  if (parts.length >= 3) return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  return null;
+}
+
+function renderPrintList() {
   var list = document.getElementById('printSelectList');
   list.innerHTML = '';
+  var now = new Date();
 
-  // 1. Aktueller Bericht
+  // Aktueller Bericht
   var cur = document.createElement('label');
   cur.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:2px solid var(--red);cursor:pointer;font-family:\'DM Sans\',sans-serif;background:rgba(232,57,74,0.04);';
+  var mitarb = document.getElementById('mitarbeiterName') ? document.getElementById('mitarbeiterName').value || '—' : '—';
+  var curDate = document.getElementById('dateInput') ? document.getElementById('dateInput').value : '';
   cur.innerHTML = '<input type="checkbox" checked data-type="current" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
-    + '<div><div style="font-weight:800;font-size:13px;color:var(--text);">📋 Aktueller Bericht</div>'
-    + '<div style="font-size:11px;color:var(--muted);">' + (document.getElementById('mitarbeiterName') ? document.getElementById('mitarbeiterName').value || '—' : '—') + '</div></div>';
+    + '<div style="flex:1;"><div style="font-weight:800;font-size:13px;color:var(--text);">📋 Aktueller Bericht</div>'
+    + '<div style="font-size:11px;color:var(--muted);">' + mitarb + (curDate ? ' · ' + curDate : '') + '</div></div>';
   list.appendChild(cur);
 
-  // 2. Archiv-Einträge
+  // Archiv filtern
   var keys = getArchiveKeys();
-  if (keys.length) {
+  var filtered = keys.filter(function(k) {
+    var d = keyToDate(k);
+    if (!d) return true;
+    if (currentPrintPeriod === 'all') return true;
+    if (currentPrintPeriod === 'week') {
+      var startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay() + 1); startOfWeek.setHours(0,0,0,0);
+      var endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6); endOfWeek.setHours(23,59,59,999);
+      return d >= startOfWeek && d <= endOfWeek;
+    }
+    if (currentPrintPeriod === 'month') {
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }
+    if (currentPrintPeriod === 'custom') {
+      var from = document.getElementById('psDateFrom').value;
+      var to = document.getElementById('psDateTo').value;
+      if (from) { var fd = new Date(from); fd.setHours(0,0,0,0); if (d < fd) return false; }
+      if (to)   { var td = new Date(to);   td.setHours(23,59,59,999); if (d > td) return false; }
+      return true;
+    }
+    return true;
+  });
+
+  if (filtered.length) {
     var sep = document.createElement('div');
-    sep.style.cssText = 'font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 0 4px;';
-    sep.textContent = '— Archiv —';
+    sep.style.cssText = 'font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 2px 4px;';
+    sep.textContent = '— Archiv (' + filtered.length + ') —';
     list.appendChild(sep);
-    keys.forEach(function(k) {
+    filtered.forEach(function(k) {
       try {
         var d = JSON.parse(localStorage.getItem(k) || '{}');
         var label = k.replace('denis_','').replace(/_/g,'.');
         var item = document.createElement('label');
-        item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+        item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:background 0.1s;';
         item.innerHTML = '<input type="checkbox" data-type="archive" data-key="'+k+'" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
-          + '<div><div style="font-weight:700;font-size:13px;color:var(--text);">📅 '+label+'</div>'
-          + '<div style="font-size:11px;color:var(--muted);">'+(d.mitarbeiter||'—')+'&nbsp;·&nbsp;'+(d.protokollNr||'—')+'</div></div>';
+          + '<div style="flex:1;"><div style="font-weight:700;font-size:13px;color:var(--text);">📅 '+label+'</div>'
+          + '<div style="font-size:11px;color:var(--muted);">'+(d.mitarbeiter||'—')+'&nbsp;·&nbsp;'+(d.protokollNr||'—')+'&nbsp;·&nbsp;'+(d.rows?d.rows.length:0)+' Eintr.</div></div>';
         list.appendChild(item);
       } catch(e) {}
     });
+  } else if (currentPrintPeriod !== 'all') {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;padding:16px;color:var(--muted);font-size:12px;';
+    empty.textContent = 'Keine Einträge in diesem Zeitraum';
+    list.appendChild(empty);
   }
-  document.getElementById('printSelectOverlay').classList.add('open');
 }
 
-function executePrintSelected() {
-  var checkboxes = document.querySelectorAll('#printSelectList input[type=checkbox]:checked');
-  if (!checkboxes.length) { showToast('Nichts ausgewählt', 'error'); return; }
+function printSelectAll()  { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked=true; }); }
+function printSelectNone() { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked=false; }); }
 
+function getSelectedPrintData() {
+  var checkboxes = document.querySelectorAll('#printSelectList input[type=checkbox]:checked');
   var hasCurrent = false;
   var archiveKeys = [];
   checkboxes.forEach(function(cb) {
     if (cb.dataset.type === 'current') hasCurrent = true;
     else if (cb.dataset.type === 'archive' && cb.dataset.key) archiveKeys.push(cb.dataset.key);
   });
+  return { hasCurrent: hasCurrent, archiveKeys: archiveKeys, total: (hasCurrent?1:0)+archiveKeys.length };
+}
 
+// ── طباعة بنفس جودة @media print ──────────────────────────────
+function executePrint() {
+  var sel = getSelectedPrintData();
+  if (!sel.total) { showToast('Nichts ausgewählt', 'error'); return; }
   closePrintSelect();
 
-  // Nur aktueller Bericht → normaler Druck
-  if (hasCurrent && !archiveKeys.length) {
+  // فقط البروتوكول الحالي → الطباعة المباشرة كالمعتاد
+  if (sel.hasCurrent && !sel.archiveKeys.length) {
     sortRowsByTime();
     setTimeout(function(){ window.print(); }, 200);
     return;
   }
 
-  // Mehrere Berichte → PDF
+  // أرشيف أو مجموعة → iframe مخفي بنفس CSS
+  var datasets = [];
+  if (sel.hasCurrent) datasets.push(collectData());
+  sel.archiveKeys.forEach(function(k) {
+    try { datasets.push(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
+  });
+
+  printDatasetsViaIframe(datasets);
+}
+
+function printDatasetsViaIframe(datasets) {
+  // اقرأ الـ CSS الكامل من الصفحة
+  var styles = '';
+  Array.from(document.styleSheets).forEach(function(ss) {
+    try {
+      Array.from(ss.cssRules || []).forEach(function(r){ styles += r.cssText + '\n'; });
+    } catch(e) {}
+  });
+  // إضافة الخطوط
+  styles += '@import url("https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap");';
+
+  var pagesHtml = datasets.map(function(data, idx) {
+    return '<div class="print-page"' + (idx > 0 ? ' style="page-break-before:always;"' : '') + '>' + buildReportHTML(data) + '</div>';
+  }).join('');
+
+  var iframeDoc = '<html><head><meta charset="utf-8"><style>'
+    + styles
+    + 'body{background:white!important;padding:0!important;margin:0!important;font-family:"DM Sans",sans-serif;font-size:8pt;}'
+    + '.no-print{display:none!important;} .toolbar{display:none!important;}'
+    + '.card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;width:100%!important;margin:0 0 0 0!important;padding:2px!important;}'
+    + '.proto-table{width:100%!important;font-size:7.5pt!important;border-collapse:collapse!important;}'
+    + '.proto-row{page-break-inside:avoid!important;}'
+    + '.proto-cell{padding:2px 4px!important;line-height:1.2!important;}'
+    + '.print-sig-area{display:block!important;margin-top:4px!important;}'
+    + '.progress-wrap,.autosave-bar,.add-zone,.overlay-base{display:none!important;}'
+    + '@page{size:A4 portrait;margin:5mm;}'
+    + '</style></head><body>' + pagesHtml + '</body></html>';
+
+  var iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:210mm;height:297mm;border:none;';
+  document.body.appendChild(iframe);
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(iframeDoc);
+  iframe.contentDocument.close();
+
+  iframe.onload = function() {
+    setTimeout(function() {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(function(){ iframe.remove(); }, 2000);
+    }, 600);
+  };
+}
+
+// بناء HTML التقرير من البيانات (نفس بنية mainCard)
+function buildReportHTML(data) {
+  var rows = data.rows || [];
+  var mitarb = data.mitarbeiter || '—';
+  var day = data.day || '';
+  var date = data.date || '—';
+  var proto = data.protokollNr || '—';
+
+  var rowsHtml = '';
+  rows.forEach(function(row, i) {
+    var kunde = (row.k && row.k !== '— Standort —') ? row.k : '—';
+    var notizen = (row.n || []).filter(function(n){ return n.ev && n.ev !== '— Ereignis —'; });
+    var isDangerRow = notizen.some(function(n){ return typeof DANGER_EVENTS !== 'undefined' && DANGER_EVENTS.indexOf(n.ev) >= 0; });
+    var notizHtml = notizen.length
+      ? '<ul class="notiz-list" style="margin:0;padding-left:12px;">'
+        + notizen.map(function(n){
+            var isDanger = typeof DANGER_EVENTS !== 'undefined' && DANGER_EVENTS.indexOf(n.ev) >= 0;
+            return '<li style="'+(isDanger?'color:#c0392b;font-weight:700;':'')+'font-size:7pt;">'
+              + (n.c > 1 ? '['+n.c+'×] ' : '') + (n.ev || '') + (n.ft ? ' – '+n.ft : '') + '</li>';
+          }).join('')
+        + '</ul>'
+      : '<span style="color:#bbb;font-size:7pt;">—</span>';
+
+    rowsHtml += '<tr class="proto-row' + (isDangerRow ? ' danger' : '') + '" style="background:'+(i%2===0?'#fafafa':'white')+';' + (isDangerRow?'background:#fff0f0;':'') + '">'
+      + '<td class="proto-cell cell-kunde" style="font-weight:700;font-size:8pt;padding:3px 5px;border:0.5px solid #e0e0e0;width:22%;vertical-align:top;">' + kunde + '</td>'
+      + '<td class="proto-cell" style="font-size:8pt;padding:3px 5px;border:0.5px solid #e0e0e0;width:10%;vertical-align:top;white-space:nowrap;">' + (row.b||'—') + '</td>'
+      + '<td class="proto-cell" style="font-size:8pt;padding:3px 5px;border:0.5px solid #e0e0e0;width:10%;vertical-align:top;white-space:nowrap;">' + (row.e||'—') + '</td>'
+      + '<td class="proto-cell" style="font-size:8pt;padding:3px 5px;border:0.5px solid #e0e0e0;width:58%;vertical-align:top;">' + notizHtml + '</td>'
+      + '</tr>';
+  });
+  if (!rowsHtml) rowsHtml = '<tr><td colspan="4" style="text-align:center;padding:10px;color:#aaa;font-size:8pt;">Keine Einträge</td></tr>';
+
+  // Unterschrift
+  var sig = localStorage.getItem('denis_signature') || '';
+  var sigHtml = sig
+    ? '<img src="'+sig+'" style="height:50px;max-width:150px;">'
+    : '<span style="font-size:9px;color:#aaa;">Keine Unterschrift</span>';
+
+  return '<div class="card" style="font-family:\'DM Sans\',sans-serif;">'
+    // Header
+    + '<div class="card-header" style="background:linear-gradient(135deg,#2d3f52,#1e2d3d);color:white;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-start;">'
+    +   '<div>'
+    +     '<div style="font-size:8pt;opacity:0.5;letter-spacing:1px;text-transform:uppercase;">Tagesbericht · Vorfallprotokoll</div>'
+    +     '<div style="font-family:\'Syne\',sans-serif;font-size:15pt;font-weight:800;margin-top:2px;">Denis <span style="color:#E8394A;">Protokoll</span></div>'
+    +   '</div>'
+    +   '<div style="text-align:right;">'
+    +     '<div style="font-size:9pt;font-weight:700;">'+mitarb+'</div>'
+    +     '<div style="font-size:8pt;opacity:0.7;">'+day+' '+date+'</div>'
+    +     '<div style="font-size:7pt;opacity:0.5;margin-top:2px;">Nr. '+proto+'</div>'
+    +   '</div>'
+    + '</div>'
+    // Tabelle
+    + '<table class="proto-table" style="width:100%;border-collapse:collapse;margin-top:4px;">'
+    +   '<thead><tr style="background:#f0f1f4;">'
+    +     '<th style="font-size:7pt;font-weight:700;padding:3px 5px;border:0.5px solid #ddd;text-align:left;">Kunde</th>'
+    +     '<th style="font-size:7pt;font-weight:700;padding:3px 5px;border:0.5px solid #ddd;text-align:left;">Beginn</th>'
+    +     '<th style="font-size:7pt;font-weight:700;padding:3px 5px;border:0.5px solid #ddd;text-align:left;">Ende</th>'
+    +     '<th style="font-size:7pt;font-weight:700;padding:3px 5px;border:0.5px solid #ddd;text-align:left;">Dienstnotiz</th>'
+    +   '</tr></thead>'
+    +   '<tbody>' + rowsHtml + '</tbody>'
+    + '</table>'
+    // Unterschrift
+    + '<div class="print-sig-area" style="display:block;margin-top:10px;border-top:1px solid #ddd;padding-top:10px;">'
+    +   '<div style="display:flex;gap:40px;">'
+    +     '<div style="flex:1;"><div style="min-height:50px;display:flex;align-items:flex-end;">'+sigHtml+'</div>'
+    +     '<div style="border-top:1px solid #333;margin-top:4px;padding-top:3px;font-size:9px;color:#555;">'+mitarb+'</div></div>'
+    +     '<div style="flex:1;"><div style="min-height:50px;"></div>'
+    +     '<div style="border-top:1px solid #333;margin-top:4px;padding-top:3px;font-size:9px;color:#555;">Vorgesetzter</div></div>'
+    +   '</div>'
+    + '</div>'
+    // Footer
+    + '<div style="margin-top:6px;padding-top:6px;border-top:1px solid #eee;display:flex;justify-content:space-between;">'
+    +   '<div style="font-size:7pt;color:#aaa;">Denis Protokoll · '+new Date().toLocaleString('de-DE')+'</div>'
+    +   '<div style="font-size:7pt;color:#aaa;">'+proto+'</div>'
+    + '</div>'
+    + '</div>';
+}
+
+// ── PDF mit gleicher Qualität ───────────────────────────────────
+function executePDF() {
+  var sel = getSelectedPrintData();
+  if (!sel.total) { showToast('Nichts ausgewählt', 'error'); return; }
+  closePrintSelect();
+
+  var datasets = [];
+  if (sel.hasCurrent) datasets.push(collectData());
+  sel.archiveKeys.forEach(function(k) {
+    try { datasets.push(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
+  });
+
   showPdfLoader(true);
   try {
     var lib = window.jspdf;
     if (!lib) { showToast('jsPDF lädt noch…', 'error'); showPdfLoader(false); return; }
-    var doc = new lib.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    var first = true;
-
-    function addDataToDoc(data) {
-      if (!first) doc.addPage();
-      first = false;
+    var doc = new lib.jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    datasets.forEach(function(data, idx) {
+      if (idx > 0) doc.addPage();
       buildPDFPage(doc, data);
-    }
-
-    if (hasCurrent) addDataToDoc(collectData());
-    archiveKeys.forEach(function(k) {
-      try { addDataToDoc(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
     });
-
-    var fileName = 'denis-protokoll-sammlung-' + new Date().toISOString().slice(0,10) + '.pdf';
-    doc.save(fileName);
-    showToast('📄 PDF (' + (hasCurrent ? 1 : 0) + (archiveKeys.length ? ' + ' + archiveKeys.length + ' Archiv' : '') + ') gespeichert!', 'success');
+    var label = sel.total === 1
+      ? 'denis-protokoll-' + (datasets[0].date || 'export')
+      : 'denis-protokoll-sammlung-' + new Date().toISOString().slice(0,10);
+    doc.save(label + '.pdf');
+    showToast('📄 PDF (' + sel.total + ' Bericht' + (sel.total>1?'e':'') + ') gespeichert!', 'success');
     playBeep && playBeep('success');
   } catch(e) { showToast('❌ ' + e.message, 'error'); }
   showPdfLoader(false);
 }
+
+// Alias für Rückwärtskompatibilität
+function executePrintSelected() { executePrint(); }
 
 // Hilfsfunktion: PDF aus beliebigen Daten bauen
 function buildPDFPage(doc, data) {
