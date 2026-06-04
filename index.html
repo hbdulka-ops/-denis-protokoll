@@ -300,13 +300,18 @@ body.app-ready::before{opacity:0.5;}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   html,body{background:white!important;padding:0!important;margin:0!important;width:100%!important;font-size:8pt!important;transform:none!important;}
   body::before{display:none!important;}
-  /* إخفاء كل شيء */
-  body > *{display:none!important;}
-  /* إظهار محتوى الطباعة فقط */
-  #printContent{display:block!important;position:static!important;width:100%!important;
-    max-width:100%!important;margin:0!important;padding:0!important;
-    left:0!important;top:0!important;transform:none!important;
-    background:white!important;color:black!important;}
+  /* إخفاء كل شيء ما عدا printContent */
+  body > *:not(#printContent){display:none!important;}
+  #printContent{
+    display:block!important;
+    position:fixed!important;
+    top:0!important;left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;height:auto!important;
+    background:white!important;color:black!important;
+    z-index:999999!important;
+    overflow:visible!important;
+    padding:0!important;margin:0!important;
+  }
   #printContent *{max-width:100%!important;box-sizing:border-box!important;}
   #printContent table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;}
   #printContent td,#printContent th{word-wrap:break-word!important;overflow-wrap:break-word!important;}
@@ -448,6 +453,10 @@ body.app-ready::before{opacity:0.5;}
         <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:#856404;margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
         <div id="snapshotInfo" style="font-size:11px;color:#856404;margin-bottom:8px;min-height:14px;"></div>
         <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">🔄 Letzte Sicherung wiederherstellen</button>
+      </div>
+      <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">📁 ARCHIV</div>
+        <button onclick="archiveCurrentShift(true);closeSettings();setTimeout(function(){openArchive();},300);" style="width:100%;background:linear-gradient(135deg,#3d5268,#4a6080);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">📁 Aktuelle Schicht archivieren</button>
       </div>
       <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
         <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
@@ -2375,15 +2384,19 @@ openSettings=function(){
 
 // ===== ARCHIVE SYSTEM =====
 
-function archiveCurrentShift(){
+function archiveCurrentShift(manual){
   try{
     var proto=localStorage.getItem('denis_protokoll');
     var log=localStorage.getItem('denis_checkin_log');
-    if(!proto&&!log)return;
+    // اجمع البيانات من الفورم الحالي إذا كانت فارغة
+    if(!proto)try{var data2=collectData();if(data2&&data2.rows&&data2.rows.length)proto=JSON.stringify(data2);}catch(e){}
+    if(!proto&&!log){if(manual)showToast('Keine Daten zum Archivieren','error');return;}
     var data=proto?JSON.parse(proto):{};
+    // أضف بيانات من الفورم الحالي
+    if(!data.rows||!data.rows.length){try{var fd=collectData();if(fd)data=fd;}catch(e){}}
     var rows=data.rows||[];
     var validRows=rows.filter(function(r){return r.k&&r.k!=='— Standort —';});
-    if(!validRows.length)return;
+    if(!validRows.length){if(manual)showToast('Keine Einträge zum Archivieren','error');return;}
     var now=new Date();
     var key='arc_'+now.getFullYear()+'_'+String(now.getMonth()+1).padStart(2,'0')+'_'+String(now.getDate()).padStart(2,'0')+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
     var archiveData={
@@ -2558,15 +2571,16 @@ function buildPrintHTML(dataArr){
 
 function doPrint(dataArr){
   var el=document.getElementById('printContent');
+  if(!el){el=document.createElement('div');el.id='printContent';document.body.appendChild(el);}
   el.innerHTML=buildPrintHTML(dataArr);
-  el.style.display='block';
+  el.style.cssText='display:block;position:fixed;top:0;left:0;width:100%;height:auto;background:white;z-index:9999999;';
   setTimeout(function(){
     window.print();
     setTimeout(function(){
       el.style.display='none';
       el.innerHTML='';
-    },1000);
-  },200);
+    },1500);
+  },350);
 }
 
 function arcPrintOne(key){
