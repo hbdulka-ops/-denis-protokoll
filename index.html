@@ -504,7 +504,11 @@ body.app-ready::before{opacity:0.5;}
       <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;" id="ciGreetDate">—</div>
       <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:white;margin-top:2px;" id="ciGreetMsg">Guten Abend</div>
     </div>
-    <div style="text-align:right;"><div class="ci-clock" id="ciClock">00:00:00</div><div class="ci-date" id="ciDate">--</div></div>
+    <div style="text-align:right;">
+        <div class="ci-clock" id="ciClock">00:00:00</div>
+        <div class="ci-date" id="ciDate">--</div>
+        <div id="shiftCountdown" style="display:none;font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:0.5px;margin-top:2px;transition:color 0.3s;"></div>
+      </div>
   </div>
   <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 16px;background:rgba(0,0,0,0.2);">
     <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#4cba6b;" id="ciCountIn">0</div><div style="font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);">Eingang</div></div>
@@ -809,6 +813,9 @@ document.addEventListener('keydown',function(e){
 
 // ===== INIT =====
 function initApp(){
+  // استعادة حالة الوردية
+  var existingLog=localStorage.getItem('denis_checkin_log');
+  if(existingLog){try{var l=JSON.parse(existingLog);if(l&&l.length>0)shiftStarted=true;}catch(e){}}
   if(localStorage.getItem('denis_dark')==='1')document.body.classList.add('dark-mode');
   if(!soundEnabled)document.getElementById('soundBtn').textContent='🔕';
   var sd=getShiftDate(),now=new Date();
@@ -854,13 +861,69 @@ function getShiftTimes(){
 }
 function updateClock(){
   var now=new Date();var st=getShiftTimes();
-  var total=st.se>st.ss?st.se-st.ss:(24*60-st.ss)+st.se;
   var nm=now.getHours()*60+now.getMinutes();
-  var el=nm>=st.ss?nm-st.ss:nm<=st.se?(24*60-st.ss)+nm:0;
-  var pct=Math.min(100,Math.round((el/total)*100));
-  var fill=document.getElementById('progressFill');if(fill)fill.style.width=pct+'%';
-  var pctEl=document.getElementById('progressPct');if(pctEl)pctEl.textContent=pct+'%';
-  var lbl=document.querySelector('.progress-label');if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
+  var fill=document.getElementById('progressFill');
+  var pctEl=document.getElementById('progressPct');
+  var lbl=document.querySelector('.progress-label');
+
+  if(!shiftStarted){
+    // قبل أول زيارة: شريط مجمد عند 0%
+    if(fill){fill.style.width='0%';fill.style.background='rgba(255,255,255,0.15)';}
+    if(pctEl){pctEl.textContent='—';}
+    if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
+  } else {
+    // بعد أول زيارة: احسب من وقت أول زيارة
+    var firstVisitMin=getFirstVisitMin();
+    var startMin = firstVisitMin>=0 ? firstVisitMin : st.ss;
+    // إجمالي من أول زيارة حتى نهاية الوردية
+    var total=st.se>startMin ? st.se-startMin : (24*60-startMin)+st.se;
+    // المنقضي من أول زيارة حتى الآن
+    var elapsed=nm>=startMin ? nm-startMin : (24*60-startMin)+nm;
+    var pct=Math.min(100,Math.round((elapsed/total)*100));
+    if(fill){
+      fill.style.width=pct+'%';
+      // لون يتغير حسب التقدم
+      if(pct>=90)fill.style.background='var(--red,#E8394A)';
+      else if(pct>=70)fill.style.background='var(--orange,#f5a623)';
+      else fill.style.background='';
+    }
+    if(pctEl)pctEl.textContent=pct+'%';
+    if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
+  }
+  updateShiftCountdown(now, st);
+}
+
+function getFirstVisitMin(){
+  try{
+    var log=ciGetLog();
+    if(!log||!log.length)return -1;
+    // ابحث عن أول إدخال من نوع 'in'
+    for(var i=0;i<log.length;i++){
+      if(log[i].type==='in'&&log[i].time){
+        var parts=log[i].time.split(':');
+        if(parts.length>=2)return parseInt(parts[0])*60+parseInt(parts[1]);
+      }
+    }
+  }catch(e){}
+  return -1;
+}
+
+function updateShiftCountdown(now, st){
+  var el=document.getElementById('shiftCountdown');
+  if(!el)return;
+  // أظهر فقط إذا بدأت الوردية (أول زيارة)
+  if(!shiftStarted)return;
+  el.style.display='block';
+  var nm=now.getHours()*60+now.getMinutes();
+  // حساب الوقت المتبقي حتى نهاية الوردية
+  var rem=st.se>=nm ? st.se-nm : (24*60-nm)+st.se;
+  var h=Math.floor(rem/60);
+  var m=rem%60;
+  var txt=h>0 ? h+'h '+p2(m)+'m' : m+'min';
+  // تلوين حسب الوقت المتبقي
+  if(rem<=15){el.style.color='#E8394A';el.textContent='⏰ '+txt+' noch';}
+  else if(rem<=30){el.style.color='#f5a623';el.textContent='⏱ '+txt+' noch';}
+  else{el.style.color='rgba(255,255,255,0.45)';el.textContent='⏱ '+txt+' noch';}
 }
 
 // ===== SHIFT KEY =====
@@ -1620,6 +1683,12 @@ function updateQuickBar(){
 function ciIn(){
   if(!ciSelected)return;var time=nowHM();
   localStorage.setItem('denis_last_kunde',ciSelected);
+  // تفعيل العداد عند أول زيارة
+  if(!shiftStarted){
+    shiftStarted=true;
+    var cdEl=document.getElementById('shiftCountdown');
+    if(cdEl)cdEl.style.display='block';
+  }
   var log=ciGetLog();
   var snapshot=JSON.stringify(log);
   var rowsBefore=document.getElementById('rowsWrap').innerHTML;
@@ -2294,6 +2363,7 @@ window.addEventListener('beforeunload',function(){try{saveData();}catch(e){}});
 
 // ===== تنبيه نهاية الوردية =====
 var shiftEndAlertFired = false;
+var shiftStarted = false; // يُفعَّل عند أول زيارة
 function checkShiftEndAlert(){
   try{
     var endStr = localStorage.getItem('denis_shift_end');
