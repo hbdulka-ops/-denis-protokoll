@@ -298,32 +298,11 @@ body.app-ready::before{opacity:0.5;}
 .print-sig-area{display:none;margin-top:20px;border-top:1px solid #ddd;padding-top:16px;}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  html,body{background:white!important;padding:0!important;margin:0!important;width:100%!important;font-size:8pt!important;transform:none!important;}
+  html,body{background:white!important;margin:0!important;padding:0!important;width:100%!important;font-size:8pt!important;}
   body::before{display:none!important;}
-  /* طباعة أرشيف: إخفاء كل شيء وإظهار printContent فقط */
-  body.printing-archive > *:not(#printContent){display:none!important;}
-  body.printing-archive #printContent{
-    display:block!important;
-    position:static!important;
-    width:100%!important;
-    background:white!important;color:black!important;
-    padding:0!important;margin:0!important;
-  }
-  /* طباعة عادية: إخفاء العناصر غير المطلوبة */
-  body:not(.printing-archive) #pinScreen,
-  body:not(.printing-archive) #splashScreen,
-  body:not(.printing-archive) #archivePanel,
-  body:not(.printing-archive) #archiveBg,
-  body:not(.printing-archive) #arcPrev,
-  body:not(.printing-archive) .toast-wrap,
-  body:not(.printing-archive) .pdf-loading,
-  body:not(.printing-archive) #printContent{display:none!important;}
-  #printContent *{max-width:100%!important;box-sizing:border-box!important;}
-  #printContent table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;}
-  #printContent td,#printContent th{word-wrap:break-word!important;overflow-wrap:break-word!important;}
   .no-print,.toolbar,.add-zone,.time-now-btn,.bottom-actions,.kunde-back,
-  .progress-wrap,.autosave-bar,
-  .toast-wrap,.pdf-loading,.report-overlay,.overlay-base,#pinScreen,#homeScreen,#checkinScreen,#fabCheckin{display:none!important;}
+  .progress-wrap,.autosave-bar,.toast-wrap,.pdf-loading,
+  #pinScreen,#settingsOverlay,#sigOverlay,#dashOverlay,#offlineBanner{display:none!important;}
   .card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;width:100%!important;margin:0!important;padding:2px!important;}
   .proto-table{width:100%!important;font-size:7.5pt!important;border-collapse:collapse!important;}
   .proto-row{page-break-inside:avoid!important;}
@@ -339,18 +318,12 @@ body.app-ready::before{opacity:0.5;}
   @page{size:A4 portrait;margin:5mm;}
 }
 </style>
-<style>
-/* منع وميض الشاشات عند التحميل */
-#checkinScreen{visibility:hidden;}
-body.app-ready #checkinScreen{visibility:visible;}
-</style>
 </head>
 <body>
 <div id="offlineBanner" style="display:none;opacity:0;position:fixed;top:0;left:0;right:0;z-index:9999999;background:linear-gradient(90deg,#e8394a,#c0392b);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:10px 16px;align-items:center;justify-content:center;gap:8px;transition:opacity 0.5s;box-shadow:0 2px 12px rgba(0,0,0,0.4);">
   <span style="font-size:16px;">📵</span>
   <span>Offline-Modus — Alle Daten lokal gespeichert</span>
 </div>
-
 
 <!-- SPLASH -->
 <div id="splashScreen" style="position:fixed;inset:0;z-index:999999;background:#0f1923;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:opacity 0.5s ease;">
@@ -439,13 +412,6 @@ body.app-ready #checkinScreen{visibility:visible;}
         </div>
       </div>
       <div class="settings-section">
-        <div class="settings-section-title">👤 Mitarbeiter</div>
-        <div class="settings-row">
-          <div><div class="settings-row-label">Name</div></div>
-          <input type="text" class="settings-input" id="settingsMitarbeiter" placeholder="Dein Name…" style="text-align:left;">
-        </div>
-      </div>
-      <div class="settings-section">
         <div class="settings-section-title">Schichtzeiten</div>
         <div class="settings-row"><div><div class="settings-row-label">Schichtbeginn</div></div><input type="time" class="settings-input" id="settingsShiftStart" value="19:45"></div>
         <div class="settings-row"><div><div class="settings-row-label">Schichtende</div></div><input type="time" class="settings-input" id="settingsShiftEnd" value="07:00"></div>
@@ -460,27 +426,23 @@ body.app-ready #checkinScreen{visibility:visible;}
           <button class="settings-btn settings-btn-red" onclick="settingsAddKunde()">+</button>
         </div>
       </div>
-      <button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;"><div style="margin-bottom:10px;padding:12px;background:#fff3cd;border-radius:12px;border:1.5px solid #ffc107;">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:#856404;margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
-        <div id="snapshotInfo" style="font-size:11px;color:#856404;margin-bottom:8px;min-height:14px;"></div>
-        <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">🔄 Letzte Sicherung wiederherstellen</button>
-      </div>
       <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">📁 ARCHIV</div>
-        <button onclick="archiveCurrentShift(true);closeSettings();setTimeout(function(){openArchive();},300);" style="width:100%;background:linear-gradient(135deg,#3d5268,#4a6080);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">📁 Aktuelle Schicht archivieren</button>
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
+      <div id="snapshotInfo" style="font-size:11px;color:var(--muted);margin-bottom:8px;min-height:14px;"></div>
+      <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;margin-bottom:6px;">🔄 Letzte Sicherung wiederherstellen</button>
+    </div>
+    <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
+        <label style="flex:1;display:block;">
+          <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+          <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
+        </label>
       </div>
-      <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
-          <label style="flex:1;display:block;">
-            <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
-            <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
-          </label>
-        </div>
-        <div id="importStatus" style="margin-top:5px;font-size:11px;color:var(--muted);text-align:center;min-height:14px;"></div>
-      </div>
-      💾 Einstellungen speichern</button>
+      <div id="importStatus" style="margin-top:5px;font-size:11px;color:var(--muted);text-align:center;min-height:14px;"></div>
+    </div>
+    <button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Einstellungen speichern</button>
     </div>
   </div>
 </div>
@@ -530,7 +492,7 @@ body.app-ready #checkinScreen{visibility:visible;}
 </div>
 
 <!-- CHECKIN SCREEN -->
-<div id="checkinScreen" style="display:none;">
+<div id="checkinScreen">
   <div class="ci-alert-banner" id="ciAlertBanner">
     <span style="font-size:18px;">⚠️</span>
     <span class="ci-alert-text" id="ciAlertText">Vergessen auszuchecken?</span>
@@ -591,7 +553,6 @@ body.app-ready #checkinScreen{visibility:visible;}
     <button class="btn btn-ghost" onclick="openSettings()">⚙️</button>
     <button class="btn btn-ghost" onclick="openSigModal()">✍️</button>
     <button class="btn btn-ghost" onclick="openDashboard()">📊</button>
-    <button class="btn btn-ghost" onclick="openArchive()" title="Archiv">📁</button>
     
     <button class="btn btn-ghost" onclick="toggleDark()">🌙</button>
     <button class="btn btn-ghost" onclick="toggleSound()" id="soundBtn">🔔</button>
@@ -681,6 +642,13 @@ body.app-ready #checkinScreen{visibility:visible;}
 </div>
 </div>
 
+
+<!-- ARCHIVE -->
+
+
+
+<div id="printContent" style="display:none;"></div>
+</body>
 <script>
 'use strict';
 // ===== CONSTANTS =====
@@ -825,7 +793,6 @@ function unlockApp(){
   document.body.classList.add('app-ready');
   document.getElementById('pinScreen').style.display='none';
   document.getElementById('appContent').style.display='block';
-  var ci=document.getElementById('checkinScreen');if(ci)ci.style.display='block';
   initApp();
   setTimeout(function(){showCheckin();},300);
 }
@@ -837,7 +804,7 @@ document.addEventListener('keydown',function(e){
     return;
   }
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();manualSave();}
-  if(e.key==='Escape'){closeReportModal();closeSigModal();closeDashboard();closeSettings();}
+  if(e.key==='Escape'){closeReportModal();closeSigModal();closeDashboard();closeArchive();closeSettings();}
 });
 
 // ===== INIT =====
@@ -902,17 +869,7 @@ function checkNewShift(){
   try{
     var ck=getShiftKey(),lk=localStorage.getItem('denis_last_shift_key');
     if(lk&&lk!==ck){
-      
-      // حفظ الوردية في الأرشيف قبل المسح
-      try{
-        var snap=localStorage.getItem('denis_protokoll');
-        var snapLog=localStorage.getItem('denis_checkin_log');
-        if(snap)localStorage.setItem('denis_snapshot_proto',snap);
-        if(snapLog)localStorage.setItem('denis_snapshot_log',snapLog);
-        localStorage.setItem('denis_snapshot_time',new Date().toISOString());
-        // أرشفة كاملة
-        archiveCurrentShift();
-      }catch(e){}
+      try{var od=localStorage.getItem('denis_protokoll');if(od){var p=JSON.parse(od);if(p.rows&&p.rows.some(function(r){return r.k&&r.k!=='— Standort —';}))localStorage.setItem('denis_archive_'+Date.now(),od);}}catch(e){}
       localStorage.removeItem('denis_protokoll');localStorage.removeItem('denis_checkin_log');
       localStorage.setItem('denis_last_shift_key',ck);return true;
     }
@@ -1098,7 +1055,7 @@ function collectData(){
   });
   return data;
 }
-
+var autoArchiveTimer=null;
 function saveData(){
   try{
     var data=collectData();
@@ -1107,16 +1064,44 @@ function saveData(){
     var now=new Date(),ts=p2(now.getHours())+':'+p2(now.getMinutes())+':'+p2(now.getSeconds());
     if(bar)bar.className='autosave-bar no-print';if(txt)txt.textContent='💾 Gespeichert um '+ts;if(chip)chip.textContent='💾 '+ts;
     playBeep('save');
-
+    clearTimeout(autoArchiveTimer);
+    autoArchiveTimer=setTimeout(function(){
+      try{
+        var dateEl=document.getElementById('dateInput');
+        var protoDate=dateEl?dateEl.value:'';
+        var refDate=new Date();
+        if(protoDate){var parts=protoDate.split('.');if(parts.length===3)refDate=new Date(parts[2],parts[1]-1,parts[0]);}
+        var dk=refDate.getFullYear()+'_'+String(refDate.getMonth()+1).padStart(2,'0')+'_'+String(refDate.getDate()).padStart(2,'0');
+        data.savedAt=new Date().toISOString();
+        localStorage.setItem('arc_'+dk,JSON.stringify(data));
+      }catch(e){}
+    },2000);
   }catch(e){var bar2=document.getElementById('autosaveBar');if(bar2)bar2.className='autosave-bar error no-print';}
 }
 
 
-
-
-
-
-
+function archivePrint(d){
+  var ov=document.getElementById('arcPrev');if(ov)ov.style.display='none';
+  var orig=localStorage.getItem('denis_protokoll');
+  localStorage.setItem('denis_protokoll',JSON.stringify(d));
+  document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+  loadData();updateSummary();
+  setTimeout(function(){window.print();setTimeout(function(){
+    if(ov)ov.style.display='flex';
+    if(orig)localStorage.setItem('denis_protokoll',orig);
+    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
+  },1000);},300);
+}
+function archivePDF(d){
+  var orig=localStorage.getItem('denis_protokoll');
+  localStorage.setItem('denis_protokoll',JSON.stringify(d));
+  document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+  loadData();updateSummary();
+  setTimeout(function(){generatePDFAndSave();setTimeout(function(){
+    if(orig)localStorage.setItem('denis_protokoll',orig);
+    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
+  },1000);},300);
+}
 function manualSave(){saveData();showToast('💾 Gespeichert!','success');}
 function loadData(){
   try{
@@ -1152,7 +1137,7 @@ function sortRowsByTime(){
   rows.forEach(function(r){wrap.appendChild(r);});showToast('Zeilen sortiert','success');
 }
 
-
+// ===== ARCHIVE =====
 function buildWaText(data,lang){
   var t='';
   if(lang==='en')t='🛡 *Denis Security Report*\n📋 Nr: '+(data.protokollNr||'—')+'\n👤 '+(data.mitarbeiter||'—')+'\n📅 '+(data.day||'')+', '+(data.date||'')+'\n\n';
@@ -1338,7 +1323,6 @@ function closeDashboard(){document.getElementById('dashOverlay').classList.remov
 
 // ===== SETTINGS =====
 function openSettings(){
-  var mitEl=document.getElementById('settingsMitarbeiter');if(mitEl)mitEl.value=localStorage.getItem('denis_mitarbeiter')||'';
   document.getElementById('settingsShiftStart').value=localStorage.getItem('denis_shift_start')||'19:45';
   document.getElementById('settingsShiftEnd').value=localStorage.getItem('denis_shift_end')||'07:00';
   document.getElementById('settingsWeekStart').value=localStorage.getItem('denis_week_start')||'1';
@@ -1351,8 +1335,6 @@ function saveSettings(){
   localStorage.setItem('denis_shift_end',document.getElementById('settingsShiftEnd').value||'07:00');
   localStorage.setItem('denis_week_start',document.getElementById('settingsWeekStart').value||'1');
   localStorage.setItem('denis_alarm_min',document.getElementById('settingsAlarmMin').value||'120');
-  var mit=document.getElementById('settingsMitarbeiter');
-  if(mit)localStorage.setItem('denis_mitarbeiter',mit.value.trim());
   closeSettings();showToast('Gespeichert','success');playBeep('success');
 }
 function startPinChange(){var a=document.getElementById('pinChangeArea');a.style.display=a.style.display==='none'?'block':'none';settingsPinEntry='';settingsPinStep='new';settingsPinFirst='';settingsUpdateDots();document.getElementById('pinChangeLabel').textContent='Neuen PIN eingeben:';}
@@ -1935,17 +1917,7 @@ function ciSyncTimeToProtocol(kunde,type,newTime,oldTime){
 }
 function ciToggleType(idx){var log=ciGetLog();log[idx].type=log[idx].type==='in'?'out':'in';ciSaveLog(log);ciRenderLog();updateQuickBar();updateDayCounter();showToast(log[idx].type==='in'?'✅ Eingang':'🚪 Ausgang','info');}
 function ciDeleteEntry(idx){var log=ciGetLog();log.splice(idx,1);ciSaveLog(log);ciRenderLog();updateDayCounter();updateQuickBar();ciShowToast('🗑 Gelöscht');}
-function ciClearLog(){
-  showConfirmDialog('🗑 Alle Einträge löschen?',function(){
-    // snapshot قبل الحذف
-    var snap=localStorage.getItem('denis_checkin_log');
-    if(snap)localStorage.setItem('denis_snapshot_log',snap);
-    localStorage.setItem('denis_snapshot_time',new Date().toISOString());
-    localStorage.removeItem('denis_checkin_log');
-    ciRenderLog();updateDayCounter();updateQuickBar();
-    showToast('🗑 Gelöscht — <span onclick="restoreSnapshot()" style="text-decoration:underline;cursor:pointer;color:#fff;">Wiederherstellen</span>');
-  });
-}
+function ciClearLog(){showConfirmDialog('🗑 Alle Einträge löschen?',function(){localStorage.removeItem('denis_checkin_log');ciRenderLog();updateDayCounter();updateQuickBar();});}
 function ciFinish(){
   var log=ciGetLog();var rows=document.querySelectorAll('.proto-row');
   var ks=new Set();rows.forEach(function(row){var id=row.id.replace('row-','');var ksel=document.getElementById('ksel-'+id);var kcust=document.getElementById('kcust-'+id);var isC=kcust&&kcust.style.display!=='none';var k=isC?kcust.value:(ksel?ksel.value:'');if(k&&k!=='— Standort —')ks.add(k);});
@@ -2393,304 +2365,5 @@ openSettings=function(){
   setTimeout(updateSnapshotInfo,100);
 };
 
-
-// ===== ARCHIVE SYSTEM =====
-
-function archiveCurrentShift(manual){
-  try{
-    var proto=localStorage.getItem('denis_protokoll');
-    var log=localStorage.getItem('denis_checkin_log');
-    // اجمع البيانات من الفورم الحالي إذا كانت فارغة
-    if(!proto)try{var data2=collectData();if(data2&&data2.rows&&data2.rows.length)proto=JSON.stringify(data2);}catch(e){}
-    if(!proto&&!log){if(manual)showToast('Keine Daten zum Archivieren','error');return;}
-    var data=proto?JSON.parse(proto):{};
-    // أضف بيانات من الفورم الحالي
-    if(!data.rows||!data.rows.length){try{var fd=collectData();if(fd)data=fd;}catch(e){}}
-    var rows=data.rows||[];
-    var validRows=rows.filter(function(r){return r.k&&r.k!=='— Standort —';});
-    if(!validRows.length){if(manual)showToast('Keine Einträge zum Archivieren','error');return;}
-    var now=new Date();
-    var key='arc_'+now.getFullYear()+'_'+String(now.getMonth()+1).padStart(2,'0')+'_'+String(now.getDate()).padStart(2,'0')+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
-    var archiveData={
-      key:key,
-      savedAt:now.toISOString(),
-      day:data.day||'',
-      date:data.date||'',
-      mitarbeiter:localStorage.getItem('denis_mitarbeiter')||data.mitarbeiter||'',
-      shiftStart:localStorage.getItem('denis_shift_start')||'',
-      shiftEnd:localStorage.getItem('denis_shift_end')||'',
-      rows:validRows,
-      checkinLog:log?JSON.parse(log):[]
-    };
-    localStorage.setItem(key,JSON.stringify(archiveData));
-  }catch(e){}
-}
-
-function openArchive(){
-  renderArchiveList('');
-  document.getElementById('archiveSearch').value='';
-  document.getElementById('arcSelAll').checked=false;
-  document.getElementById('archivePanel').style.transform='translateX(0)';
-  document.getElementById('archiveBg').style.display='block';
-}
-
-function closeArchive(){
-  document.getElementById('archivePanel').style.transform='translateX(-100%)';
-  document.getElementById('archiveBg').style.display='none';
-}
-
-function renderArchiveList(query){
-  var list=document.getElementById('archiveList');
-  list.innerHTML='';
-  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');}).sort().reverse();
-  // إحصاء
-  var statsEl=document.getElementById('archiveStats');
-  var totalRows=0;
-  keys.forEach(function(k){try{var d=JSON.parse(localStorage.getItem(k));totalRows+=(d.rows||[]).length;}catch(e){}});
-  if(statsEl)statsEl.textContent=keys.length+' Schichten · '+totalRows+' Einträge';
-  if(!keys.length){
-    list.innerHTML='<div style="text-align:center;padding:40px 16px;"><div style="font-size:32px;margin-bottom:8px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:12px;">Kein Archiv</div></div>';
-    return;
-  }
-  var q=(query||'').toLowerCase().trim();
-  var filtered=keys.filter(function(k){
-    if(!q)return true;
-    try{
-      var d=JSON.parse(localStorage.getItem(k));
-      var locs=(d.rows||[]).map(function(r){return r.k||'';}).join(' ').toLowerCase();
-      return((d.day||'')+(d.date||'')).toLowerCase().indexOf(q)>=0||locs.indexOf(q)>=0||(d.mitarbeiter||'').toLowerCase().indexOf(q)>=0;
-    }catch(e){return false;}
-  });
-  if(!filtered.length){
-    list.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:30px;font-size:12px;">Keine Ergebnisse</div>';
-    return;
-  }
-  filtered.forEach(function(key){
-    try{
-      var d=JSON.parse(localStorage.getItem(key));if(!d)return;
-      var rowCount=(d.rows||[]).length;
-      var locs=[...new Set((d.rows||[]).map(function(r){return r.k;}).filter(Boolean))].slice(0,3).join(', ');
-      var savedAt=d.savedAt?new Date(d.savedAt).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'';
-      var accent=rowCount>10?'#E8394A':rowCount>5?'#f5a623':'#4cba6b';
-      var card=document.createElement('div');
-      card.style.cssText='background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:11px;overflow:hidden;';
-      card.innerHTML=
-        '<div style="display:flex;align-items:stretch;">'+
-          '<label style="padding:12px 4px 12px 10px;display:flex;align-items:center;cursor:pointer;" onclick="event.stopPropagation()">'+
-            '<input type="checkbox" class="arcSel" data-key="'+key+'" onchange="arcUpdateSelBtn()" style="width:15px;height:15px;accent-color:#4cba6b;cursor:pointer;">'+
-          '</label>'+
-          '<div class="arc-body" style="flex:1;padding:10px 10px 10px 6px;cursor:pointer;">'+
-            '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">'+
-              '<div style="font-family:Syne,sans-serif;font-size:13px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
-              '<span style="background:'+accent+'22;color:'+accent+';border:1px solid '+accent+'44;font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;">'+rowCount+'×</span>'+
-            '</div>'+
-            (locs?'<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:3px;">📍 '+locs+'</div>':'')+
-            '<div style="font-size:10px;color:rgba(255,255,255,0.2);">'+(d.mitarbeiter?'👤 '+d.mitarbeiter+' · ':'')+( savedAt?'💾 '+savedAt:'')+'</div>'+
-          '</div>'+
-        '</div>'+
-        '<div style="display:flex;border-top:1px solid rgba(255,255,255,0.06);">'+
-          '<button class="arc-print" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(232,57,74,0.85);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.06);">🖨 Drucken</button>'+
-          '<button class="arc-del" style="padding:7px 12px;border:none;background:transparent;color:rgba(232,57,74,0.35);font-size:13px;cursor:pointer;">🗑</button>'+
-        '</div>';
-      // event listeners
-      card.querySelector('.arc-body').addEventListener('click',function(){arcPreview(key);});
-      card.querySelector('.arc-print').addEventListener('click',function(){arcPrintOne(key);});
-      card.querySelector('.arc-del').addEventListener('click',function(){arcDeleteOne(key);});
-      list.appendChild(card);
-    }catch(e){}
-  });
-}
-
-function filterArchive(q){renderArchiveList(q);}
-
-function arcToggleAll(checked){
-  document.querySelectorAll('.arcSel').forEach(function(cb){cb.checked=checked;});
-  arcUpdateSelBtn();
-}
-
-function arcUpdateSelBtn(){
-  var all=document.querySelectorAll('.arcSel');
-  var checked=document.querySelectorAll('.arcSel:checked');
-  var selAll=document.getElementById('arcSelAll');
-  if(selAll)selAll.checked=checked.length===all.length&&all.length>0;
-  var btn=document.getElementById('arcPrintSelBtn');
-  if(btn){
-    if(checked.length>0){btn.style.display='block';btn.textContent='🖨 ('+checked.length+')';}
-    else{btn.style.display='none';}
-  }
-}
-
-function arcDeleteOne(key){
-  showConfirmDialog('Schicht löschen?',function(){
-    localStorage.removeItem(key);
-    renderArchiveList(document.getElementById('archiveSearch').value||'');
-    showToast('🗑 Gelöscht');
-  });
-}
-
-// ===== PRINT SYSTEM =====
-
-function buildPrintHTML(dataArr){
-  var html='<style>'+
-    'body{font-family:"DM Sans",Arial,sans-serif;margin:0;padding:0;background:white;color:#111;}'+
-    '.rep{max-width:100%;padding:12px;}'+
-    '.rep-hdr{text-align:center;border-bottom:2px solid #1a2535;padding-bottom:10px;margin-bottom:14px;}'+
-    '.rep-hdr h1{font-size:16pt;font-weight:800;color:#1a2535;margin:0 0 4px;}'+
-    '.rep-hdr p{font-size:10pt;color:#555;margin:0;}'+
-    'table{width:100%;border-collapse:collapse;font-size:9pt;}'+
-    'thead tr{background:#1a2535;color:white;}'+
-    'th{padding:6px 8px;text-align:left;font-size:8pt;}'+
-    'tbody tr:nth-child(even){background:#f5f7fa;}'+
-    'td{padding:5px 8px;border-bottom:1px solid #eee;vertical-align:top;}'+
-    '.page-break{page-break-before:always;}'+
-    '@page{size:A4 portrait;margin:8mm;}'+
-    '</style>';
-  dataArr.forEach(function(d,di){
-    if(di>0)html+='<div class="page-break"></div>';
-    var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-    html+='<div class="rep">';
-    html+='<div class="rep-hdr">';
-    html+='<h1>SICHERHEITSDIENST PROTOKOLL</h1>';
-    html+='<p>'+(d.day||'')+' '+(d.date||'')+(d.mitarbeiter?' &nbsp;·&nbsp; 👤 '+d.mitarbeiter:'')+
-          (d.shiftStart?' &nbsp;·&nbsp; '+d.shiftStart+' – '+d.shiftEnd:'')+'</p>';
-    html+='</div>';
-    if(!rows.length){html+='<p style="color:#999;text-align:center;">Keine Einträge</p>';}
-    else{
-      html+='<table><thead><tr>'+
-        '<th style="width:24px;">#</th>'+
-        '<th>Standort</th>'+
-        '<th style="width:44px;">Von</th>'+
-        '<th style="width:44px;">Bis</th>'+
-        '<th>Ereignisse</th>'+
-        '</tr></thead><tbody>';
-      rows.forEach(function(r,ri){
-        var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';}).map(function(n){return(n.c>1?n.c+'× ':'')+n.ev;}).join(', ')||'—';
-        html+='<tr>'+
-          '<td style="color:#aaa;">'+(ri+1)+'</td>'+
-          '<td><strong>'+r.k+'</strong></td>'+
-          '<td>'+(r.b||'—')+'</td>'+
-          '<td>'+(r.e||'—')+'</td>'+
-          '<td style="color:#444;">'+evts+'</td>'+
-          '</tr>';
-      });
-      html+='</tbody></table>';
-      html+='<p style="font-size:8pt;color:#aaa;text-align:right;margin-top:6px;">'+rows.length+' Einträge · Gedruckt: '+new Date().toLocaleString('de-DE')+'</p>';
-    }
-    html+='</div>';
-  });
-  return html;
-}
-
-function doPrint(dataArr){
-  var el=document.getElementById('printContent');
-  if(!el){el=document.createElement('div');el.id='printContent';document.body.appendChild(el);}
-  el.innerHTML=buildPrintHTML(dataArr);
-  el.style.cssText='display:block;';
-  document.body.classList.add('printing-archive');
-  setTimeout(function(){
-    window.print();
-    setTimeout(function(){
-      document.body.classList.remove('printing-archive');
-      el.style.display='none';
-      el.innerHTML='';
-    },1500);
-  },350);
-}
-
-function arcPrintOne(key){
-  try{var d=JSON.parse(localStorage.getItem(key));doPrint([d]);}catch(e){}
-}
-
-function archivePrintSelected(){
-  var checked=Array.from(document.querySelectorAll('.arcSel:checked'));
-  if(!checked.length){showToast('Keine Auswahl','error');return;}
-  var arr=checked.map(function(cb){try{return JSON.parse(localStorage.getItem(cb.dataset.key));}catch(e){return null;}}).filter(Boolean);
-  if(arr.length===1){doPrint(arr);}
-  else{showConfirmDialog(arr.length+' Schichten drucken?',function(){doPrint(arr);});}
-}
-
-function archivePrintAll(){
-  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');}).sort();
-  if(!keys.length){showToast('Kein Archiv','error');return;}
-  var arr=keys.map(function(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}).filter(Boolean);
-  showConfirmDialog('Alle '+arr.length+' Schichten drucken?',function(){doPrint(arr);});
-}
-
-function arcPreview(key){
-  try{
-    var d=JSON.parse(localStorage.getItem(key));
-    var old=document.getElementById('arcPrev');if(old)old.remove();
-    var ov=document.createElement('div');
-    ov.id='arcPrev';
-    ov.style.cssText='position:fixed;inset:0;z-index:9999995;background:#0f1923;overflow-y:auto;font-family:"DM Sans",sans-serif;';
-    var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-    var html='<div style="background:#1e2d3d;padding:44px 16px 14px;position:sticky;top:0;z-index:1;">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
-    html+='<div><div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>';
-    html+=(d.mitarbeiter?'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;">👤 '+d.mitarbeiter+'</div>':'');
-    html+='</div>';
-    html+='<div style="display:flex;gap:6px;">';
-    html+='<button onclick="arcPrintOne(\''+key+'\')" style="padding:7px 11px;border-radius:9px;border:none;background:#E8394A;color:white;font-size:11px;font-weight:700;cursor:pointer;">🖨</button>';
-    html+='<button onclick="document.getElementById(\'arcPrev\').remove()" style="padding:7px 11px;border-radius:9px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.7);font-size:11px;cursor:pointer;">✕</button>';
-    html+='</div></div>';
-    html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;">';
-    html+='<div style="background:rgba(61,82,104,0.5);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:white;">'+rows.length+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">BESUCHE</div></div>';
-    var evtCount=rows.reduce(function(s,r){return s+(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';}).length;},0);
-    html+='<div style="background:rgba(76,186,107,0.15);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:#4cba6b;">'+evtCount+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">EREIGNISSE</div></div>';
-    html+='<div style="background:rgba(61,82,104,0.5);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:white;">'+(d.shiftStart||'—')+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">BEGINN</div></div>';
-    html+='</div></div>';
-    html+='<div style="padding:12px;display:flex;flex-direction:column;gap:6px;">';
-    rows.forEach(function(r){
-      var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';});
-      html+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;">';
-      html+='<div style="display:flex;justify-content:space-between;margin-bottom:5px;">';
-      html+='<div style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:white;">'+r.k+'</div>';
-      html+='<div style="font-size:10px;color:rgba(255,255,255,0.3);">'+(r.b||'—')+' – '+(r.e||'—')+'</div>';
-      html+='</div>';
-      evts.forEach(function(n){html+='<div style="font-size:11px;color:rgba(255,255,255,0.5);">• '+(n.c>1?n.c+'× ':'')+n.ev+'</div>';});
-      if(!evts.length)html+='<div style="font-size:11px;color:rgba(255,255,255,0.2);">— Keine Ereignisse</div>';
-      html+='</div>';
-    });
-    html+='</div>';
-    ov.innerHTML=html;
-    document.body.appendChild(ov);
-  }catch(e){}
-}
-
 </script>
-
-
-
-<!-- ARCHIVE PANEL -->
-<div id="archiveBg" onclick="closeArchive()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999989;"></div>
-<div id="archivePanel" style="position:fixed;left:0;top:0;bottom:0;width:300px;max-width:93vw;background:#1a2535;z-index:9999990;transform:translateX(-100%);transition:transform 0.3s ease;display:flex;flex-direction:column;overflow:hidden;">
-  <!-- Header -->
-  <div style="background:#243447;padding:14px 16px 10px;flex-shrink:0;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:white;">📁 Archiv</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button onclick="archivePrintSelected()" id="arcPrintSelBtn" style="display:none;background:linear-gradient(135deg,#E8394A,#c8102e);color:white;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">🖨 Auswahl</button>
-        <button onclick="archivePrintAll()" style="background:rgba(61,82,104,0.6);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">🖨 Alle</button>
-        <button onclick="closeArchive()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:0 4px;">✕</button>
-      </div>
-    </div>
-    <input id="archiveSearch" type="text" placeholder="🔍 Suchen…" oninput="filterArchive(this.value)"
-      autocorrect="off" autocapitalize="off" spellcheck="false"
-      style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:white;font-size:12px;outline:none;box-sizing:border-box;margin-bottom:6px;">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:rgba(255,255,255,0.5);">
-        <input type="checkbox" id="arcSelAll" onchange="arcToggleAll(this.checked)" style="accent-color:#4cba6b;width:14px;height:14px;">
-        Alle
-      </label>
-      <div id="archiveStats" style="flex:1;font-size:10px;color:rgba(255,255,255,0.3);text-align:right;"></div>
-    </div>
-  </div>
-  <!-- List -->
-  <div id="archiveList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;"></div>
-</div>
-
-<!-- PRINT CONTENT (hidden, shown only on print) -->
-<div id="printContent" style="display:none;"></div>
-
-</body>
 </html>
