@@ -298,11 +298,11 @@ body.app-ready::before{opacity:0.5;}
 .print-sig-area{display:none;margin-top:20px;border-top:1px solid #ddd;padding-top:16px;}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  html,body{background:white!important;margin:0!important;padding:0!important;width:100%!important;font-size:8pt!important;}
+  html,body{background:white!important;padding:0!important;margin:0!important;width:100%!important;font-size:8pt!important;}
   body::before{display:none!important;}
   .no-print,.toolbar,.add-zone,.time-now-btn,.bottom-actions,.kunde-back,
-  .progress-wrap,.autosave-bar,.toast-wrap,.pdf-loading,
-  #pinScreen,#settingsOverlay,#sigOverlay,#dashOverlay,#offlineBanner{display:none!important;}
+  .progress-wrap,.autosave-bar,
+  .toast-wrap,.pdf-loading,.report-overlay,.overlay-base,#pinScreen,#homeScreen,#checkinScreen,#fabCheckin{display:none!important;}
   .card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;width:100%!important;margin:0!important;padding:2px!important;}
   .proto-table{width:100%!important;font-size:7.5pt!important;border-collapse:collapse!important;}
   .proto-row{page-break-inside:avoid!important;}
@@ -317,6 +317,18 @@ body.app-ready::before{opacity:0.5;}
   .rows-wrap{margin:0!important;}
   @page{size:A4 portrait;margin:5mm;}
 }
+
+/* ===== ARCHIVE ===== */
+.archive-card:hover { border-color: var(--red) !important; background: rgba(232,57,74,0.04) !important; }
+#archiveList::-webkit-scrollbar { width: 4px; }
+#archiveList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+#printSelectList::-webkit-scrollbar { width: 4px; }
+#printSelectList::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+#archiveDetailBody::-webkit-scrollbar { width: 4px; }
+#archiveDetailBody::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+/* ===== PRINT SELECT ===== */
+.ps-period-btn{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);transition:all 0.15s;}
+.ps-period-btn.active{background:var(--red);border-color:var(--red);color:white;}
 </style>
 </head>
 <body>
@@ -324,6 +336,7 @@ body.app-ready::before{opacity:0.5;}
   <span style="font-size:16px;">📵</span>
   <span>Offline-Modus — Alle Daten lokal gespeichert</span>
 </div>
+
 
 <!-- SPLASH -->
 <div id="splashScreen" style="position:fixed;inset:0;z-index:999999;background:#0f1923;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:opacity 0.5s ease;">
@@ -412,6 +425,13 @@ body.app-ready::before{opacity:0.5;}
         </div>
       </div>
       <div class="settings-section">
+        <div class="settings-section-title">👤 Mitarbeiter</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Name</div></div>
+          <input type="text" class="settings-input" id="settingsMitarbeiter" placeholder="Dein Name…" style="text-align:left;">
+        </div>
+      </div>
+      <div class="settings-section">
         <div class="settings-section-title">Schichtzeiten</div>
         <div class="settings-row"><div><div class="settings-row-label">Schichtbeginn</div></div><input type="time" class="settings-input" id="settingsShiftStart" value="19:45"></div>
         <div class="settings-row"><div><div class="settings-row-label">Schichtende</div></div><input type="time" class="settings-input" id="settingsShiftEnd" value="07:00"></div>
@@ -426,23 +446,25 @@ body.app-ready::before{opacity:0.5;}
           <button class="settings-btn settings-btn-red" onclick="settingsAddKunde()">+</button>
         </div>
       </div>
-      <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
-      <div id="snapshotInfo" style="font-size:11px;color:var(--muted);margin-bottom:8px;min-height:14px;"></div>
-      <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;margin-bottom:6px;">🔄 Letzte Sicherung wiederherstellen</button>
-    </div>
-    <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
-        <label style="flex:1;display:block;">
-          <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
-          <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
-        </label>
+      <button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;"><div style="margin-bottom:10px;padding:12px;background:#fff3cd;border-radius:12px;border:1.5px solid #ffc107;">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:#856404;margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
+        <div id="snapshotInfo" style="font-size:11px;color:#856404;margin-bottom:8px;min-height:14px;"></div>
+        <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">🔄 Letzte Sicherung wiederherstellen</button>
       </div>
-      <div id="importStatus" style="margin-top:5px;font-size:11px;color:var(--muted);text-align:center;min-height:14px;"></div>
-    </div>
-    <button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Einstellungen speichern</button>
+      <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
+          <label style="flex:1;display:block;">
+            <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+            <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
+          </label>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button onclick="closeSettings();openArchive()" style="flex:1;background:rgba(61,82,104,0.15);color:var(--text);font-weight:700;padding:9px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-size:12px;">🗄️ Archiv öffnen</button>
+        </div></div>
+      </div>
+      💾 Einstellungen speichern</button>
     </div>
   </div>
 </div>
@@ -491,6 +513,83 @@ body.app-ready::before{opacity:0.5;}
   </div>
 </div>
 
+<!-- ARCHIVE -->
+<div class="overlay-base" id="archiveOverlay">
+  <div class="modal-base" style="max-width:560px;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title">🗄️ Archiv</div>
+      <button class="modal-close" onclick="closeArchive()">✕</button>
+    </div>
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input id="archiveSearch" type="text" placeholder="🔍 Datum oder Mitarbeiter suchen…"
+        oninput="renderArchiveList()"
+        style="flex:1;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;outline:none;min-width:160px;">
+      <button onclick="archiveDeleteSelected()" id="archiveDelBtn" style="display:none;padding:7px 12px;border-radius:10px;border:none;background:rgba(232,57,74,0.12);color:var(--red);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🗑 Löschen</button>
+      <button onclick="archivePrintSelected()" id="archivePrintBtn" style="display:none;padding:7px 12px;border-radius:10px;border:none;background:rgba(61,82,104,0.12);color:#3d5268;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🖨 Drucken</button>
+    </div>
+    <div id="archiveList" style="flex:1;overflow-y:auto;padding:10px 14px;"></div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="archiveSelectAll()" style="padding:7px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);">Alle wählen</button>
+      <button onclick="closeArchive()" style="padding:7px 14px;border-radius:10px;border:none;background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHIVE DETAIL -->
+<div class="overlay-base" id="archiveDetailOverlay">
+  <div class="modal-base" style="max-width:560px;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title" id="archiveDetailTitle">📋 Archiv-Eintrag</div>
+      <button class="modal-close" onclick="closeArchiveDetail()">✕</button>
+    </div>
+    <div id="archiveDetailBody" style="flex:1;overflow-y:auto;padding:14px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--text);"></div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+      <button onclick="archiveDetailLoad()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(76,186,107,0.15);color:var(--green);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📂 Laden</button>
+      <button onclick="archiveDetailPDF()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(61,82,104,0.12);color:#3d5268;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📄 PDF</button>
+      <button onclick="archiveDetailWA()" style="padding:8px 14px;border-radius:10px;border:none;background:rgba(37,211,102,0.12);color:#25d366;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📲 WhatsApp</button>
+      <button onclick="closeArchiveDetail()" style="padding:8px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">✕ Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT SELECTION -->
+<div class="overlay-base" id="printSelectOverlay">
+  <div class="modal-base" style="max-width:520px;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title">🖨 Drucken / PDF – Auswahl</div>
+      <button class="modal-close" onclick="closePrintSelect()">✕</button>
+    </div>
+    <div class="modal-body" style="flex:1;overflow-y:auto;padding-bottom:0;">
+
+      <!-- فلتر المدة -->
+      <div style="margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📅 Zeitraum-Filter</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="ps-period-btn active" data-period="all" onclick="setPrintPeriod('all',this)">Alle</button>
+          <button class="ps-period-btn" data-period="week" onclick="setPrintPeriod('week',this)">Diese Woche</button>
+          <button class="ps-period-btn" data-period="month" onclick="setPrintPeriod('month',this)">Dieser Monat</button>
+          <button class="ps-period-btn" data-period="custom" onclick="setPrintPeriod('custom',this)">Benutzerdefiniert</button>
+        </div>
+        <div id="psCustomRange" style="display:none;margin-top:8px;display:none;gap:8px;align-items:center;">
+          <input type="date" id="psDateFrom" style="flex:1;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:6px 10px;outline:none;" onchange="renderPrintList()">
+          <span style="color:var(--muted);font-size:11px;">bis</span>
+          <input type="date" id="psDateTo" style="flex:1;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:6px 10px;outline:none;" onchange="renderPrintList()">
+        </div>
+      </div>
+
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">📋 Berichte wählen</div>
+      <div id="printSelectList" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;padding-right:4px;"></div>
+    </div>
+
+    <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
+      <button onclick="printSelectAll()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text);">✓ Alle</button>
+      <button onclick="printSelectNone()" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);">✗ Keine</button>
+      <button onclick="executePrint()" style="flex:2;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">🖨 Drucken</button>
+      <button onclick="executePDF()" style="flex:2;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,#E8394A,#c8102e);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">📄 PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- CHECKIN SCREEN -->
 <div id="checkinScreen">
   <div class="ci-alert-banner" id="ciAlertBanner">
@@ -504,11 +603,7 @@ body.app-ready::before{opacity:0.5;}
       <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;" id="ciGreetDate">—</div>
       <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:white;margin-top:2px;" id="ciGreetMsg">Guten Abend</div>
     </div>
-    <div style="text-align:right;">
-        <div class="ci-clock" id="ciClock">00:00:00</div>
-        <div class="ci-date" id="ciDate">--</div>
-        <div id="shiftCountdown" style="display:none;font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:0.5px;margin-top:2px;transition:color 0.3s;"></div>
-      </div>
+    <div style="text-align:right;"><div class="ci-clock" id="ciClock">00:00:00</div><div class="ci-date" id="ciDate">--</div></div>
   </div>
   <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 16px;background:rgba(0,0,0,0.2);">
     <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#4cba6b;" id="ciCountIn">0</div><div style="font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);">Eingang</div></div>
@@ -546,7 +641,11 @@ body.app-ready::before{opacity:0.5;}
       <div class="ci-log-actions-bar"><button class="ci-log-act" onclick="ciClearLog()">🗑 Alle löschen</button></div>
     </div>
     <!-- زر نهاية الشيفت -->
-    <button class="ci-back-btn" onclick="hideCheckin()">📋 Protokoll anzeigen</button>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="ci-back-btn" onclick="hideCheckin()">📋 Protokoll anzeigen</button>
+      <button class="ci-back-btn" onclick="openArchive()" style="flex-shrink:0;width:auto;padding:11px 16px;">🗄️ Archiv</button>
+    </div>
+    <button onclick="ciFinish()" style="width:100%;margin-top:10px;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#4cba6b,#2e8b47);color:white;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.5px;">✅ Schicht beenden</button>
   </div>
 </div>
 
@@ -554,6 +653,7 @@ body.app-ready::before{opacity:0.5;}
 <div class="toolbar no-print">
   <div class="toolbar-brand">Denis <span>Protokoll</span></div>
   <div class="toolbar-right">
+    <button class="btn btn-ghost" onclick="openArchive()">🗄️</button>
     <button class="btn btn-ghost" onclick="openSettings()">⚙️</button>
     <button class="btn btn-ghost" onclick="openSigModal()">✍️</button>
     <button class="btn btn-ghost" onclick="openDashboard()">📊</button>
@@ -563,8 +663,7 @@ body.app-ready::before{opacity:0.5;}
     <button class="btn btn-green" onclick="openReportPreview()">📲 WhatsApp</button>
     <button class="btn btn-blue" onclick="generatePDFAndSave()">📄 PDF</button>
     <button class="btn btn-ghost" onclick="resetForm()">↺</button>
-    <button class="btn btn-ghost" onclick="arcOpen()" title="Archiv" style="font-size:16px;">📁</button>
-    <button class="btn btn-red" onclick="sortRowsByTime();window.print()">🖨</button>
+    <button class="btn btn-red" onclick="openPrintSelect()">🖨</button>
   </div>
 </div>
 
@@ -647,66 +746,6 @@ body.app-ready::before{opacity:0.5;}
 </div>
 </div>
 
-
-<!-- ARCHIVE -->
-
-
-
-<div id="printContent" style="display:none;"></div>
-
-<!-- ═══════════ ARCHIVE SYSTEM v2 ═══════════ -->
-<div id="arcOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999988;" onclick="arcClose()"></div>
-
-<div id="arcPanel" style="position:fixed;top:0;right:0;bottom:0;width:320px;max-width:96vw;background:#1a2535;z-index:9999989;transform:translateX(100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,0.4);">
-
-  <!-- Header -->
-  <div style="background:#243447;padding:14px 14px 10px;flex-shrink:0;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:white;">📁 Archiv</div>
-      <button onclick="arcClose()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;line-height:1;">✕</button>
-    </div>
-
-    <!-- Filter Tabs: Täglich / Wöchentlich / Monatlich -->
-    <div style="display:flex;gap:5px;margin-bottom:8px;">
-      <button id="arcTab_day"   onclick="arcSetFilter('day')"   class="arc-tab arc-tab-active">📅 Täglich</button>
-      <button id="arcTab_week"  onclick="arcSetFilter('week')"  class="arc-tab">📆 Wöchentlich</button>
-      <button id="arcTab_month" onclick="arcSetFilter('month')" class="arc-tab">🗓 Monatlich</button>
-    </div>
-
-    <!-- Search -->
-    <input id="arcSearch" type="text" placeholder="🔍 Suchen…" oninput="arcRender()"
-      autocorrect="off" autocapitalize="off" spellcheck="false"
-      style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:white;font-size:12px;outline:none;box-sizing:border-box;">
-
-    <!-- Bulk Actions -->
-    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:rgba(255,255,255,0.5);">
-        <input type="checkbox" id="arcSelAll" onchange="arcToggleAll(this.checked)" style="accent-color:#4cba6b;width:14px;height:14px;"> Alle
-      </label>
-      <div id="arcStats" style="flex:1;font-size:10px;color:rgba(255,255,255,0.3);text-align:right;"></div>
-      <button id="arcPrintSelBtn" onclick="arcPrintSelected()" style="display:none;background:#E8394A;color:white;border:none;border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;">🖨 (<span id="arcSelCount">0</span>)</button>
-    </div>
-  </div>
-
-  <!-- List -->
-  <div id="arcList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;"></div>
-
-  <!-- Bottom: Print All -->
-  <div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.07);flex-shrink:0;display:flex;gap:8px;">
-    <button onclick="arcPrintAll()" style="flex:1;padding:9px;border:none;border-radius:10px;background:#E8394A;color:white;font-weight:700;font-size:12px;cursor:pointer;">🖨 Alle drucken</button>
-    <button onclick="arcDeleteAll()" style="padding:9px 12px;border:1px solid rgba(232,57,74,0.3);border-radius:10px;background:transparent;color:rgba(232,57,74,0.7);font-size:12px;cursor:pointer;">🗑</button>
-  </div>
-</div>
-
-<!-- Archive CSS -->
-<style>
-.arc-tab{flex:1;padding:5px 4px;border:1px solid rgba(255,255,255,0.1);border-radius:7px;background:transparent;color:rgba(255,255,255,0.45);font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;}
-.arc-tab-active{background:rgba(61,82,104,0.8);color:white;border-color:rgba(61,82,104,0.9);}
-.arc-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden;transition:border-color 0.2s;}
-.arc-card:hover{border-color:rgba(255,255,255,0.15);}
-</style>
-
-</body>
 <script>
 'use strict';
 // ===== CONSTANTS =====
@@ -850,7 +889,13 @@ function showPinGreeting(){
 function unlockApp(){
   document.body.classList.add('app-ready');
   document.getElementById('pinScreen').style.display='none';
-  document.getElementById('appContent').style.display='block';
+  // إخفاء toolbar و mainCard أثناء رسالة الترحيب
+  var toolbar=document.querySelector('.toolbar');
+  var mainCard=document.getElementById('mainCard');
+  var appContent=document.getElementById('appContent');
+  if(toolbar)toolbar.style.visibility='hidden';
+  if(mainCard)mainCard.style.visibility='hidden';
+  appContent.style.display='block';
   initApp();
   setTimeout(function(){showCheckin();},300);
 }
@@ -862,15 +907,11 @@ document.addEventListener('keydown',function(e){
     return;
   }
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();manualSave();}
-  if(e.key==='Escape'){closeReportModal();closeSigModal();closeDashboard();closeArchive();closeSettings();}
+  if(e.key==='Escape'){closeReportModal();closeSigModal();closeDashboard();closeSettings();}
 });
 
 // ===== INIT =====
 function initApp(){
-  // استعادة حالة الوردية
-  var existingLog=localStorage.getItem('denis_checkin_log');
-  if(existingLog){try{var l=JSON.parse(existingLog);if(l&&l.length>0)shiftStarted=true;}catch(e){}}
-  if(localStorage.getItem('denis_shift_first_visit'))shiftStarted=true;
   if(localStorage.getItem('denis_dark')==='1')document.body.classList.add('dark-mode');
   if(!soundEnabled)document.getElementById('soundBtn').textContent='🔕';
   var sd=getShiftDate(),now=new Date();
@@ -916,76 +957,22 @@ function getShiftTimes(){
 }
 function updateClock(){
   var now=new Date();var st=getShiftTimes();
+  var total=st.se>st.ss?st.se-st.ss:(24*60-st.ss)+st.se;
   var nm=now.getHours()*60+now.getMinutes();
-  var fill=document.getElementById('progressFill');
-  var pctEl=document.getElementById('progressPct');
-  var lbl=document.querySelector('.progress-label');
-  if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
-
-  if(!shiftStarted){
-    // قبل أول زيارة — شريط مجمد
-    if(fill){fill.style.width='0%';fill.style.background='rgba(255,255,255,0.12)';}
-    if(pctEl)pctEl.textContent='—';
-  } else {
-    // startMin = وقت أول ciIn المحفوظ
-    var startMin=getFirstVisitMin();
-    if(startMin<0)startMin=st.ss;
-    // endMin = نهاية الوردية
-    var endMin=st.se;
-    // إجمالي المدة من أول زيارة حتى نهاية الوردية
-    var total=endMin>startMin ? endMin-startMin : (24*60-startMin)+endMin;
-    if(total<=0)total=1;
-    // المنقضي من أول زيارة حتى الآن
-    var elapsed=nm>=startMin ? nm-startMin : (24*60-startMin)+nm;
-    elapsed=Math.max(0,elapsed);
-    var pct=Math.min(100,Math.round((elapsed/total)*100));
-    if(fill){
-      fill.style.width=pct+'%';
-      if(pct>=90)fill.style.background='#E8394A';
-      else if(pct>=70)fill.style.background='#f5a623';
-      else fill.style.background='';
-    }
-    if(pctEl)pctEl.textContent=pct+'%';
+  // حساب المنقضي: دائماً نسبة إلى وقت الشيفت بغض النظر عن الوقت الحالي
+  var elapsed;
+  if(nm>=st.ss){elapsed=nm-st.ss;}
+  else if(nm<=st.se){elapsed=(24*60-st.ss)+nm;}
+  else{
+    // خارج وقت الشيفت تماماً — أظهر نسبة بناءً على أقرب نقطة
+    var toStart=nm<st.ss?(st.ss-nm):(24*60-nm+st.ss);
+    var pctIdle=Math.max(0,Math.min(100,Math.round((1-(toStart/total))*100)));
+    elapsed=0;
   }
-  updateShiftCountdown(now,st);
-}
-
-function getFirstVisitMin(){
-  // أولاً: من localStorage المحفوظ
-  try{
-    var saved=localStorage.getItem('denis_shift_first_visit');
-    if(saved){var p=saved.split(':');if(p.length>=2)return parseInt(p[0])*60+parseInt(p[1]);}
-  }catch(e){}
-  // ثانياً: من السجل
-  try{
-    var log=ciGetLog();
-    if(!log||!log.length)return -1;
-    for(var i=0;i<log.length;i++){
-      if(log[i].type==='in'&&log[i].time){
-        var parts=log[i].time.split(':');
-        if(parts.length>=2)return parseInt(parts[0])*60+parseInt(parts[1]);
-      }
-    }
-  }catch(e){}
-  return -1;
-}
-
-function updateShiftCountdown(now, st){
-  var el=document.getElementById('shiftCountdown');
-  if(!el)return;
-  // أظهر فقط إذا بدأت الوردية (أول زيارة)
-  if(!shiftStarted)return;
-  el.style.display='block';
-  var nm=now.getHours()*60+now.getMinutes();
-  // حساب الوقت المتبقي حتى نهاية الوردية
-  var rem=st.se>=nm ? st.se-nm : (24*60-nm)+st.se;
-  var h=Math.floor(rem/60);
-  var m=rem%60;
-  var txt=h>0 ? h+'h '+p2(m)+'m' : m+'min';
-  // تلوين حسب الوقت المتبقي
-  if(rem<=15){el.style.color='#E8394A';el.textContent='⏰ '+txt+' noch';}
-  else if(rem<=30){el.style.color='#f5a623';el.textContent='⏱ '+txt+' noch';}
-  else{el.style.color='rgba(255,255,255,0.45)';el.textContent='⏱ '+txt+' noch';}
+  var pct=Math.min(100,Math.max(0,Math.round((elapsed/total)*100)));
+  var fill=document.getElementById('progressFill');if(fill)fill.style.width=pct+'%';
+  var pctEl=document.getElementById('progressPct');if(pctEl)pctEl.textContent=pct+'%';
+  var lbl=document.querySelector('.progress-label');if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
 }
 
 // ===== SHIFT KEY =====
@@ -994,9 +981,16 @@ function checkNewShift(){
   try{
     var ck=getShiftKey(),lk=localStorage.getItem('denis_last_shift_key');
     if(lk&&lk!==ck){
-      try{var od=localStorage.getItem('denis_protokoll');if(od){var p=JSON.parse(od);if(p.rows&&p.rows.some(function(r){return r.k&&r.k!=='— Standort —';}))localStorage.setItem('denis_archive_'+Date.now(),od);}}catch(e){}
+      
+      // حفظ snapshot قبل مسح الوردية القديمة
+      try{
+        var snap=localStorage.getItem('denis_protokoll');
+        var snapLog=localStorage.getItem('denis_checkin_log');
+        if(snap)localStorage.setItem('denis_snapshot_proto',snap);
+        if(snapLog)localStorage.setItem('denis_snapshot_log',snapLog);
+        localStorage.setItem('denis_snapshot_time',new Date().toISOString());
+      }catch(e){}
       localStorage.removeItem('denis_protokoll');localStorage.removeItem('denis_checkin_log');
-      localStorage.removeItem('denis_shift_first_visit');
       localStorage.setItem('denis_last_shift_key',ck);return true;
     }
     if(!lk)localStorage.setItem('denis_last_shift_key',ck);return false;
@@ -1181,7 +1175,7 @@ function collectData(){
   });
   return data;
 }
-var autoArchiveTimer=null;
+
 function saveData(){
   try{
     var data=collectData();
@@ -1190,44 +1184,16 @@ function saveData(){
     var now=new Date(),ts=p2(now.getHours())+':'+p2(now.getMinutes())+':'+p2(now.getSeconds());
     if(bar)bar.className='autosave-bar no-print';if(txt)txt.textContent='💾 Gespeichert um '+ts;if(chip)chip.textContent='💾 '+ts;
     playBeep('save');
-    clearTimeout(autoArchiveTimer);
-    autoArchiveTimer=setTimeout(function(){
-      try{
-        var dateEl=document.getElementById('dateInput');
-        var protoDate=dateEl?dateEl.value:'';
-        var refDate=new Date();
-        if(protoDate){var parts=protoDate.split('.');if(parts.length===3)refDate=new Date(parts[2],parts[1]-1,parts[0]);}
-        var dk=refDate.getFullYear()+'_'+String(refDate.getMonth()+1).padStart(2,'0')+'_'+String(refDate.getDate()).padStart(2,'0');
-        data.savedAt=new Date().toISOString();
-        localStorage.setItem('arc_'+dk,JSON.stringify(data));
-      }catch(e){}
-    },2000);
+
   }catch(e){var bar2=document.getElementById('autosaveBar');if(bar2)bar2.className='autosave-bar error no-print';}
 }
 
 
-function archivePrint(d){
-  var ov=document.getElementById('arcPrev');if(ov)ov.style.display='none';
-  var orig=localStorage.getItem('denis_protokoll');
-  localStorage.setItem('denis_protokoll',JSON.stringify(d));
-  document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
-  loadData();updateSummary();
-  setTimeout(function(){window.print();setTimeout(function(){
-    if(ov)ov.style.display='flex';
-    if(orig)localStorage.setItem('denis_protokoll',orig);
-    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
-  },1000);},300);
-}
-function archivePDF(d){
-  var orig=localStorage.getItem('denis_protokoll');
-  localStorage.setItem('denis_protokoll',JSON.stringify(d));
-  document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
-  loadData();updateSummary();
-  setTimeout(function(){generatePDFAndSave();setTimeout(function(){
-    if(orig)localStorage.setItem('denis_protokoll',orig);
-    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
-  },1000);},300);
-}
+
+
+
+
+
 function manualSave(){saveData();showToast('💾 Gespeichert!','success');}
 function loadData(){
   try{
@@ -1263,7 +1229,7 @@ function sortRowsByTime(){
   rows.forEach(function(r){wrap.appendChild(r);});showToast('Zeilen sortiert','success');
 }
 
-// ===== ARCHIVE =====
+
 function buildWaText(data,lang){
   var t='';
   if(lang==='en')t='🛡 *Denis Security Report*\n📋 Nr: '+(data.protokollNr||'—')+'\n👤 '+(data.mitarbeiter||'—')+'\n📅 '+(data.day||'')+', '+(data.date||'')+'\n\n';
@@ -1449,6 +1415,7 @@ function closeDashboard(){document.getElementById('dashOverlay').classList.remov
 
 // ===== SETTINGS =====
 function openSettings(){
+  var mitEl=document.getElementById('settingsMitarbeiter');if(mitEl)mitEl.value=localStorage.getItem('denis_mitarbeiter')||'';
   document.getElementById('settingsShiftStart').value=localStorage.getItem('denis_shift_start')||'19:45';
   document.getElementById('settingsShiftEnd').value=localStorage.getItem('denis_shift_end')||'07:00';
   document.getElementById('settingsWeekStart').value=localStorage.getItem('denis_week_start')||'1';
@@ -1461,6 +1428,8 @@ function saveSettings(){
   localStorage.setItem('denis_shift_end',document.getElementById('settingsShiftEnd').value||'07:00');
   localStorage.setItem('denis_week_start',document.getElementById('settingsWeekStart').value||'1');
   localStorage.setItem('denis_alarm_min',document.getElementById('settingsAlarmMin').value||'120');
+  var mit=document.getElementById('settingsMitarbeiter');
+  if(mit)localStorage.setItem('denis_mitarbeiter',mit.value.trim());
   closeSettings();showToast('Gespeichert','success');playBeep('success');
 }
 function startPinChange(){var a=document.getElementById('pinChangeArea');a.style.display=a.style.display==='none'?'block':'none';settingsPinEntry='';settingsPinStep='new';settingsPinFirst='';settingsUpdateDots();document.getElementById('pinChangeLabel').textContent='Neuen PIN eingeben:';}
@@ -1513,6 +1482,11 @@ function hideCheckin(){
   document.getElementById('checkinScreen').style.display='none';document.body.style.overflow='';
   if(ciClockInterval)clearInterval(ciClockInterval);
   var fc=document.getElementById('fabCheckin');if(fc)fc.style.display='flex';
+  // أظهر toolbar و mainCard بعد إغلاق شاشة الترحيب
+  var toolbar=document.querySelector('.toolbar');
+  var mainCard=document.getElementById('mainCard');
+  if(toolbar)toolbar.style.visibility='';
+  if(mainCard)mainCard.style.visibility='';
 }
 // ===== VISIT HISTORY =====
 function saveVisitDuration(kunde,mins){
@@ -1746,13 +1720,6 @@ function updateQuickBar(){
 function ciIn(){
   if(!ciSelected)return;var time=nowHM();
   localStorage.setItem('denis_last_kunde',ciSelected);
-  // تفعيل الشريط والعداد عند أول زيارة
-  if(!shiftStarted){
-    shiftStarted=true;
-    localStorage.setItem('denis_shift_first_visit', nowHM());
-    var cdEl=document.getElementById('shiftCountdown');
-    if(cdEl)cdEl.style.display='block';
-  }
   var log=ciGetLog();
   var snapshot=JSON.stringify(log);
   var rowsBefore=document.getElementById('rowsWrap').innerHTML;
@@ -2050,7 +2017,17 @@ function ciSyncTimeToProtocol(kunde,type,newTime,oldTime){
 }
 function ciToggleType(idx){var log=ciGetLog();log[idx].type=log[idx].type==='in'?'out':'in';ciSaveLog(log);ciRenderLog();updateQuickBar();updateDayCounter();showToast(log[idx].type==='in'?'✅ Eingang':'🚪 Ausgang','info');}
 function ciDeleteEntry(idx){var log=ciGetLog();log.splice(idx,1);ciSaveLog(log);ciRenderLog();updateDayCounter();updateQuickBar();ciShowToast('🗑 Gelöscht');}
-function ciClearLog(){showConfirmDialog('🗑 Alle Einträge löschen?',function(){localStorage.removeItem('denis_checkin_log');ciRenderLog();updateDayCounter();updateQuickBar();});}
+function ciClearLog(){
+  showConfirmDialog('🗑 Alle Einträge löschen?',function(){
+    // snapshot قبل الحذف
+    var snap=localStorage.getItem('denis_checkin_log');
+    if(snap)localStorage.setItem('denis_snapshot_log',snap);
+    localStorage.setItem('denis_snapshot_time',new Date().toISOString());
+    localStorage.removeItem('denis_checkin_log');
+    ciRenderLog();updateDayCounter();updateQuickBar();
+    showToast('🗑 Gelöscht — <span onclick="restoreSnapshot()" style="text-decoration:underline;cursor:pointer;color:#fff;">Wiederherstellen</span>');
+  });
+}
 function ciFinish(){
   var log=ciGetLog();var rows=document.querySelectorAll('.proto-row');
   var ks=new Set();rows.forEach(function(row){var id=row.id.replace('row-','');var ksel=document.getElementById('ksel-'+id);var kcust=document.getElementById('kcust-'+id);var isC=kcust&&kcust.style.display!=='none';var k=isC?kcust.value:(ksel?ksel.value:'');if(k&&k!=='— Standort —')ks.add(k);});
@@ -2335,48 +2312,7 @@ function ciShowToast(msg){
   setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){t.remove();},300);},2200);
 }
 
-// ===== OFFLINE + CACHE =====
-(function(){
-  function cachePageResources(){
-    if(!('caches' in window))return;
-    caches.open('denis-v1').then(function(cache){
-      cache.add(window.location.href).catch(function(){});
-      cache.add('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap').catch(function(){});
-      cache.add('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').catch(function(){});
-    });
-  }
 
-  function updateOnlineStatus(){
-    var banner=document.getElementById('offlineBanner');
-    if(!banner)return;
-    if(!navigator.onLine){
-      banner.style.display='flex';
-      setTimeout(function(){banner.style.opacity='1';},10);
-    } else {
-      banner.style.opacity='0';
-      setTimeout(function(){banner.style.display='none';},600);
-    }
-  }
-
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-
-  document.addEventListener('DOMContentLoaded', function(){
-    updateOnlineStatus();
-    if(!('caches' in window))return;
-    caches.open('denis-v1').then(function(c){return c.keys();}).then(function(keys){
-      if(!keys.length){cachePageResources();setTimeout(function(){typeof showToast==='function'&&showToast('📥 Offline gespeichert ✅');},3000);}
-    }).catch(function(){});
-  });
-
-  // PWA Manifest
-  document.addEventListener('DOMContentLoaded', function(){
-    var manifest={name:"Denis Protokoll",short_name:"Check-in",start_url:"./",display:"standalone",background_color:"#1a2535",theme_color:"#3d5268",orientation:"portrait",icons:[]};
-    var blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    var link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
-    document.head.appendChild(link);
-  });
-})();
 
 // ===== EXPORT / IMPORT =====
 function exportData(){
@@ -2423,11 +2359,702 @@ function importData(event){
 }
 
 
-window.addEventListener('beforeunload',function(){try{saveData();}catch(e){}});
+// ================================================================
+// ===== ARCHIV =====
+// ================================================================
+var archiveSelectedKeys = [];
+var archiveCurrentKey = null;
+var archiveCurrentData = null;
+
+function getArchiveKeys() {
+  var keys = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (k && k.match(/^denis_\d{4}_\d{2}_\d{2}$/)) keys.push(k);
+  }
+  keys.sort().reverse();
+  return keys;
+}
+
+function openArchive() {
+  archiveSelectedKeys = [];
+  document.getElementById('archiveSearch').value = '';
+  renderArchiveList();
+  document.getElementById('archiveOverlay').classList.add('open');
+}
+function closeArchive() { document.getElementById('archiveOverlay').classList.remove('open'); }
+
+function renderArchiveList() {
+  var list = document.getElementById('archiveList');
+  var query = (document.getElementById('archiveSearch').value || '').toLowerCase().trim();
+  var keys = getArchiveKeys();
+  if (!keys.length) {
+    list.innerHTML = '<div style="text-align:center;padding:32px 0 16px;color:var(--muted);font-size:13px;">📭 Kein Archiv vorhanden.<br><small style="font-size:11px;">Beende eine Schicht mit „Schicht beenden" um Einträge zu speichern.</small></div>'
+      + '<div style="padding:0 4px 8px;"><button onclick="importOldArchiveData()" style="width:100%;padding:11px;border-radius:12px;border:1.5px dashed var(--border);background:transparent;color:var(--muted);font-family:DM Sans,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">📦 Alte Daten aus Browser importieren</button></div>';
+    updateArchiveActionBtns();
+    return;
+  }
+  var html = '';
+  keys.forEach(function(k) {
+    try {
+      var d = JSON.parse(localStorage.getItem(k) || '{}');
+      var label = (k.replace('denis_','').replace(/_/g,'.'));
+      var mitarb = d.mitarbeiter || '—';
+      var rows = (d.rows || []).length;
+      var protoNr = d.protokollNr || '—';
+      // filter
+      var search = label + ' ' + mitarb + ' ' + protoNr;
+      if (query && search.toLowerCase().indexOf(query) < 0) return;
+      var isSel = archiveSelectedKeys.indexOf(k) >= 0;
+      html += '<div class="archive-card" id="arc-card-'+k+'" onclick="toggleArchiveSelect(\''+k+'\')" style="'
+        + 'border-radius:12px;border:1.5px solid '+(isSel?'var(--red)':'var(--border)')+';background:'+(isSel?'rgba(232,57,74,0.06)':'var(--surface)')+';'
+        + 'padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:6px;transition:all 0.15s;">'
+        + '<div style="width:20px;height:20px;border-radius:6px;border:2px solid '+(isSel?'var(--red)':'var(--border)')+';background:'+(isSel?'var(--red)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;">'
+        + (isSel ? '<span style="color:white;font-size:12px;font-weight:800;">✓</span>' : '')
+        + '</div>'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-family:\'Syne\',sans-serif;font-size:14px;font-weight:800;color:var(--text);">📅 ' + label + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">👤 ' + mitarb + ' &nbsp;·&nbsp; 📋 ' + protoNr + ' &nbsp;·&nbsp; ' + rows + ' Einträge</div>'
+        + '</div>'
+        + '<button onclick="event.stopPropagation();openArchiveDetail(\''+k+'\')" style="padding:6px 11px;border-radius:9px;border:none;background:rgba(61,82,104,0.1);color:#3d5268;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">Details</button>'
+        + '</div>';
+    } catch(e) {}
+  });
+  list.innerHTML = html || '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">Keine Treffer</div>';
+  updateArchiveActionBtns();
+}
+
+function toggleArchiveSelect(key) {
+  var idx = archiveSelectedKeys.indexOf(key);
+  if (idx >= 0) archiveSelectedKeys.splice(idx, 1);
+  else archiveSelectedKeys.push(key);
+  renderArchiveList();
+}
+
+function archiveSelectAll() {
+  var query = (document.getElementById('archiveSearch').value || '').toLowerCase().trim();
+  var keys = getArchiveKeys();
+  archiveSelectedKeys = keys.filter(function(k) {
+    if (!query) return true;
+    try {
+      var d = JSON.parse(localStorage.getItem(k) || '{}');
+      var label = k.replace('denis_','').replace(/_/g,'.');
+      return (label + ' ' + (d.mitarbeiter||'') + ' ' + (d.protokollNr||'')).toLowerCase().indexOf(query) >= 0;
+    } catch(e) { return true; }
+  });
+  renderArchiveList();
+}
+
+function updateArchiveActionBtns() {
+  var hasSel = archiveSelectedKeys.length > 0;
+  var delBtn = document.getElementById('archiveDelBtn');
+  var prBtn = document.getElementById('archivePrintBtn');
+  if (delBtn) delBtn.style.display = hasSel ? 'block' : 'none';
+  if (prBtn) prBtn.style.display = hasSel ? 'block' : 'none';
+}
+
+function archiveDeleteSelected() {
+  if (!archiveSelectedKeys.length) return;
+  showConfirmDialog('🗑 ' + archiveSelectedKeys.length + ' Einträge löschen?', function() {
+    archiveSelectedKeys.forEach(function(k) { localStorage.removeItem(k); });
+    archiveSelectedKeys = [];
+    renderArchiveList();
+    showToast('🗑 Gelöscht', 'success');
+  }, 'Löschen', 'var(--red)');
+}
+
+function archivePrintSelected() {
+  if (!archiveSelectedKeys.length) return;
+  openArchivePrint(archiveSelectedKeys);
+}
+
+// Archive Detail
+function openArchiveDetail(key) {
+  try {
+    var d = JSON.parse(localStorage.getItem(key) || '{}');
+    archiveCurrentKey = key;
+    archiveCurrentData = d;
+    var label = key.replace('denis_','').replace(/_/g,'.');
+    document.getElementById('archiveDetailTitle').textContent = '📋 ' + label + ' – ' + (d.mitarbeiter || '—');
+    var html = '<div style="background:var(--surface);border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid var(--border);">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Protokoll-Nr.</div><div style="font-weight:800;color:var(--text);">' + (d.protokollNr||'—') + '</div></div>'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Mitarbeiter</div><div style="font-weight:700;color:var(--text);">' + (d.mitarbeiter||'—') + '</div></div>'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Datum</div><div style="font-weight:700;color:var(--text);">' + (d.day||'') + ' ' + (d.date||'—') + '</div></div>'
+      + '<div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Gespeichert</div><div style="font-weight:700;color:var(--text);font-size:11px;">' + (d.savedAt ? new Date(d.savedAt).toLocaleString('de-DE') : '—') + '</div></div>'
+      + '</div></div>';
+    (d.rows || []).forEach(function(row, i) {
+      var k = row.k === '— Standort —' ? '—' : (row.k || '—');
+      var notizen = (row.n || []).filter(function(n){ return n.ev && n.ev !== '— Ereignis —'; });
+      html += '<div style="background:var(--surface);border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:'+(notizen.length?'8px':'0')+'px;">'
+        + '<div style="font-weight:800;color:var(--text);">📍 ' + k + '</div>'
+        + '<div style="font-size:12px;color:var(--muted);font-weight:600;">' + (row.b||'—') + ' → ' + (row.e||'—') + '</div>'
+        + '</div>';
+      if (notizen.length) {
+        notizen.forEach(function(n) {
+          html += '<div style="font-size:12px;color:var(--text);padding:2px 0;">• ' + (n.c > 1 ? '['+n.c+'×] ' : '') + (n.ev||'') + '</div>';
+        });
+      }
+      html += '</div>';
+    });
+    if (!d.rows || !d.rows.length) html += '<div style="text-align:center;padding:20px;color:var(--muted);">Keine Einträge</div>';
+    document.getElementById('archiveDetailBody').innerHTML = html;
+    document.getElementById('archiveDetailOverlay').classList.add('open');
+  } catch(e) { showToast('Fehler: ' + e.message, 'error'); }
+}
+
+function closeArchiveDetail() { document.getElementById('archiveDetailOverlay').classList.remove('open'); }
+
+function archiveDetailLoad() {
+  if (!archiveCurrentData) return;
+  showConfirmDialog('📂 Diesen Eintrag laden? Aktuelle Daten werden überschrieben.', function() {
+    localStorage.setItem('denis_protokoll', JSON.stringify(archiveCurrentData));
+    showToast('📂 Geladen – Seite wird neu geladen…');
+    closeArchiveDetail();
+    closeArchive();
+    setTimeout(function(){ window.location.reload(); }, 1200);
+  }, 'Laden', 'var(--green)');
+}
+
+function archiveDetailPDF() {
+  if (!archiveCurrentData) return;
+  generatePDFFromData(archiveCurrentData);
+  closeArchiveDetail();
+}
+
+function archiveDetailWA() {
+  if (!archiveCurrentData) return;
+  var text = buildWaText(archiveCurrentData, 'de');
+  window.open('https://wa.me/?text=' + encodeURIComponent(text));
+}
+
+// Archive multi-print
+function openArchivePrint(keys) {
+  var list = document.getElementById('printSelectList');
+  list.innerHTML = '';
+  keys.forEach(function(k) {
+    try {
+      var d = JSON.parse(localStorage.getItem(k) || '{}');
+      var label = k.replace('denis_','').replace(/_/g,'.');
+      var item = document.createElement('label');
+      item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:\'DM Sans\',sans-serif;';
+      item.innerHTML = '<input type="checkbox" checked data-key="'+k+'" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
+        + '<div><div style="font-weight:700;font-size:13px;color:var(--text);">📅 '+label+'</div>'
+        + '<div style="font-size:11px;color:var(--muted);">'+(d.mitarbeiter||'—')+'&nbsp;·&nbsp;'+(d.protokollNr||'—')+'</div></div>';
+      list.appendChild(item);
+    } catch(e) {}
+  });
+  document.getElementById('printSelectOverlay').classList.add('open');
+}
+
+
+// ================================================================
+// ===== DRUCKEN / PDF – NEUES SYSTEM =====
+// ================================================================
+var currentPrintPeriod = 'all';
+
+function openPrintSelect() {
+  currentPrintPeriod = 'all';
+  // Reset period buttons
+  document.querySelectorAll('.ps-period-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.period==='all'); });
+  document.getElementById('psCustomRange').style.display = 'none';
+  renderPrintList();
+  document.getElementById('printSelectOverlay').classList.add('open');
+}
+
+function closePrintSelect() { document.getElementById('printSelectOverlay').classList.remove('open'); }
+
+function setPrintPeriod(period, btn) {
+  currentPrintPeriod = period;
+  document.querySelectorAll('.ps-period-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var cr = document.getElementById('psCustomRange');
+  cr.style.display = period === 'custom' ? 'flex' : 'none';
+  if (period !== 'custom') renderPrintList();
+}
+
+function keyToDate(k) {
+  // 'denis_2025_06_03' → Date
+  var parts = k.replace('denis_','').split('_');
+  if (parts.length >= 3) return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  return null;
+}
+
+function renderPrintList() {
+  var list = document.getElementById('printSelectList');
+  list.innerHTML = '';
+  var now = new Date();
+
+  // Aktueller Bericht
+  var cur = document.createElement('label');
+  cur.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:2px solid var(--red);cursor:pointer;font-family:\'DM Sans\',sans-serif;background:rgba(232,57,74,0.04);';
+  var mitarb = document.getElementById('mitarbeiterName') ? document.getElementById('mitarbeiterName').value || '—' : '—';
+  var curDate = document.getElementById('dateInput') ? document.getElementById('dateInput').value : '';
+  cur.innerHTML = '<input type="checkbox" checked data-type="current" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
+    + '<div style="flex:1;"><div style="font-weight:800;font-size:13px;color:var(--text);">📋 Aktueller Bericht</div>'
+    + '<div style="font-size:11px;color:var(--muted);">' + mitarb + (curDate ? ' · ' + curDate : '') + '</div></div>';
+  list.appendChild(cur);
+
+  // Archiv filtern
+  var keys = getArchiveKeys();
+  var filtered = keys.filter(function(k) {
+    var d = keyToDate(k);
+    if (!d) return true;
+    if (currentPrintPeriod === 'all') return true;
+    if (currentPrintPeriod === 'week') {
+      var startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay() + 1); startOfWeek.setHours(0,0,0,0);
+      var endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6); endOfWeek.setHours(23,59,59,999);
+      return d >= startOfWeek && d <= endOfWeek;
+    }
+    if (currentPrintPeriod === 'month') {
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }
+    if (currentPrintPeriod === 'custom') {
+      var from = document.getElementById('psDateFrom').value;
+      var to = document.getElementById('psDateTo').value;
+      if (from) { var fd = new Date(from); fd.setHours(0,0,0,0); if (d < fd) return false; }
+      if (to)   { var td = new Date(to);   td.setHours(23,59,59,999); if (d > td) return false; }
+      return true;
+    }
+    return true;
+  });
+
+  if (filtered.length) {
+    var sep = document.createElement('div');
+    sep.style.cssText = 'font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:8px 2px 4px;';
+    sep.textContent = '— Archiv (' + filtered.length + ') —';
+    list.appendChild(sep);
+    filtered.forEach(function(k) {
+      try {
+        var d = JSON.parse(localStorage.getItem(k) || '{}');
+        var label = k.replace('denis_','').replace(/_/g,'.');
+        var item = document.createElement('label');
+        item.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:\'DM Sans\',sans-serif;transition:background 0.1s;';
+        item.innerHTML = '<input type="checkbox" data-type="archive" data-key="'+k+'" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">'
+          + '<div style="flex:1;"><div style="font-weight:700;font-size:13px;color:var(--text);">📅 '+label+'</div>'
+          + '<div style="font-size:11px;color:var(--muted);">'+(d.mitarbeiter||'—')+'&nbsp;·&nbsp;'+(d.protokollNr||'—')+'&nbsp;·&nbsp;'+(d.rows?d.rows.length:0)+' Eintr.</div></div>';
+        list.appendChild(item);
+      } catch(e) {}
+    });
+  } else if (currentPrintPeriod !== 'all') {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;padding:16px;color:var(--muted);font-size:12px;';
+    empty.textContent = 'Keine Einträge in diesem Zeitraum';
+    list.appendChild(empty);
+  }
+}
+
+function printSelectAll()  { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked=true; }); }
+function printSelectNone() { document.querySelectorAll('#printSelectList input[type=checkbox]').forEach(function(cb){ cb.checked=false; }); }
+
+function getSelectedPrintData() {
+  var checkboxes = document.querySelectorAll('#printSelectList input[type=checkbox]:checked');
+  var hasCurrent = false;
+  var archiveKeys = [];
+  checkboxes.forEach(function(cb) {
+    if (cb.dataset.type === 'current') hasCurrent = true;
+    else if (cb.dataset.type === 'archive' && cb.dataset.key) archiveKeys.push(cb.dataset.key);
+  });
+  return { hasCurrent: hasCurrent, archiveKeys: archiveKeys, total: (hasCurrent?1:0)+archiveKeys.length };
+}
+
+// ── طباعة بنفس جودة @media print ──────────────────────────────
+// ── طباعة عبر DOM-Swap: نفس جودة الزر الأحمر تماماً ──────────
+function executePrint() {
+  var sel = getSelectedPrintData();
+  if (!sel.total) { showToast('Nichts ausgewählt', 'error'); return; }
+  closePrintSelect();
+
+  var datasets = [];
+  if (sel.hasCurrent) datasets.push(null); // null = aktueller Stand bleibt
+  sel.archiveKeys.forEach(function(k) {
+    try { datasets.push(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
+  });
+
+  // Nur aktueller Bericht → direkter Druck
+  if (datasets.length === 1 && datasets[0] === null) {
+    sortRowsByTime();
+    setTimeout(function(){ window.print(); }, 200);
+    return;
+  }
+
+  printDatasetsViaSwap(datasets);
+}
+
+function printDatasetsViaSwap(datasets) {
+  // Snapshot aktueller DOM-Zustand
+  var originalData = collectData();
+  var originalShiftNotes = localStorage.getItem('denis_shift_notes') || '';
+  var printQueue = datasets.filter(function(d){ return d !== null; });
+  if (!printQueue.length) { window.print(); return; }
+
+  showToast('🖨 Drucke ' + printQueue.length + ' Bericht(e)…');
+
+  var currentIdx = 0;
+
+  function printNext() {
+    if (currentIdx >= printQueue.length) {
+      // Alles gedruckt → Originaldaten wiederherstellen
+      restoreDOMData(originalData, originalShiftNotes);
+      showToast('✅ Alle Berichte gedruckt!', 'success');
+      return;
+    }
+    var data = printQueue[currentIdx];
+    currentIdx++;
+    loadDOMData(data, function() {
+      sortRowsByTime();
+      setTimeout(function() {
+        window.print();
+        // Nächsten nach kurzer Pause
+        setTimeout(printNext, 800);
+      }, 300);
+    });
+  }
+
+  printNext();
+}
+
+// Lade Daten direkt in den DOM (wie loadData, aber aus Objekt)
+function loadDOMData(data, callback) {
+  if (!data) { if(callback) callback(); return; }
+
+  // Header-Felder
+  var dayEl = document.getElementById('daySelect');
+  var dateEl = document.getElementById('dateInput');
+  var nameEl = document.getElementById('mitarbeiterName');
+  if (dayEl  && data.day)        dayEl.value  = data.day;
+  if (dateEl && data.date)       dateEl.value = data.date;
+  if (nameEl && data.mitarbeiter) nameEl.value = data.mitarbeiter;
+  if (data.protokollNr) applyProtoNr(data.protokollNr);
+  if (typeof data.status !== 'undefined' && data.status !== statusOk) toggleStatus();
+
+  // Zeilen leeren und neu aufbauen
+  var wrap = document.getElementById('rowsWrap');
+  wrap.innerHTML = '';
+  rowId = 0;
+  Object.keys(nCounts).forEach(function(k){ delete nCounts[k]; });
+
+  if (data.rows && data.rows.length) {
+    data.rows.forEach(function(r){ addRow(r); });
+  }
+
+  // Schichtnotizen
+  var notesEl = document.getElementById('shiftNotes');
+  var notesVal = data.shiftNotes || '';
+  if (notesEl) notesEl.value = notesVal;
+  updateShiftNotes(notesVal);
+
+  // Unterschrift
+  var sig = data.signature || localStorage.getItem('denis_signature');
+  if (sig) { updateSigChip(sig); updatePrintSigArea(); }
+
+  updateSummary();
+  document.querySelectorAll('.time-input-direct').forEach(colorTime);
+  document.querySelectorAll('.notiz-select').forEach(styleNotizSelect);
+
+  if (callback) setTimeout(callback, 150);
+}
+
+// Originalzustand wiederherstellen
+function restoreDOMData(data, shiftNotes) {
+  loadDOMData(data, function() {
+    var notesEl = document.getElementById('shiftNotes');
+    if (notesEl) notesEl.value = shiftNotes;
+    updateShiftNotes(shiftNotes);
+  });
+}
+
+// ── PDF – gleiche Methode für Archiv ──────────────────────────
+function executePDF() {
+  var sel = getSelectedPrintData();
+  if (!sel.total) { showToast('Nichts ausgewählt', 'error'); return; }
+  closePrintSelect();
+
+  var datasets = [];
+  if (sel.hasCurrent) datasets.push(collectData());
+  sel.archiveKeys.forEach(function(k) {
+    try { datasets.push(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
+  });
+
+  showPdfLoader(true);
+  try {
+    var lib = window.jspdf;
+    if (!lib) { showToast('jsPDF lädt noch…', 'error'); showPdfLoader(false); return; }
+    var doc = new lib.jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    datasets.forEach(function(data, idx) {
+      if (idx > 0) doc.addPage();
+      buildPDFPage(doc, data);
+    });
+    var label = sel.total === 1
+      ? 'denis-protokoll-' + (datasets[0].date || 'export')
+      : 'denis-protokoll-sammlung-' + new Date().toISOString().slice(0,10);
+    doc.save(label + '.pdf');
+    showToast('📄 PDF (' + sel.total + ' Bericht' + (sel.total>1?'e':'') + ') gespeichert!', 'success');
+    playBeep && playBeep('success');
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+  showPdfLoader(false);
+}
+
+// Alias
+function executePrintSelected() { executePrint(); }
+// ── PDF mit gleicher Qualität ───────────────────────────────────
+function executePDF() {
+  var sel = getSelectedPrintData();
+  if (!sel.total) { showToast('Nichts ausgewählt', 'error'); return; }
+  closePrintSelect();
+
+  var datasets = [];
+  if (sel.hasCurrent) datasets.push(collectData());
+  sel.archiveKeys.forEach(function(k) {
+    try { datasets.push(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
+  });
+
+  showPdfLoader(true);
+  try {
+    var lib = window.jspdf;
+    if (!lib) { showToast('jsPDF lädt noch…', 'error'); showPdfLoader(false); return; }
+    var doc = new lib.jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    datasets.forEach(function(data, idx) {
+      if (idx > 0) doc.addPage();
+      buildPDFPage(doc, data);
+    });
+    var label = sel.total === 1
+      ? 'denis-protokoll-' + (datasets[0].date || 'export')
+      : 'denis-protokoll-sammlung-' + new Date().toISOString().slice(0,10);
+    doc.save(label + '.pdf');
+    showToast('📄 PDF (' + sel.total + ' Bericht' + (sel.total>1?'e':'') + ') gespeichert!', 'success');
+    playBeep && playBeep('success');
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+  showPdfLoader(false);
+}
+
+// Alias für Rückwärtskompatibilität
+function executePrintSelected() { executePrint(); }
+
+// Hilfsfunktion: PDF aus beliebigen Daten bauen
+function buildPDFPage(doc, data) {
+  var pageW = 210, margin = 10, cW = pageW - 2 * margin;
+  var y = margin;
+  doc.setFillColor(61, 82, 104); doc.rect(0, 0, pageW, 28, 'F');
+  doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.text('Denis Protokoll', margin, 12);
+  doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.text('Tagesbericht · Vorfallprotokoll', margin, 18);
+  doc.setFontSize(9); doc.text('Mitarbeiter: ' + (data.mitarbeiter || '—'), margin, 23); doc.text((data.day || '') + ' ' + (data.date || ''), 160, 23); y = 33;
+  doc.setFillColor(240, 241, 244); doc.rect(margin, y, cW, 7, 'F'); doc.setTextColor(80, 80, 80); doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+  doc.text('Kunde', margin + 2, y + 5); doc.text('Beginn', margin + 38, y + 5); doc.text('Ende', margin + 60, y + 5); doc.text('Dienstnotiz', margin + 82, y + 5); y += 9;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  (data.rows || []).forEach(function(row, i) {
+    if (y > 270) { doc.addPage(); y = margin; }
+    var notizen = (row.n ? row.n.filter(function(n) { return n.ev && n.ev !== '— Ereignis —'; }) : []);
+    var hasPhotos = row.photos && row.photos.length > 0;
+    var notizLines = notizen.length || 1;
+    var photoRowH = hasPhotos ? 12 : 0;
+    var rH = Math.max(9, notizLines * 6 + 6) + photoRowH;
+    if (y + rH > 275) { doc.addPage(); y = margin; }
+    if (i % 2 === 0) { doc.setFillColor(252, 252, 252); doc.rect(margin, y, cW, rH, 'F'); }
+    doc.setDrawColor(220, 220, 220); doc.rect(margin, y, cW, rH);
+    doc.setTextColor(20, 21, 24); doc.setFont('helvetica', 'bold');
+    doc.text(stripEmoji(row.k === '— Standort —' ? '' : row.k), margin + 2, y + 5, { maxWidth: 34 });
+    doc.setFont('helvetica', 'normal'); doc.text(stripEmoji(row.b || ''), margin + 38, y + 5); doc.text(stripEmoji(row.e || ''), margin + 60, y + 5);
+    var ny = y + 4;
+    if (notizen.length) {
+      notizen.forEach(function(n) {
+        doc.setFontSize(7.5);
+        var isDanger = typeof DANGER_EVENTS !== 'undefined' && DANGER_EVENTS.indexOf(n.ev) >= 0;
+        doc.setTextColor(isDanger ? 180 : 20, isDanger ? 30 : 21, isDanger ? 30 : 24);
+        doc.setFont('helvetica', isDanger ? 'bold' : 'normal');
+        doc.text('• ' + (n.c > 0 ? '[' + n.c + 'x] ' + stripEmoji(n.ev) : stripEmoji(n.ev)), margin + 82, ny, { maxWidth: cW - 84 });
+        ny += 5.5;
+        doc.setFont('helvetica', 'normal');
+      });
+    } else { doc.setFontSize(8); doc.setTextColor(160, 160, 160); doc.text('—', margin + 82, y + 5); }
+    y += rH + 1;
+  });
+  var sig = localStorage.getItem('denis_signature');
+  if (sig && y < 240) { try { doc.addImage(sig, 'PNG', margin, y, 60, 18); } catch(e) {} }
+  doc.setFontSize(7); doc.setTextColor(180, 180, 180); doc.text('Denis Protokoll · ' + new Date().toLocaleString('de-DE'), margin, 292);
+}
+
+// generatePDFFromData – für Archiv-Einzel-PDF
+function generatePDFFromData(data) {
+  showPdfLoader(true);
+  try {
+    var lib = window.jspdf;
+    if (!lib) { showToast('jsPDF lädt noch…', 'error'); showPdfLoader(false); return; }
+    var doc = new lib.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    buildPDFPage(doc, data);
+    doc.save('denis-protokoll-' + (data.date || 'archiv') + '.pdf');
+    showToast('📄 PDF gespeichert!', 'success');
+    playBeep && playBeep('success');
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+  showPdfLoader(false);
+}
+
+
+// ================================================================
+// ===== استيراد البيانات القديمة إلى الأرشيف =====
+// ================================================================
+function importOldArchiveData() {
+  var found = [];
+
+  // 1. البروتوكول الحالي المحفوظ
+  var proto = localStorage.getItem('denis_protokoll');
+  if (proto) {
+    try {
+      var d = JSON.parse(proto);
+      if (d && (d.rows && d.rows.length || d.date)) {
+        found.push({ source: 'denis_protokoll', data: d, label: 'Aktuelles Protokoll (' + (d.date || '?') + ' – ' + (d.mitarbeiter || '?') + ')' });
+      }
+    } catch(e) {}
+  }
+
+  // 2. Alte Archiv-Schlüssel mit anderen Präfixen (arc_, denis_archive_)
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (!k) continue;
+    if (k.startsWith('arc_') || k.startsWith('denis_archive_')) {
+      try {
+        var d2 = JSON.parse(localStorage.getItem(k) || '{}');
+        if (d2 && (d2.rows || d2.date)) {
+          found.push({ source: k, data: d2, label: k + ' (' + (d2.date || '?') + ' – ' + (d2.mitarbeiter || '?') + ')' });
+        }
+      } catch(e) {}
+    }
+  }
+
+  if (!found.length) {
+    showToast('⚠️ Keine alten Daten im Browser gefunden', 'error');
+    return;
+  }
+
+  // نافذة تأكيد مع قائمة ما سيُستورد
+  var itemList = found.map(function(f) { return '• ' + f.label; }).join('\n');
+  showConfirmDialog(
+    '📦 ' + found.length + ' Einträge gefunden:\n\n' + itemList + '\n\nIns Archiv importieren?',
+    function() {
+      var imported = 0;
+      found.forEach(function(f) {
+        var d = f.data;
+        // استخرج أو اصنع مفتاح تاريخ
+        var dk = null;
+        if (d.archiveKey) {
+          dk = 'denis_' + d.archiveKey;
+        } else if (d.date) {
+          // تنسيق DD.MM.YYYY أو YYYY-MM-DD
+          var parts = d.date.indexOf('.') >= 0 ? d.date.split('.') : null;
+          if (parts && parts.length === 3) {
+            dk = 'denis_' + parts[2] + '_' + parts[1].padStart(2,'0') + '_' + parts[0].padStart(2,'0');
+          } else if (d.date.indexOf('-') >= 0) {
+            dk = 'denis_' + d.date.replace(/-/g,'_');
+          }
+        }
+        if (!dk) {
+          // مفتاح بناءً على وقت الحفظ أو الآن
+          var now = new Date();
+          dk = 'denis_' + now.getFullYear() + '_' + String(now.getMonth()+1).padStart(2,'0') + '_' + String(now.getDate()).padStart(2,'0') + '_imp' + imported;
+        }
+        // لا تستبدل إذا كان موجوداً بالفعل
+        if (!localStorage.getItem(dk)) {
+          d.savedAt = d.savedAt || new Date().toISOString();
+          d.archiveKey = dk.replace('denis_','');
+          localStorage.setItem(dk, JSON.stringify(d));
+          imported++;
+        }
+      });
+      showToast('✅ ' + imported + ' Einträge ins Archiv importiert!', 'success');
+      renderArchiveList();
+    },
+    'Importieren',
+    'var(--green)'
+  );
+}
+
+
+// ================================================================
+(function() {
+  var CACHE_NAME = 'denis-v2';
+  var ASSETS = [
+    'https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap',
+    'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  ];
+
+  // Online/Offline Banner
+  function updateOnlineBanner() {
+    var banner = document.getElementById('offlineBanner');
+    if (!banner) return;
+    if (!navigator.onLine) {
+      banner.style.display = 'flex';
+      setTimeout(function(){ banner.style.opacity = '1'; }, 10);
+    } else {
+      banner.style.opacity = '0';
+      setTimeout(function(){ banner.style.display = 'none'; }, 600);
+    }
+  }
+  window.addEventListener('online',  updateOnlineBanner);
+  window.addEventListener('offline', updateOnlineBanner);
+
+  // Assets im Cache-Speicher vorhalten
+  function warmCache() {
+    if (!('caches' in window)) return;
+    caches.open(CACHE_NAME).then(function(cache) {
+      ASSETS.forEach(function(url) {
+        cache.match(url).then(function(hit) {
+          if (!hit) cache.add(url).catch(function(){});
+        });
+      });
+      // Aktuelle Seite selbst cachen
+      cache.add(window.location.href).catch(function(){});
+    });
+  }
+
+  // Alte Cache-Versionen aufräumen
+  function pruneOldCaches() {
+    if (!('caches' in window)) return;
+    caches.keys().then(function(keys) {
+      keys.forEach(function(k) {
+        if (k !== CACHE_NAME) caches.delete(k);
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    updateOnlineBanner();
+    pruneOldCaches();
+    // Erst cachen wenn Seite vollständig geladen
+    window.addEventListener('load', function() {
+      warmCache();
+      setTimeout(function() {
+        if ('caches' in window) {
+          typeof showToast === 'function' && showToast('📥 Offline-Daten gespeichert ✅');
+        }
+      }, 3500);
+    });
+  });
+
+  // PWA Manifest
+  document.addEventListener('DOMContentLoaded', function() {
+    var manifest = {
+      name: 'Denis Protokoll',
+      short_name: 'Protokoll',
+      start_url: './',
+      display: 'standalone',
+      background_color: '#1a2535',
+      theme_color: '#3d5268',
+      orientation: 'portrait',
+      icons: []
+    };
+    var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    var link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  });
+})();
+
+
 
 // ===== تنبيه نهاية الوردية =====
 var shiftEndAlertFired = false;
-var shiftStarted = false; // يُفعَّل عند أول زيارة
 function checkShiftEndAlert(){
   try{
     var endStr = localStorage.getItem('denis_shift_end');
@@ -2499,363 +3126,8 @@ openSettings=function(){
   setTimeout(updateSnapshotInfo,100);
 };
 
-
-// ══════════════════════════════════════════
-// ARCHIVE SYSTEM v2
-// ══════════════════════════════════════════
-
-var arcFilter = 'day';
-
-// ── فتح/إغلاق
-function arcOpen(){
-  arcRender();
-  document.getElementById('arcPanel').style.transform='translateX(0)';
-  document.getElementById('arcOverlay').style.display='block';
-}
-function arcClose(){
-  document.getElementById('arcPanel').style.transform='translateX(100%)';
-  document.getElementById('arcOverlay').style.display='none';
-}
-
-// ── تغيير الفلتر
-function arcSetFilter(f){
-  arcFilter=f;
-  ['day','week','month'].forEach(function(k){
-    var t=document.getElementById('arcTab_'+k);
-    if(t)t.className='arc-tab'+(k===f?' arc-tab-active':'');
-  });
-  document.getElementById('arcSelAll').checked=false;
-  arcUpdateSelBtn();
-  arcRender();
-}
-
-// ── جلب كل مفاتيح الأرشيف
-function arcGetKeys(){
-  var keys=[];
-  for(var i=0;i<localStorage.length;i++){
-    var k=localStorage.key(i);
-    if(k&&(k.startsWith('denis_archive_')||k.startsWith('arc_')))keys.push(k);
-  }
-  return keys.sort().reverse();
-}
-
-// ── فلترة حسب نوع الفترة
-function arcFilterKeys(keys){
-  var now=new Date();
-  return keys.filter(function(k){
-    var d=arcParseData(k);
-    if(!d)return false;
-    var ts=new Date(d.savedAt||d.date||0);
-    if(isNaN(ts))ts=new Date();
-    if(arcFilter==='day'){
-      return ts.toDateString()===now.toDateString();
-    } else if(arcFilter==='week'){
-      var startOfWeek=new Date(now);
-      startOfWeek.setDate(now.getDate()-now.getDay());
-      startOfWeek.setHours(0,0,0,0);
-      return ts>=startOfWeek;
-    } else if(arcFilter==='month'){
-      return ts.getMonth()===now.getMonth()&&ts.getFullYear()===now.getFullYear();
-    }
-    return true;
-  });
-}
-
-function arcParseData(key){
-  try{return JSON.parse(localStorage.getItem(key));}catch(e){return null;}
-}
-
-// ── عرض القائمة
-function arcRender(){
-  var list=document.getElementById('arcList');
-  var stats=document.getElementById('arcStats');
-  if(!list)return;
-  list.innerHTML='';
-
-  var allKeys=arcGetKeys();
-  var filtered=arcFilterKeys(allKeys);
-  var q=(document.getElementById('arcSearch')||{}).value||'';
-  q=q.toLowerCase().trim();
-  if(q){
-    filtered=filtered.filter(function(k){
-      var d=arcParseData(k);if(!d)return false;
-      var txt=((d.day||'')+' '+(d.date||'')+' '+(d.mitarbeiter||'')+' '+
-               (d.rows||[]).map(function(r){return r.k||'';}).join(' ')).toLowerCase();
-      return txt.indexOf(q)>=0;
-    });
-  }
-
-  var total=0;
-  filtered.forEach(function(k){var d=arcParseData(k);if(d)total+=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';}).length;});
-  if(stats)stats.textContent=filtered.length+' Schichten · '+total+' Einträge';
-
-  if(!filtered.length){
-    list.innerHTML='<div style="text-align:center;padding:40px 16px;"><div style="font-size:36px;margin-bottom:8px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:12px;">Keine Einträge gefunden</div></div>';
-    return;
-  }
-
-  filtered.forEach(function(key){
-    var d=arcParseData(key);if(!d)return;
-    var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-    var cnt=rows.length;
-    var locs=[...new Set(rows.map(function(r){return r.k;}))].slice(0,3).join(', ');
-    var ts=d.savedAt?new Date(d.savedAt).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    var accent=cnt>10?'#E8394A':cnt>5?'#f5a623':'#4cba6b';
-
-    var card=document.createElement('div');
-    card.className='arc-card';
-    card.innerHTML=
-      '<div style="display:flex;align-items:stretch;">'+
-        '<label style="padding:12px 4px 12px 10px;display:flex;align-items:center;cursor:pointer;" onclick="event.stopPropagation()">'+
-          '<input type="checkbox" class="arcSel" data-key="'+key+'" onchange="arcUpdateSelBtn()" style="accent-color:#4cba6b;width:15px;height:15px;cursor:pointer;">'+
-        '</label>'+
-        '<div class="arc-info" style="flex:1;padding:10px 8px 10px 4px;cursor:pointer;">'+
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;">'+
-            '<div style="font-family:Syne,sans-serif;font-size:13px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
-            '<span style="background:'+accent+'22;color:'+accent+';border:1px solid '+accent+'44;font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;">'+cnt+'×</span>'+
-          '</div>'+
-          (locs?'<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;">📍 '+locs+'</div>':'')+
-          '<div style="font-size:10px;color:rgba(255,255,255,0.2);">'+(d.mitarbeiter?'👤 '+d.mitarbeiter+' · ':'')+ts+'</div>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:flex;border-top:1px solid rgba(255,255,255,0.06);">'+
-        '<button class="arc-btn-print" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(232,57,74,0.85);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.06);">🖨 Drucken</button>'+
-        '<button class="arc-btn-pdf"   style="flex:1;padding:7px;border:none;background:transparent;color:rgba(100,160,230,0.85);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.06);">📄 PDF</button>'+
-        '<button class="arc-btn-del"   style="padding:7px 12px;border:none;background:transparent;color:rgba(232,57,74,0.35);font-size:13px;cursor:pointer;">🗑</button>'+
-      '</div>';
-
-    card.querySelector('.arc-info').addEventListener('click',function(){arcPreview(key);});
-    card.querySelector('.arc-btn-print').addEventListener('click',function(e){e.stopPropagation();arcPrint([arcParseData(key)]);});
-    card.querySelector('.arc-btn-pdf').addEventListener('click',function(e){e.stopPropagation();arcPDF(arcParseData(key));});
-    card.querySelector('.arc-btn-del').addEventListener('click',function(e){e.stopPropagation();arcDeleteOne(key);});
-    list.appendChild(card);
-  });
-}
-
-// ── تحديد الكل
-function arcToggleAll(checked){
-  document.querySelectorAll('.arcSel').forEach(function(cb){cb.checked=checked;});
-  arcUpdateSelBtn();
-}
-function arcUpdateSelBtn(){
-  var all=document.querySelectorAll('.arcSel');
-  var sel=document.querySelectorAll('.arcSel:checked');
-  var selAll=document.getElementById('arcSelAll');
-  if(selAll)selAll.checked=sel.length===all.length&&all.length>0;
-  var btn=document.getElementById('arcPrintSelBtn');
-  var cnt=document.getElementById('arcSelCount');
-  if(btn){btn.style.display=sel.length>0?'block':'none';}
-  if(cnt)cnt.textContent=sel.length;
-}
-
-// ── حذف
-function arcDeleteOne(key){
-  showConfirmDialog('Schicht löschen?',function(){
-    localStorage.removeItem(key);
-    arcRender();
-    showToast('🗑 Gelöscht');
-  });
-}
-function arcDeleteAll(){
-  var keys=arcGetKeys();
-  if(!keys.length){showToast('Kein Archiv','error');return;}
-  showConfirmDialog('Alle '+keys.length+' Einträge löschen?',function(){
-    keys.forEach(function(k){localStorage.removeItem(k);});
-    arcRender();
-    showToast('🗑 Archiv geleert');
-  });
-}
-
-// ══════════════════════════════════════════
-// PRINT ENGINE — نفس منطق الزر الأحمر الرئيسي
-// ══════════════════════════════════════════
-function arcPrint(dataArr){
-  // بناء HTML مطابق لبنية الـ proto-table الأصلية
-  var printWin=window.open('','_blank','width=900,height=700');
-  if(!printWin){showToast('Popup blockiert','error');return;}
-  printWin.document.write(arcBuildPrintHTML(dataArr));
-  printWin.document.close();
-  printWin.focus();
-  setTimeout(function(){printWin.print();printWin.close();},400);
-}
-
-function arcBuildPrintHTML(dataArr){
-  var css='<style>'+
-    '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;}'+
-    'body{font-family:"DM Sans",Arial,sans-serif;margin:0;padding:6mm;background:white;color:#111;font-size:8pt;}'+
-    'h1{font-size:14pt;font-weight:800;color:#1a2535;margin:0 0 2px;}'+
-    '.hdr{border-bottom:2px solid #1a2535;padding-bottom:6px;margin-bottom:8px;}'+
-    '.meta{font-size:8pt;color:#555;margin-bottom:4px;}'+
-    'table{width:100%;border-collapse:collapse;font-size:7.5pt;}'+
-    'thead tr{background:#1a2535;color:white;}'+
-    'th{padding:4px 6px;text-align:left;font-size:7pt;font-weight:700;}'+
-    'tbody tr:nth-child(even){background:#f5f7fa;}'+
-    'td{padding:4px 6px;border-bottom:1px solid #e8ecf0;vertical-align:top;}'+
-    '.badge{display:inline-block;padding:1px 5px;border-radius:10px;font-size:6.5pt;font-weight:700;}'+
-    '.page-break{page-break-before:always;padding-top:6mm;}'+
-    '@page{size:A4 portrait;margin:5mm;}'+
-    '@media print{body{padding:0;}}'+
-    '</style>';
-
-  var body='';
-  dataArr.forEach(function(d,di){
-    if(!d)return;
-    var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-    if(di>0)body+='<div class="page-break"></div>';
-    body+='<div class="hdr">';
-    body+='<h1>PROTOKOLL — '+(d.day||'')+' '+(d.date||'')+'</h1>';
-    body+='<div class="meta">';
-    if(d.mitarbeiter)body+='👤 '+d.mitarbeiter+'&nbsp;&nbsp;';
-    if(d.shiftStart)body+='⏱ '+d.shiftStart+' – '+d.shiftEnd+'&nbsp;&nbsp;';
-    body+='📅 Gedruckt: '+new Date().toLocaleString('de-DE');
-    body+='</div></div>';
-
-    if(!rows.length){body+='<p style="color:#999;">Keine Einträge</p>';}
-    else{
-      body+='<table><thead><tr>'+
-        '<th style="width:22px;">#</th>'+
-        '<th style="width:22%;">Standort / Kunde</th>'+
-        '<th style="width:36px;">Von</th>'+
-        '<th style="width:36px;">Bis</th>'+
-        '<th>Ereignisse / Notizen</th>'+
-        '</tr></thead><tbody>';
-      rows.forEach(function(r,ri){
-        var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —'&&n.ev!=='Freitext…';});
-        var evtStr=evts.map(function(n){return(n.c>1?'<strong>'+n.c+'×</strong> ':'')+n.ev;}).join('<br>');
-        var freis=(r.n||[]).filter(function(n){return n.tx&&n.tx.trim();}).map(function(n){return n.tx;}).join('; ');
-        body+='<tr>'+
-          '<td style="color:#aaa;font-size:7pt;">'+(ri+1)+'</td>'+
-          '<td><strong>'+r.k+'</strong></td>'+
-          '<td>'+(r.b||'—')+'</td>'+
-          '<td>'+(r.e||'—')+'</td>'+
-          '<td>'+(evtStr||'—')+(freis?'<br><em style="color:#666;font-size:6.5pt;">'+freis+'</em>':'')+'</td>'+
-          '</tr>';
-      });
-      body+='</tbody></table>';
-      body+='<div style="font-size:7pt;color:#aaa;text-align:right;margin-top:4px;">'+rows.length+' Einträge</div>';
-    }
-  });
-
-  return '<!DOCTYPE html><html><head><meta charset="utf-8">'+css+'</head><body>'+body+'</body></html>';
-}
-
-// ── طباعة المحدد
-function arcPrintSelected(){
-  var sel=Array.from(document.querySelectorAll('.arcSel:checked'));
-  if(!sel.length){showToast('Keine Auswahl','error');return;}
-  var arr=sel.map(function(cb){return arcParseData(cb.dataset.key);}).filter(Boolean);
-  arcPrint(arr);
-}
-
-// ── طباعة الكل
-function arcPrintAll(){
-  var keys=arcFilterKeys(arcGetKeys());
-  if(!keys.length){showToast('Kein Archiv','error');return;}
-  var arr=keys.map(function(k){return arcParseData(k);}).filter(Boolean);
-  if(arr.length>1){
-    showConfirmDialog(arr.length+' Schichten drucken?',function(){arcPrint(arr);});
-  } else {
-    arcPrint(arr);
-  }
-}
-
-// ── PDF
-function arcPDF(d){
-  if(!d)return;
-  var lib=window.jspdf;
-  if(!lib){showToast('jsPDF lädt noch…','error');return;}
-  var doc=new lib.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-  var W=210,mg=10,cW=W-2*mg,y=mg;
-
-  doc.setFillColor(26,37,53);doc.rect(0,0,W,26,'F');
-  doc.setTextColor(255,255,255);doc.setFontSize(14);doc.setFont('helvetica','bold');
-  doc.text('PROTOKOLL'+(d.day?' — '+d.day+' '+d.date:''),mg,10);
-  doc.setFontSize(8);doc.setFont('helvetica','normal');
-  if(d.mitarbeiter)doc.text('Mitarbeiter: '+d.mitarbeiter,mg,16);
-  if(d.shiftStart)doc.text(d.shiftStart+' – '+d.shiftEnd,W-mg-20,16);
-  doc.text('Gedruckt: '+new Date().toLocaleString('de-DE'),mg,22);
-  y=32;
-
-  var cols=[8,52,14,14,cW-88];var heads=['#','Standort','Von','Bis','Ereignisse'];
-  doc.setFillColor(240,242,245);doc.rect(mg,y,cW,5,'F');
-  doc.setTextColor(80,80,80);doc.setFontSize(7);doc.setFont('helvetica','bold');
-  var x=mg;
-  heads.forEach(function(h,i){doc.text(h,x+1,y+3.5);x+=cols[i];});
-  y+=6;doc.setFont('helvetica','normal');doc.setFontSize(7.5);
-
-  rows.forEach(function(r,ri){
-    var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';}).map(function(n){return(n.c>1?n.c+'x ':'')+n.ev;}).join(', ')||'—';
-    var lines=doc.splitTextToSize(evts,cols[4]-2);
-    var rh=Math.max(5,lines.length*3.5+1.5);
-    if(y+rh>290){doc.addPage();y=mg;}
-    if(ri%2===0){doc.setFillColor(248,249,252);doc.rect(mg,y,cW,rh,'F');}
-    doc.setTextColor(0,0,0);
-    var x2=mg;
-    [String(ri+1),r.k,r.b||'—',r.e||'—'].forEach(function(txt,i){
-      doc.text(String(txt).substring(0,cols[i]/2),x2+1,y+3.5);x2+=cols[i];
-    });
-    doc.text(lines,x2+1,y+3.5);
-    y+=rh;
-  });
-
-  var fname='Protokoll_'+(d.date||'export').replace(/\./g,'-')+'.pdf';
-  doc.save(fname);
-  showToast('📄 PDF gespeichert');
-}
-
-// ── معاينة مفصلة
-function arcPreview(key){
-  var d=arcParseData(key);if(!d)return;
-  var old=document.getElementById('arcPrevModal');if(old)old.remove();
-  var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-  var ev_total=rows.reduce(function(s,r){return s+(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';}).length;},0);
-
-  var ov=document.createElement('div');
-  ov.id='arcPrevModal';
-  ov.style.cssText='position:fixed;inset:0;z-index:9999995;background:#0f1923;overflow-y:auto;font-family:"DM Sans",sans-serif;';
-  ov.innerHTML=
-    '<div style="background:#1e2d3d;padding:50px 14px 12px;position:sticky;top:0;z-index:1;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'+
-        '<div>'+
-          '<div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
-          (d.mitarbeiter?'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">👤 '+d.mitarbeiter+'</div>':'')+
-        '</div>'+
-        '<div style="display:flex;gap:6px;">'+
-          '<button class="arc-prev-print" style="padding:7px 12px;border-radius:9px;border:none;background:#E8394A;color:white;font-size:12px;font-weight:700;cursor:pointer;">🖨</button>'+
-          '<button class="arc-prev-pdf" style="padding:7px 12px;border-radius:9px;border:none;background:#3d6a9e;color:white;font-size:12px;font-weight:700;cursor:pointer;">📄</button>'+
-          '<button onclick="document.getElementById(\'arcPrevModal\').remove()" style="padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.6);font-size:12px;cursor:pointer;">✕</button>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">'+
-        '<div style="background:rgba(61,82,104,0.5);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:white;">'+rows.length+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">BESUCHE</div></div>'+
-        '<div style="background:rgba(76,186,107,0.15);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:#4cba6b;">'+ev_total+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">EREIGNISSE</div></div>'+
-        '<div style="background:rgba(61,82,104,0.5);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:white;">'+(d.shiftStart||'—')+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">BEGINN</div></div>'+
-      '</div>'+
-    '</div>'+
-    '<div id="arcPrevRows" style="padding:10px;display:flex;flex-direction:column;gap:5px;"></div>';
-
-  ov.querySelector('.arc-prev-print').addEventListener('click',function(){arcPrint([d]);});
-  ov.querySelector('.arc-prev-pdf').addEventListener('click',function(){arcPDF(d);});
-
-  var rowsEl=ov.querySelector('#arcPrevRows');
-  rows.forEach(function(r){
-    var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';});
-    var div=document.createElement('div');
-    div.style.cssText='background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;';
-    div.innerHTML=
-      '<div style="display:flex;justify-content:space-between;margin-bottom:5px;">'+
-        '<div style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:white;">'+r.k+'</div>'+
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);">'+(r.b||'—')+' – '+(r.e||'—')+'</div>'+
-      '</div>'+
-      (evts.length
-        ? evts.map(function(n){return '<div style="font-size:11px;color:rgba(255,255,255,0.5);">• '+(n.c>1?n.c+'× ':'')+n.ev+'</div>';}).join('')
-        : '<div style="font-size:11px;color:rgba(255,255,255,0.2);">— Keine Ereignisse</div>');
-    rowsEl.appendChild(div);
-  });
-
-  document.body.appendChild(ov);
-}
-
 </script>
+
+
+</body>
 </html>
