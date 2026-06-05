@@ -51,6 +51,9 @@ body.dark-mode .notiz-select,body.dark-mode .time-input-direct,body.dark-mode .n
 body.dark-mode .autosave-bar{background:#1a2a1a!important;}
 body.dark-mode .settings-section{background:#2a2a2a;border-color:#444;}
 body.dark-mode .settings-pin-btn{background:#3a3a3a;color:var(--text);}
+  .dark-mode #archiveSearch{background:rgba(255,255,255,0.08)!important;color:white!important;border-color:rgba(255,255,255,0.15)!important;}
+  .dark-mode #archiveStats{color:rgba(255,255,255,0.35)!important;}
+  .dark-mode #importStatus{color:rgba(255,255,255,0.4)!important;}
 .proto-row.danger{border-left-color:var(--red)!important;}
 .proto-row.danger .cell{border-color:rgba(232,57,74,0.4)!important;background:#fff5f5!important;}
 body.dark-mode .proto-row.danger .cell{background:#3a1a1a!important;}
@@ -244,7 +247,8 @@ body.app-ready::before{opacity:0.5;}
 .settings-pin-btn{height:44px;border-radius:10px;border:1.5px solid var(--border);background:white;color:var(--text);font-family:'Syne',sans-serif;font-size:16px;font-weight:800;cursor:pointer;}
 .settings-pin-btn:active{transform:scale(0.94);}
 .settings-pin-btn.del{background:#fff0f1;border-color:#f5c0c4;color:var(--red);}
-
+/* ARCHIVE */
+.archive-item:hover{border-color:var(--red);background:#fff5f5;}
 /* CHECKIN */
 #checkinScreen{display:none;position:fixed;inset:0;z-index:99998;background:linear-gradient(160deg,#2d3f52 0%,#1a2535 100%);font-family:'DM Sans',sans-serif;overflow-y:auto;}
 .ci-hdr{background:linear-gradient(135deg,#3d5268,#2d3f52);padding:44px 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -298,11 +302,11 @@ body.app-ready::before{opacity:0.5;}
 .print-sig-area{display:none;margin-top:20px;border-top:1px solid #ddd;padding-top:16px;}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  html,body{background:white!important;margin:0!important;padding:0!important;width:100%!important;font-size:8pt!important;}
+  html,body{background:white!important;padding:0!important;margin:0!important;width:100%!important;font-size:8pt!important;}
   body::before{display:none!important;}
   .no-print,.toolbar,.add-zone,.time-now-btn,.bottom-actions,.kunde-back,
-  .progress-wrap,.autosave-bar,.toast-wrap,.pdf-loading,
-  #pinScreen,#settingsOverlay,#sigOverlay,#dashOverlay,#offlineBanner{display:none!important;}
+  .progress-wrap,.autosave-bar,
+  .toast-wrap,.pdf-loading,.report-overlay,.overlay-base,#pinScreen,#homeScreen,#checkinScreen,#fabCheckin,#archivePreviewOverlay{display:none!important;}
   .card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;width:100%!important;margin:0!important;padding:2px!important;}
   .proto-table{width:100%!important;font-size:7.5pt!important;border-collapse:collapse!important;}
   .proto-row{page-break-inside:avoid!important;}
@@ -318,12 +322,84 @@ body.app-ready::before{opacity:0.5;}
   @page{size:A4 portrait;margin:5mm;}
 }
 </style>
+
+<script>
+// ===== OFFLINE SUPPORT =====
+(function() {
+
+  // 1. Web App Manifest
+  function setupManifest() {
+    var iconHref = '';
+    var appIcon = document.getElementById('appIcon');
+    if (appIcon) iconHref = appIcon.href;
+    var manifest = {
+      name: "Denis Protokoll",
+      short_name: "Check-in",
+      description: "Sicherheitsdienst Protokoll App",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#1a2535",
+      theme_color: "#3d5268",
+      orientation: "portrait",
+      icons: [
+        { src: iconHref, sizes: "180x180", type: "image/png" },
+        { src: iconHref, sizes: "192x192", type: "image/png" }
+      ]
+    };
+    var blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+    var link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  }
+
+  // 2. Cache الصفحة الكاملة باستخدام Cache API مباشرة
+  function cachePageResources() {
+    if (!('caches' in window)) return;
+    var CACHE = 'denis-v1';
+    caches.open(CACHE).then(function(cache) {
+      // كيش الصفحة الحالية
+      cache.add(window.location.href).catch(function(){});
+      // كيش الخطوط
+      cache.add('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap').catch(function(){});
+      // كيش jsPDF
+      cache.add('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').catch(function(){});
+    });
+  }
+
+  // 3. إشعار الأوفلاين
+  function updateOnlineStatus() {
+    var banner = document.getElementById('offlineBanner');
+    if (!banner) return;
+    if (!navigator.onLine) {
+      banner.style.display = 'flex';
+      setTimeout(function(){ banner.style.opacity = '1'; }, 10);
+    } else {
+      banner.style.opacity = '0';
+      setTimeout(function(){ banner.style.display = 'none'; }, 600);
+    }
+  }
+
+  window.addEventListener('online',  updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+
+  document.addEventListener('DOMContentLoaded', function() {
+    setupManifest();
+    cachePageResources();
+    updateOnlineStatus();
+  });
+
+})();
+</script>
+
 </head>
 <body>
+
 <div id="offlineBanner" style="display:none;opacity:0;position:fixed;top:0;left:0;right:0;z-index:9999999;background:linear-gradient(90deg,#e8394a,#c0392b);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:10px 16px;align-items:center;justify-content:center;gap:8px;transition:opacity 0.5s;box-shadow:0 2px 12px rgba(0,0,0,0.4);">
   <span style="font-size:16px;">📵</span>
   <span>Offline-Modus — Alle Daten lokal gespeichert</span>
 </div>
+
 
 <!-- SPLASH -->
 <div id="splashScreen" style="position:fixed;inset:0;z-index:999999;background:#0f1923;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:opacity 0.5s ease;">
@@ -427,22 +503,17 @@ body.app-ready::before{opacity:0.5;}
         </div>
       </div>
       <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">🔄 WIEDERHERSTELLUNG</div>
-      <div id="snapshotInfo" style="font-size:11px;color:var(--muted);margin-bottom:8px;min-height:14px;"></div>
-      <button onclick="restoreSnapshot()" style="width:100%;background:#ffc107;color:#333;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;margin-bottom:6px;">🔄 Letzte Sicherung wiederherstellen</button>
-    </div>
-    <div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
-        <label style="flex:1;display:block;">
-          <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
-          <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
-        </label>
+        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">💾 DATENSICHERUNG</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="exportData()" style="flex:1;background:var(--green);color:#fff;font-weight:700;padding:9px;border-radius:10px;border:none;cursor:pointer;font-size:12px;">⬇️ Export</button>
+          <label style="flex:1;display:block;">
+            <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+            <span style="display:block;text-align:center;background:#3d5268;color:#fff;font-weight:700;padding:9px;border-radius:10px;cursor:pointer;font-size:12px;">⬆️ Import</span>
+          </label>
+        </div>
+        <div id="importStatus" style="margin-top:5px;font-size:11px;color:var(--muted);text-align:center;min-height:14px;"></div>
       </div>
-      <div id="importStatus" style="margin-top:5px;font-size:11px;color:var(--muted);text-align:center;min-height:14px;"></div>
-    </div>
-    <button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Einstellungen speichern</button>
+<button onclick="saveSettings()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">💾 Einstellungen speichern</button>
     </div>
   </div>
 </div>
@@ -488,6 +559,7 @@ body.app-ready::before{opacity:0.5;}
   <div class="modal-base">
     <div class="modal-hdr"><div class="modal-hdr-title">📊 Schicht-Übersicht</div><button class="modal-close" onclick="closeDashboard()">✕</button></div>
     <div class="modal-body" id="dashBody">Lädt…</div>
+<canvas id="dashChart" width="320" height="140" style="width:100%;max-width:320px;display:block;margin:8px auto;border-radius:10px;background:var(--bg);"></canvas>
   </div>
 </div>
 
@@ -504,11 +576,7 @@ body.app-ready::before{opacity:0.5;}
       <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;" id="ciGreetDate">—</div>
       <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:white;margin-top:2px;" id="ciGreetMsg">Guten Abend</div>
     </div>
-    <div style="text-align:right;">
-        <div class="ci-clock" id="ciClock">00:00:00</div>
-        <div class="ci-date" id="ciDate">--</div>
-        <div id="shiftCountdown" style="display:none;font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:0.5px;margin-top:2px;transition:color 0.3s;"></div>
-      </div>
+    <div style="text-align:right;"><div class="ci-clock" id="ciClock">00:00:00</div><div class="ci-date" id="ciDate">--</div></div>
   </div>
   <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 16px;background:rgba(0,0,0,0.2);">
     <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#4cba6b;" id="ciCountIn">0</div><div style="font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);">Eingang</div></div>
@@ -557,13 +625,12 @@ body.app-ready::before{opacity:0.5;}
     <button class="btn btn-ghost" onclick="openSettings()">⚙️</button>
     <button class="btn btn-ghost" onclick="openSigModal()">✍️</button>
     <button class="btn btn-ghost" onclick="openDashboard()">📊</button>
-    
+    <button class="btn btn-ghost" onclick="openArchive()">📁</button>
     <button class="btn btn-ghost" onclick="toggleDark()">🌙</button>
     <button class="btn btn-ghost" onclick="toggleSound()" id="soundBtn">🔔</button>
     <button class="btn btn-green" onclick="openReportPreview()">📲 WhatsApp</button>
     <button class="btn btn-blue" onclick="generatePDFAndSave()">📄 PDF</button>
     <button class="btn btn-ghost" onclick="resetForm()">↺</button>
-    <button class="btn btn-ghost" onclick="arcOpen()" title="Archiv" style="font-size:16px;">📁</button>
     <button class="btn btn-red" onclick="sortRowsByTime();window.print()">🖨</button>
   </div>
 </div>
@@ -647,66 +714,6 @@ body.app-ready::before{opacity:0.5;}
 </div>
 </div>
 
-
-<!-- ARCHIVE -->
-
-
-
-<div id="printContent" style="display:none;"></div>
-
-<!-- ═══════════ ARCHIVE SYSTEM v2 ═══════════ -->
-<div id="arcOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999988;" onclick="arcClose()"></div>
-
-<div id="arcPanel" style="position:fixed;top:0;right:0;bottom:0;width:320px;max-width:96vw;background:#1a2535;z-index:9999989;transform:translateX(100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,0.4);">
-
-  <!-- Header -->
-  <div style="background:#243447;padding:14px 14px 10px;flex-shrink:0;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:white;">📁 Archiv</div>
-      <button onclick="arcClose()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;line-height:1;">✕</button>
-    </div>
-
-    <!-- Filter Tabs: Täglich / Wöchentlich / Monatlich -->
-    <div style="display:flex;gap:5px;margin-bottom:8px;">
-      <button id="arcTab_day"   onclick="arcSetFilter('day')"   class="arc-tab arc-tab-active">📅 Täglich</button>
-      <button id="arcTab_week"  onclick="arcSetFilter('week')"  class="arc-tab">📆 Wöchentlich</button>
-      <button id="arcTab_month" onclick="arcSetFilter('month')" class="arc-tab">🗓 Monatlich</button>
-    </div>
-
-    <!-- Search -->
-    <input id="arcSearch" type="text" placeholder="🔍 Suchen…" oninput="arcRender()"
-      autocorrect="off" autocapitalize="off" spellcheck="false"
-      style="width:100%;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:white;font-size:12px;outline:none;box-sizing:border-box;">
-
-    <!-- Bulk Actions -->
-    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:rgba(255,255,255,0.5);">
-        <input type="checkbox" id="arcSelAll" onchange="arcToggleAll(this.checked)" style="accent-color:#4cba6b;width:14px;height:14px;"> Alle
-      </label>
-      <div id="arcStats" style="flex:1;font-size:10px;color:rgba(255,255,255,0.3);text-align:right;"></div>
-      <button id="arcPrintSelBtn" onclick="arcPrintSelected()" style="display:none;background:#E8394A;color:white;border:none;border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;">🖨 (<span id="arcSelCount">0</span>)</button>
-    </div>
-  </div>
-
-  <!-- List -->
-  <div id="arcList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;"></div>
-
-  <!-- Bottom: Print All -->
-  <div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.07);flex-shrink:0;display:flex;gap:8px;">
-    <button onclick="arcPrintAll()" style="flex:1;padding:9px;border:none;border-radius:10px;background:#E8394A;color:white;font-weight:700;font-size:12px;cursor:pointer;">🖨 Alle drucken</button>
-    <button onclick="arcDeleteAll()" style="padding:9px 12px;border:1px solid rgba(232,57,74,0.3);border-radius:10px;background:transparent;color:rgba(232,57,74,0.7);font-size:12px;cursor:pointer;">🗑</button>
-  </div>
-</div>
-
-<!-- Archive CSS -->
-<style>
-.arc-tab{flex:1;padding:5px 4px;border:1px solid rgba(255,255,255,0.1);border-radius:7px;background:transparent;color:rgba(255,255,255,0.45);font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;}
-.arc-tab-active{background:rgba(61,82,104,0.8);color:white;border-color:rgba(61,82,104,0.9);}
-.arc-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden;transition:border-color 0.2s;}
-.arc-card:hover{border-color:rgba(255,255,255,0.15);}
-</style>
-
-</body>
 <script>
 'use strict';
 // ===== CONSTANTS =====
@@ -737,6 +744,8 @@ var BLUE_EVENTS=['Technischer Defekt gemeldet 🔧','Defekte Beleuchtung 💡','
 // ===== STATE =====
 var rowId=0,statusOk=true,currentProtoNr='',currentReportText='';
 var nCounts={};
+var undoStack=[];
+var undoTimer=null;
 var soundEnabled=localStorage.getItem('denis_sound')!=='0';
 var autoSaveTimer=null;
 var pinEntry='';
@@ -867,10 +876,6 @@ document.addEventListener('keydown',function(e){
 
 // ===== INIT =====
 function initApp(){
-  // استعادة حالة الوردية
-  var existingLog=localStorage.getItem('denis_checkin_log');
-  if(existingLog){try{var l=JSON.parse(existingLog);if(l&&l.length>0)shiftStarted=true;}catch(e){}}
-  if(localStorage.getItem('denis_shift_first_visit'))shiftStarted=true;
   if(localStorage.getItem('denis_dark')==='1')document.body.classList.add('dark-mode');
   if(!soundEnabled)document.getElementById('soundBtn').textContent='🔕';
   var sd=getShiftDate(),now=new Date();
@@ -916,76 +921,13 @@ function getShiftTimes(){
 }
 function updateClock(){
   var now=new Date();var st=getShiftTimes();
+  var total=st.se>st.ss?st.se-st.ss:(24*60-st.ss)+st.se;
   var nm=now.getHours()*60+now.getMinutes();
-  var fill=document.getElementById('progressFill');
-  var pctEl=document.getElementById('progressPct');
-  var lbl=document.querySelector('.progress-label');
-  if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
-
-  if(!shiftStarted){
-    // قبل أول زيارة — شريط مجمد
-    if(fill){fill.style.width='0%';fill.style.background='rgba(255,255,255,0.12)';}
-    if(pctEl)pctEl.textContent='—';
-  } else {
-    // startMin = وقت أول ciIn المحفوظ
-    var startMin=getFirstVisitMin();
-    if(startMin<0)startMin=st.ss;
-    // endMin = نهاية الوردية
-    var endMin=st.se;
-    // إجمالي المدة من أول زيارة حتى نهاية الوردية
-    var total=endMin>startMin ? endMin-startMin : (24*60-startMin)+endMin;
-    if(total<=0)total=1;
-    // المنقضي من أول زيارة حتى الآن
-    var elapsed=nm>=startMin ? nm-startMin : (24*60-startMin)+nm;
-    elapsed=Math.max(0,elapsed);
-    var pct=Math.min(100,Math.round((elapsed/total)*100));
-    if(fill){
-      fill.style.width=pct+'%';
-      if(pct>=90)fill.style.background='#E8394A';
-      else if(pct>=70)fill.style.background='#f5a623';
-      else fill.style.background='';
-    }
-    if(pctEl)pctEl.textContent=pct+'%';
-  }
-  updateShiftCountdown(now,st);
-}
-
-function getFirstVisitMin(){
-  // أولاً: من localStorage المحفوظ
-  try{
-    var saved=localStorage.getItem('denis_shift_first_visit');
-    if(saved){var p=saved.split(':');if(p.length>=2)return parseInt(p[0])*60+parseInt(p[1]);}
-  }catch(e){}
-  // ثانياً: من السجل
-  try{
-    var log=ciGetLog();
-    if(!log||!log.length)return -1;
-    for(var i=0;i<log.length;i++){
-      if(log[i].type==='in'&&log[i].time){
-        var parts=log[i].time.split(':');
-        if(parts.length>=2)return parseInt(parts[0])*60+parseInt(parts[1]);
-      }
-    }
-  }catch(e){}
-  return -1;
-}
-
-function updateShiftCountdown(now, st){
-  var el=document.getElementById('shiftCountdown');
-  if(!el)return;
-  // أظهر فقط إذا بدأت الوردية (أول زيارة)
-  if(!shiftStarted)return;
-  el.style.display='block';
-  var nm=now.getHours()*60+now.getMinutes();
-  // حساب الوقت المتبقي حتى نهاية الوردية
-  var rem=st.se>=nm ? st.se-nm : (24*60-nm)+st.se;
-  var h=Math.floor(rem/60);
-  var m=rem%60;
-  var txt=h>0 ? h+'h '+p2(m)+'m' : m+'min';
-  // تلوين حسب الوقت المتبقي
-  if(rem<=15){el.style.color='#E8394A';el.textContent='⏰ '+txt+' noch';}
-  else if(rem<=30){el.style.color='#f5a623';el.textContent='⏱ '+txt+' noch';}
-  else{el.style.color='rgba(255,255,255,0.45)';el.textContent='⏱ '+txt+' noch';}
+  var el=nm>=st.ss?nm-st.ss:nm<=st.se?(24*60-st.ss)+nm:0;
+  var pct=Math.min(100,Math.round((el/total)*100));
+  var fill=document.getElementById('progressFill');if(fill)fill.style.width=pct+'%';
+  var pctEl=document.getElementById('progressPct');if(pctEl)pctEl.textContent=pct+'%';
+  var lbl=document.querySelector('.progress-label');if(lbl)lbl.textContent=st.ssStr+' → '+st.seStr;
 }
 
 // ===== SHIFT KEY =====
@@ -996,7 +938,6 @@ function checkNewShift(){
     if(lk&&lk!==ck){
       try{var od=localStorage.getItem('denis_protokoll');if(od){var p=JSON.parse(od);if(p.rows&&p.rows.some(function(r){return r.k&&r.k!=='— Standort —';}))localStorage.setItem('denis_archive_'+Date.now(),od);}}catch(e){}
       localStorage.removeItem('denis_protokoll');localStorage.removeItem('denis_checkin_log');
-      localStorage.removeItem('denis_shift_first_visit');
       localStorage.setItem('denis_last_shift_key',ck);return true;
     }
     if(!lk)localStorage.setItem('denis_last_shift_key',ck);return false;
@@ -1205,7 +1146,242 @@ function saveData(){
   }catch(e){var bar2=document.getElementById('autosaveBar');if(bar2)bar2.className='autosave-bar error no-print';}
 }
 
+// ===== ARCHIVE =====
+var _arcFilter='all';
+function openArchive(){
+  _arcFilter='all';
+  renderArchiveList('');
+  document.getElementById('archiveSearch').value='';
+  document.getElementById('archivePanel').style.transform='translateX(0)';
+  document.getElementById('archiveBg').style.display='block';
+  arcSetFilter('all');
+  updateArcQuickStats();
+}
 
+function arcSetFilter(f){
+  _arcFilter=f;
+  ['all','week','month','danger'].forEach(function(t){
+    var btn=document.getElementById('arcTab_'+t);
+    if(!btn)return;
+    if(t===f){btn.style.background='rgba(232,57,74,0.2)';btn.style.borderColor='rgba(232,57,74,0.4)';btn.style.color='#E8394A';}
+    else{btn.style.background='rgba(255,255,255,0.05)';btn.style.borderColor='rgba(255,255,255,0.1)';btn.style.color='rgba(255,255,255,0.4)';}
+  });
+  renderArchiveList(document.getElementById('archiveSearch').value||'');
+}
+function updateArcQuickStats(){
+  var el=document.getElementById('arcQuickStats');if(!el)return;
+  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');});
+  var totalRows=0,dangerTotal=0;
+  keys.forEach(function(k){
+    try{
+      var d=JSON.parse(localStorage.getItem(k));
+      var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
+      totalRows+=rows.length;
+      dangerTotal+=rows.filter(function(r){return(r.n||[]).some(function(n){return(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;});}).length;
+    }catch(e){}
+  });
+  el.innerHTML=
+    '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:6px;text-align:center;">'+
+      '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;color:white;">'+keys.length+'</div>'+
+      '<div style="font-size:8px;color:rgba(255,255,255,0.3);">SCHICHTEN</div>'+
+    '</div>'+
+    '<div style="background:rgba(76,186,107,0.1);border-radius:8px;padding:6px;text-align:center;">'+
+      '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;color:#4cba6b;">'+totalRows+'</div>'+
+      '<div style="font-size:8px;color:rgba(255,255,255,0.3);">EINTRÄGE</div>'+
+    '</div>'+
+    '<div style="background:rgba(232,57,74,0.1);border-radius:8px;padding:6px;text-align:center;">'+
+      '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;color:#E8394A;">'+dangerTotal+'</div>'+
+      '<div style="font-size:8px;color:rgba(255,255,255,0.3);">VORFÄLLE</div>'+
+    '</div>';
+}
+function archiveExportAll(){
+  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');});
+  if(!keys.length){showToast('Kein Archiv vorhanden','error');return;}
+  var data={exportDate:new Date().toISOString(),count:keys.length,entries:{}};
+  keys.forEach(function(k){try{data.entries[k]=JSON.parse(localStorage.getItem(k));}catch(e){}});
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='Denis_Archiv_'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  URL.revokeObjectURL(url);showToast('📤 Archiv exportiert!','success');
+}
+function renderArchiveList(query){
+  var list=document.getElementById('archiveList');
+  list.innerHTML='';
+  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');}).sort().reverse();
+  
+  var statsEl=document.getElementById('archiveStats');
+  if(statsEl){
+    var totalRows=0;
+    keys.forEach(function(k){try{var d=JSON.parse(localStorage.getItem(k));totalRows+=(d.rows||[]).length;}catch(e){}});
+    statsEl.textContent=keys.length+' Schichten · '+totalRows+' Einträge';
+  }
+
+  if(!keys.length){
+    list.innerHTML='<div style="text-align:center;padding:40px 16px;"><div style="font-size:32px;margin-bottom:8px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:12px;">Noch keine archivierten Schichten</div></div>';
+    return;
+  }
+
+  var q=(query||'').toLowerCase().trim();
+  var now=Date.now();
+  var filtered=keys.filter(function(key){
+    try{
+      var d=JSON.parse(localStorage.getItem(key));
+      if(_arcFilter==='week'){var ts=d.savedAt?new Date(d.savedAt).getTime():0;if(now-ts>7*24*3600000)return false;}
+      if(_arcFilter==='month'){var ts=d.savedAt?new Date(d.savedAt).getTime():0;if(now-ts>30*24*3600000)return false;}
+      if(_arcFilter==='danger'){var hd=(d.rows||[]).some(function(r){return(r.n||[]).some(function(n){return(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;});});if(!hd)return false;}
+      if(!q)return true;
+      var locs=(d.rows||[]).map(function(r){return r.k||'';}).join(' ').toLowerCase();
+      var dayDate=((d.day||'')+' '+(d.date||'')).toLowerCase();
+      var worker=(d.mitarbeiter||'').toLowerCase();
+      return dayDate.indexOf(q)>=0||locs.indexOf(q)>=0||worker.indexOf(q)>=0;
+    }catch(e){return false;}
+  });
+
+  if(!filtered.length){
+    list.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:30px;font-size:12px;">'+(q?'Keine Ergebnisse für "'+q+'"':'Keine Schichten in diesem Zeitraum')+'</div>';
+    return;
+  }
+
+  filtered.forEach(function(key){
+    try{
+      var d=JSON.parse(localStorage.getItem(key));if(!d)return;
+      var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
+      var uniqueLocs=[...new Set(rows.map(function(r){return r.k;}))];
+      var rowCount=rows.length;
+      var worker=d.mitarbeiter||'';
+      var protoNr=d.protokollNr||'';
+      var dangerRows=rows.filter(function(r){return(r.n||[]).some(function(n){return(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;});}).length;
+      var totalEvents=rows.reduce(function(s,r){return s+(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —'&&n.ev!=='Freitext…';}).reduce(function(a,n){return a+(n.c||1);},0);},0);
+      var accent=dangerRows>0?'#E8394A':rowCount>10?'#f5a623':'#4cba6b';
+      var locStr=uniqueLocs.slice(0,2).join(', ')+(uniqueLocs.length>2?' +'+(uniqueLocs.length-2):'');
+
+      var card=document.createElement('div');
+      card.style.cssText='background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-left:3px solid '+accent+';border-radius:11px;overflow:hidden;transition:background 0.2s;';
+      card.onmouseover=function(){this.style.background='rgba(255,255,255,0.07)';};
+      card.onmouseout=function(){this.style.background='rgba(255,255,255,0.04)';};
+
+      card.innerHTML=
+        '<div onclick="showArchivePreview(JSON.parse(localStorage.getItem(\''+key+'\')))" style="padding:10px 12px;cursor:pointer;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
+            '<div style="font-family:\'Syne\',sans-serif;font-size:12px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
+            '<div style="display:flex;gap:4px;">'+
+              (dangerRows>0?'<span style="background:rgba(232,57,74,0.2);color:#E8394A;font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;">⚠️ '+dangerRows+'</span>':'')+
+              '<span style="background:'+accent+'18;color:'+accent+';font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;">'+rowCount+'×</span>'+
+            '</div>'+
+          '</div>'+
+          (locStr?'<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:3px;">📍 '+locStr+'</div>':'')+
+          '<div style="display:flex;gap:8px;font-size:9px;color:rgba(255,255,255,0.2);">'+
+            (protoNr?'<span>📋 '+protoNr+'</span>':'')+
+            (worker?'<span>👤 '+worker+'</span>':'')+
+            (totalEvents?'<span>📝 '+totalEvents+'</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<div style="display:flex;border-top:1px solid rgba(255,255,255,0.05);">'+
+          '<button onclick="showArchivePreview(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(255,255,255,0.5);font-size:10px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.05);">👁</button>'+
+          '<button onclick="archivePrint(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(232,57,74,0.85);font-size:10px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.05);">🖨</button>'+
+          '<button onclick="archivePDF(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(100,160,230,0.85);font-size:10px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.05);">📄</button>'+
+          '<button onclick="archiveDeleteOne(\''+key+'\')" style="padding:7px 11px;border:none;background:transparent;color:rgba(232,57,74,0.4);font-size:12px;cursor:pointer;">🗑</button>'+
+        '</div>';
+      list.appendChild(card);
+    }catch(e){}
+  });
+}
+function filterArchive(q){renderArchiveList(q);}
+
+function archiveDeleteOne(key){
+  showConfirmDialog('Schicht löschen?',function(){
+    localStorage.removeItem(key);
+    renderArchiveList(document.getElementById('archiveSearch').value||'');
+    showToast('🗑 Schicht gelöscht');
+  });
+}
+
+function archiveDeleteAll(){
+  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');});
+  if(!keys.length){showToast('Kein Archiv vorhanden','error');return;}
+  showConfirmDialog('Alle '+keys.length+' Schichten löschen?',function(){
+    keys.forEach(function(k){localStorage.removeItem(k);});
+    renderArchiveList('');
+    showToast('🗑 Archiv geleert');
+  });
+}
+function closeArchive(){
+  document.getElementById('archivePanel').style.transform='translateX(-100%)';
+  document.getElementById('archiveBg').style.display='none';
+}
+function showArchivePreview(d){
+  var old=document.getElementById('arcPrev');if(old)old.remove();
+  var ov=document.createElement('div');ov.id='arcPrev';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999995;background:#0f1923;display:flex;flex-direction:column;overflow-y:auto;font-family:\'DM Sans\',sans-serif;';
+
+  // إحصاءات الوردية
+  var validRows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
+  var allEvents=validRows.reduce(function(a,r){return a.concat((r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —'&&n.ev!=='Freitext…';}));} ,[]);
+  var dangerCount=validRows.filter(function(r){return(r.n||[]).some(function(n){return(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;});}).length;
+  var totalMin=0;
+  validRows.forEach(function(r){if(r.b&&r.e){var b=r.b.split(':'),e=r.e.split(':');var diff=(parseInt(e[0])*60+parseInt(e[1]))-(parseInt(b[0])*60+parseInt(b[1]));if(diff<0)diff+=1440;totalMin+=diff;}});
+  var avgMin=validRows.length?Math.round(totalMin/validRows.length):0;
+
+  var hdr='<div style="background:#1e2d3d;padding:50px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">'+
+      '<div>'+
+        '<div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:3px;">ARCHIV</div>'+
+        '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:white;margin-top:4px;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
+        (d.mitarbeiter?'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;">👤 '+d.mitarbeiter+'</div>':'')+
+      '</div>'+
+      '<div style="display:flex;gap:6px;">'+
+        '<button onclick="archivePrint(window._arcD)" style="padding:7px 11px;border-radius:9px;border:none;background:linear-gradient(135deg,#E8394A,#c8102e);color:white;font-size:11px;font-weight:700;cursor:pointer;">🖨</button>'+
+        '<button onclick="archivePDF(window._arcD)" style="padding:7px 11px;border-radius:9px;border:none;background:linear-gradient(135deg,#3d6a9e,#2a4f7c);color:white;font-size:11px;font-weight:700;cursor:pointer;">📄</button>'+
+        '<button onclick="document.getElementById(\'arcPrev\').remove()" style="padding:7px 11px;border-radius:9px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;">✕</button>'+
+      '</div>'+
+    '</div>'+
+    // شريط الإحصاءات
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">'+
+      '<div style="background:rgba(61,82,104,0.4);border-radius:8px;padding:7px;text-align:center;">'+
+        '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:white;">'+validRows.length+'</div>'+
+        '<div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;">BESUCHE</div>'+
+      '</div>'+
+      '<div style="background:rgba(76,186,107,0.15);border-radius:8px;padding:7px;text-align:center;">'+
+        '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:#4cba6b;">'+allEvents.reduce(function(s,n){return s+(n.c||1);},0)+'</div>'+
+        '<div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;">EREIGNISSE</div>'+
+      '</div>'+
+      '<div style="background:rgba(232,57,74,0.15);border-radius:8px;padding:7px;text-align:center;">'+
+        '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:#E8394A;">'+dangerCount+'</div>'+
+        '<div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;">VORFÄLLE</div>'+
+      '</div>'+
+      '<div style="background:rgba(245,166,35,0.15);border-radius:8px;padding:7px;text-align:center;">'+
+        '<div style="font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:#f5a623;">'+avgMin+'m</div>'+
+        '<div style="font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;">Ø DAUER</div>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+
+  var rows='<div style="padding:12px;display:flex;flex-direction:column;gap:6px;">';
+  (d.rows||[]).forEach(function(row){
+    if(!row.k||row.k==='— Standort —')return;
+    var notizen=(row.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';});
+    var hasDanger=(typeof DANGER_EVENTS!=='undefined')&&notizen.some(function(n){return DANGER_EVENTS.indexOf(n.ev)>=0;});
+    var borderColor=hasDanger?'rgba(232,57,74,0.4)':'rgba(255,255,255,0.07)';
+    rows+='<div style="background:rgba(255,255,255,0.04);border:1px solid '+borderColor+';border-radius:10px;padding:12px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+        '<div style="font-family:\'Syne\',sans-serif;font-size:12px;font-weight:800;color:white;">'+row.k+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,0.35);">⏱ '+(row.b||'—')+' – '+(row.e||'—')+'</div>'+
+      '</div>';
+    if(notizen.length){
+      notizen.forEach(function(n){
+        var danger=(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;
+        rows+='<div style="font-size:11px;color:'+(danger?'#ff8090':'rgba(255,255,255,0.55)')+';">'+
+          (danger?'⚠️ ':'• ')+(n.c>1?'['+n.c+'×] ':'')+n.ev+'</div>';
+      });
+    } else {
+      rows+='<div style="font-size:11px;color:rgba(255,255,255,0.2);">— Keine Vorfälle</div>';
+    }
+    rows+='</div>';
+  });
+  rows+='</div>';
+
+  ov.innerHTML=hdr+rows;window._arcD=d;document.body.appendChild(ov);
+}
 function archivePrint(d){
   var ov=document.getElementById('arcPrev');if(ov)ov.style.display='none';
   var orig=localStorage.getItem('denis_protokoll');
@@ -1443,6 +1619,7 @@ function openDashboard(){
     +'<div style="background:#f0faf2;border:1.5px solid #a5d6a7;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:14px;"><div style="font-size:28px;">⏱</div><div><div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:#1a6630;">'+Math.floor(tm/60)+'h '+( tm%60)+'m</div><div style="font-size:10px;color:#4cba6b;font-weight:700;">Einsatzzeit · '+rows.length+' Besuche</div></div></div>'
     +(Object.entries(km).length?'<div style="background:#f8f9fc;border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">📍 Standorte</div>'+Object.entries(km).map(function(e){return'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:12px;font-weight:600;color:var(--text);">'+e[0]+'</span><span style="font-family:Syne,sans-serif;font-size:11px;font-weight:800;color:#3d5268;">'+e[1]+'x</span></div>';}).join('')+'</div>':'')
     +'<button onclick="closeDashboard();openReportPreview();" style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">📋 Bericht generieren</button>';
+  renderDashboardChart(rows);
   document.getElementById('dashOverlay').classList.add('open');
 }
 function closeDashboard(){document.getElementById('dashOverlay').classList.remove('open');}
@@ -1746,13 +1923,6 @@ function updateQuickBar(){
 function ciIn(){
   if(!ciSelected)return;var time=nowHM();
   localStorage.setItem('denis_last_kunde',ciSelected);
-  // تفعيل الشريط والعداد عند أول زيارة
-  if(!shiftStarted){
-    shiftStarted=true;
-    localStorage.setItem('denis_shift_first_visit', nowHM());
-    var cdEl=document.getElementById('shiftCountdown');
-    if(cdEl)cdEl.style.display='block';
-  }
   var log=ciGetLog();
   var snapshot=JSON.stringify(log);
   var rowsBefore=document.getElementById('rowsWrap').innerHTML;
@@ -2049,7 +2219,7 @@ function ciSyncTimeToProtocol(kunde,type,newTime,oldTime){
   });
 }
 function ciToggleType(idx){var log=ciGetLog();log[idx].type=log[idx].type==='in'?'out':'in';ciSaveLog(log);ciRenderLog();updateQuickBar();updateDayCounter();showToast(log[idx].type==='in'?'✅ Eingang':'🚪 Ausgang','info');}
-function ciDeleteEntry(idx){var log=ciGetLog();log.splice(idx,1);ciSaveLog(log);ciRenderLog();updateDayCounter();updateQuickBar();ciShowToast('🗑 Gelöscht');}
+function ciDeleteEntry(idx){showConfirmDialog('Eintrag wirklich löschen?',function(){var log=ciGetLog();var deleted=log[idx];log.splice(idx,1);ciSaveLog(log);ciRenderLog();updateDayCounter();updateQuickBar();undoStack.push(function(){var l=ciGetLog();l.splice(idx,0,deleted);ciSaveLog(l);ciRenderLog();updateDayCounter();updateQuickBar();});showUndoToast('Eintrag gelöscht');});}
 function ciClearLog(){showConfirmDialog('🗑 Alle Einträge löschen?',function(){localStorage.removeItem('denis_checkin_log');ciRenderLog();updateDayCounter();updateQuickBar();});}
 function ciFinish(){
   var log=ciGetLog();var rows=document.querySelectorAll('.proto-row');
@@ -2244,8 +2414,6 @@ function ciFilterKunden(query){
 }
 
 // ===== ٤. Undo =====
-var undoStack=[];
-var undoTimer=null;
 
 function showUndoToast(msg,undoFn){
   var old=document.querySelector('.undo-toast');if(old)old.remove();
@@ -2335,48 +2503,6 @@ function ciShowToast(msg){
   setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){t.remove();},300);},2200);
 }
 
-// ===== OFFLINE + CACHE =====
-(function(){
-  function cachePageResources(){
-    if(!('caches' in window))return;
-    caches.open('denis-v1').then(function(cache){
-      cache.add(window.location.href).catch(function(){});
-      cache.add('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap').catch(function(){});
-      cache.add('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js').catch(function(){});
-    });
-  }
-
-  function updateOnlineStatus(){
-    var banner=document.getElementById('offlineBanner');
-    if(!banner)return;
-    if(!navigator.onLine){
-      banner.style.display='flex';
-      setTimeout(function(){banner.style.opacity='1';},10);
-    } else {
-      banner.style.opacity='0';
-      setTimeout(function(){banner.style.display='none';},600);
-    }
-  }
-
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-
-  document.addEventListener('DOMContentLoaded', function(){
-    updateOnlineStatus();
-    if(!('caches' in window))return;
-    caches.open('denis-v1').then(function(c){return c.keys();}).then(function(keys){
-      if(!keys.length){cachePageResources();setTimeout(function(){typeof showToast==='function'&&showToast('📥 Offline gespeichert ✅');},3000);}
-    }).catch(function(){});
-  });
-
-  // PWA Manifest
-  document.addEventListener('DOMContentLoaded', function(){
-    var manifest={name:"Denis Protokoll",short_name:"Check-in",start_url:"./",display:"standalone",background_color:"#1a2535",theme_color:"#3d5268",orientation:"portrait",icons:[]};
-    var blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    var link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
-    document.head.appendChild(link);
-  });
-})();
 
 // ===== EXPORT / IMPORT =====
 function exportData(){
@@ -2384,20 +2510,15 @@ function exportData(){
     'denis_signature','denis_shift_start','denis_shift_end','denis_alarm_min',
     'denis_dark','denis_sound','denis_week_start','denis_mitarbeiter','denis_last_kunde',
     'denis_proto_date','denis_proto_seq','denis_event_freq'];
-  var backup={version:1,exportedAt:new Date().toISOString(),data:{}};
+  var backup={version:2,exportedAt:new Date().toISOString(),data:{}};
   keys.forEach(function(k){var v=localStorage.getItem(k);if(v!=null)backup.data[k]=v;});
-  for(var i=0;i<localStorage.length;i++){
-    var k=localStorage.key(i);
-    if(k&&(k.startsWith('arc_')||k.startsWith('denis_archive_')))backup.data[k]=localStorage.getItem(k);
-  }
+  for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.startsWith('denis_archive_')||k.startsWith('arc_')))backup.data[k]=localStorage.getItem(k);}
   var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='denis-backup-'+new Date().toISOString().slice(0,10)+'.json';
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(a.href);
   showToast('✅ Export erfolgreich');
 }
-
 function importData(event){
   var file=event.target.files[0];if(!file)return;
   var st=document.getElementById('importStatus');if(st)st.textContent='⏳ Wird importiert…';
@@ -2407,519 +2528,90 @@ function importData(event){
       var backup=JSON.parse(e.target.result);
       if(!backup||!backup.data)throw new Error('Ungültiges Format');
       var count=0;
-      Object.keys(backup.data).forEach(function(k){
-        if(k.startsWith('denis_')||k.startsWith('arc_')){localStorage.setItem(k,backup.data[k]);count++;}
-      });
+      Object.keys(backup.data).forEach(function(k){if(k.startsWith('denis_')||k.startsWith('arc_')){localStorage.setItem(k,backup.data[k]);count++;}});
       if(st)st.textContent='✅ '+count+' Einträge importiert';
       showToast('✅ Import OK – Neu laden…');
       setTimeout(function(){window.location.reload();},1800);
-    }catch(err){
-      if(st)st.textContent='❌ '+err.message;
-      showToast('❌ Import fehlgeschlagen','error');
-    }
+    }catch(err){if(st)st.textContent='❌ '+err.message;showToast('❌ Import fehlgeschlagen','error');}
   };
-  reader.readAsText(file);
-  event.target.value='';
+  reader.readAsText(file);event.target.value='';
 }
 
-
-window.addEventListener('beforeunload',function(){try{saveData();}catch(e){}});
-
-// ===== تنبيه نهاية الوردية =====
-var shiftEndAlertFired = false;
-var shiftStarted = false; // يُفعَّل عند أول زيارة
-function checkShiftEndAlert(){
-  try{
-    var endStr = localStorage.getItem('denis_shift_end');
-    if(!endStr) return;
-    var parts = endStr.split(':');
-    if(parts.length < 2) return;
-    var now = new Date();
-    var endMin = parseInt(parts[0])*60 + parseInt(parts[1]);
-    var nowMin = now.getHours()*60 + now.getMinutes();
-    var diff = endMin - nowMin;
-    if(diff > 0 && diff <= 15 && !shiftEndAlertFired){
-      shiftEndAlertFired = true;
-      showToast('⏰ Schicht endet in '+diff+' Min!', 'warning');
-      playBeep && playBeep('alarm');
-    }
-    if(diff > 15) shiftEndAlertFired = false;
-  }catch(e){}
-}
-setInterval(checkShiftEndAlert, 60000);
-
-// ===== DATA PROTECTION =====
-
-// Auto snapshot كل 5 دقائق
-setInterval(function(){
-  try{
-    var proto=localStorage.getItem('denis_protokoll');
-    var log=localStorage.getItem('denis_checkin_log');
-    if(proto||log){
-      if(proto)localStorage.setItem('denis_snapshot_proto',proto);
-      if(log)localStorage.setItem('denis_snapshot_log',log);
-      localStorage.setItem('denis_snapshot_time',new Date().toISOString());
-    }
-  }catch(e){}
-}, 5*60*1000);
-
-// استعادة آخر snapshot
-function restoreSnapshot(){
-  var t=localStorage.getItem('denis_snapshot_time');
-  var proto=localStorage.getItem('denis_snapshot_proto');
-  var log=localStorage.getItem('denis_snapshot_log');
-  if(!proto&&!log){showToast('⚠️ Keine Sicherung vorhanden','error');return;}
-  var timeStr=t?new Date(t).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'?';
-  showConfirmDialog('Sicherung vom '+timeStr+' wiederherstellen?',function(){
-    if(proto)localStorage.setItem('denis_protokoll',proto);
-    if(log)localStorage.setItem('denis_checkin_log',log);
-    showToast('✅ Wiederhergestellt!');
-    setTimeout(function(){window.location.reload();},1200);
+// ===== CHART IN DASHBOARD =====
+function renderDashboardChart(rows){
+  var canvas=document.getElementById('dashChart');if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  // بيانات: عدد الأحداث لكل عميل
+  var km={};rows.forEach(function(r){if(r.k&&r.k!=='— Standort —')km[r.k]=(km[r.k]||0)+1;});
+  var entries=Object.entries(km).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+  if(!entries.length){ctx.clearRect(0,0,canvas.width,canvas.height);return;}
+  var W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  var barW=Math.floor((W-40)/entries.length)-8;
+  var maxVal=Math.max.apply(null,entries.map(function(e){return e[1];}));
+  var colors=['#3d5268','#4cba6b','#f5a623','#E8394A','#7c5cbf','#26c6da'];
+  entries.forEach(function(entry,i){
+    var barH=Math.floor(((H-40)*entry[1])/maxVal);
+    var x=20+i*(barW+8);var y=H-20-barH;
+    ctx.fillStyle=colors[i%colors.length];
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(x,y,barW,barH,4);
+    else ctx.rect(x,y,barW,barH);
+    ctx.fill();
+    // label
+    ctx.fillStyle='#888';ctx.font='9px sans-serif';ctx.textAlign='center';
+    var label=entry[0].length>6?entry[0].slice(0,6)+'…':entry[0];
+    ctx.fillText(label,x+barW/2,H-6);
+    // count
+    ctx.fillStyle='#444';ctx.font='bold 11px sans-serif';
+    ctx.fillText(entry[1],x+barW/2,y-4);
   });
 }
 
-// تحديث معلومات الـ snapshot في الإعدادات
-function updateSnapshotInfo(){
-  var el=document.getElementById('snapshotInfo');
-  if(!el)return;
-  var t=localStorage.getItem('denis_snapshot_time');
-  var proto=localStorage.getItem('denis_snapshot_proto');
-  var log=localStorage.getItem('denis_snapshot_log');
-  if(!t&&!proto){el.textContent='Keine Sicherung vorhanden';return;}
-  var timeStr=t?new Date(t).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'?';
-  var rows=0;
-  try{if(log)rows=JSON.parse(log).length;}catch(e){}
-  el.textContent='Letzte Sicherung: '+timeStr+(rows?' · '+rows+' Einträge':'');
-}
 
-// استدعاء updateSnapshotInfo عند فتح الإعدادات
-var _origOpenSettings=openSettings;
-openSettings=function(){
-  _origOpenSettings();
-  setTimeout(updateSnapshotInfo,100);
-};
-
-
-// ══════════════════════════════════════════
-// ARCHIVE SYSTEM v2
-// ══════════════════════════════════════════
-
-var arcFilter = 'day';
-
-// ── فتح/إغلاق
-function arcOpen(){
-  arcRender();
-  document.getElementById('arcPanel').style.transform='translateX(0)';
-  document.getElementById('arcOverlay').style.display='block';
-}
-function arcClose(){
-  document.getElementById('arcPanel').style.transform='translateX(100%)';
-  document.getElementById('arcOverlay').style.display='none';
-}
-
-// ── تغيير الفلتر
-function arcSetFilter(f){
-  arcFilter=f;
-  ['day','week','month'].forEach(function(k){
-    var t=document.getElementById('arcTab_'+k);
-    if(t)t.className='arc-tab'+(k===f?' arc-tab-active':'');
-  });
-  document.getElementById('arcSelAll').checked=false;
-  arcUpdateSelBtn();
-  arcRender();
-}
-
-// ── جلب كل مفاتيح الأرشيف
-function arcGetKeys(){
-  var keys=[];
-  for(var i=0;i<localStorage.length;i++){
-    var k=localStorage.key(i);
-    if(k&&(k.startsWith('denis_archive_')||k.startsWith('arc_')))keys.push(k);
-  }
-  return keys.sort().reverse();
-}
-
-// ── فلترة حسب نوع الفترة
-function arcFilterKeys(keys){
-  var now=new Date();
-  return keys.filter(function(k){
-    var d=arcParseData(k);
-    if(!d)return false;
-    var ts=new Date(d.savedAt||d.date||0);
-    if(isNaN(ts))ts=new Date();
-    if(arcFilter==='day'){
-      return ts.toDateString()===now.toDateString();
-    } else if(arcFilter==='week'){
-      var startOfWeek=new Date(now);
-      startOfWeek.setDate(now.getDate()-now.getDay());
-      startOfWeek.setHours(0,0,0,0);
-      return ts>=startOfWeek;
-    } else if(arcFilter==='month'){
-      return ts.getMonth()===now.getMonth()&&ts.getFullYear()===now.getFullYear();
-    }
-    return true;
-  });
-}
-
-function arcParseData(key){
-  try{return JSON.parse(localStorage.getItem(key));}catch(e){return null;}
-}
-
-// ── عرض القائمة
-function arcRender(){
-  var list=document.getElementById('arcList');
-  var stats=document.getElementById('arcStats');
-  if(!list)return;
-  list.innerHTML='';
-
-  var allKeys=arcGetKeys();
-  var filtered=arcFilterKeys(allKeys);
-  var q=(document.getElementById('arcSearch')||{}).value||'';
-  q=q.toLowerCase().trim();
-  if(q){
-    filtered=filtered.filter(function(k){
-      var d=arcParseData(k);if(!d)return false;
-      var txt=((d.day||'')+' '+(d.date||'')+' '+(d.mitarbeiter||'')+' '+
-               (d.rows||[]).map(function(r){return r.k||'';}).join(' ')).toLowerCase();
-      return txt.indexOf(q)>=0;
-    });
-  }
-
-  var total=0;
-  filtered.forEach(function(k){var d=arcParseData(k);if(d)total+=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';}).length;});
-  if(stats)stats.textContent=filtered.length+' Schichten · '+total+' Einträge';
-
-  if(!filtered.length){
-    list.innerHTML='<div style="text-align:center;padding:40px 16px;"><div style="font-size:36px;margin-bottom:8px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:12px;">Keine Einträge gefunden</div></div>';
-    return;
-  }
-
-  filtered.forEach(function(key){
-    var d=arcParseData(key);if(!d)return;
-    var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-    var cnt=rows.length;
-    var locs=[...new Set(rows.map(function(r){return r.k;}))].slice(0,3).join(', ');
-    var ts=d.savedAt?new Date(d.savedAt).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    var accent=cnt>10?'#E8394A':cnt>5?'#f5a623':'#4cba6b';
-
-    var card=document.createElement('div');
-    card.className='arc-card';
-    card.innerHTML=
-      '<div style="display:flex;align-items:stretch;">'+
-        '<label style="padding:12px 4px 12px 10px;display:flex;align-items:center;cursor:pointer;" onclick="event.stopPropagation()">'+
-          '<input type="checkbox" class="arcSel" data-key="'+key+'" onchange="arcUpdateSelBtn()" style="accent-color:#4cba6b;width:15px;height:15px;cursor:pointer;">'+
-        '</label>'+
-        '<div class="arc-info" style="flex:1;padding:10px 8px 10px 4px;cursor:pointer;">'+
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;">'+
-            '<div style="font-family:Syne,sans-serif;font-size:13px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
-            '<span style="background:'+accent+'22;color:'+accent+';border:1px solid '+accent+'44;font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;">'+cnt+'×</span>'+
-          '</div>'+
-          (locs?'<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:2px;">📍 '+locs+'</div>':'')+
-          '<div style="font-size:10px;color:rgba(255,255,255,0.2);">'+(d.mitarbeiter?'👤 '+d.mitarbeiter+' · ':'')+ts+'</div>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:flex;border-top:1px solid rgba(255,255,255,0.06);">'+
-        '<button class="arc-btn-print" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(232,57,74,0.85);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.06);">🖨 Drucken</button>'+
-        '<button class="arc-btn-pdf"   style="flex:1;padding:7px;border:none;background:transparent;color:rgba(100,160,230,0.85);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.06);">📄 PDF</button>'+
-        '<button class="arc-btn-del"   style="padding:7px 12px;border:none;background:transparent;color:rgba(232,57,74,0.35);font-size:13px;cursor:pointer;">🗑</button>'+
-      '</div>';
-
-    card.querySelector('.arc-info').addEventListener('click',function(){arcPreview(key);});
-    card.querySelector('.arc-btn-print').addEventListener('click',function(e){e.stopPropagation();arcPrint([arcParseData(key)]);});
-    card.querySelector('.arc-btn-pdf').addEventListener('click',function(e){e.stopPropagation();arcPDF(arcParseData(key));});
-    card.querySelector('.arc-btn-del').addEventListener('click',function(e){e.stopPropagation();arcDeleteOne(key);});
-    list.appendChild(card);
-  });
-}
-
-// ── تحديد الكل
-function arcToggleAll(checked){
-  document.querySelectorAll('.arcSel').forEach(function(cb){cb.checked=checked;});
-  arcUpdateSelBtn();
-}
-function arcUpdateSelBtn(){
-  var all=document.querySelectorAll('.arcSel');
-  var sel=document.querySelectorAll('.arcSel:checked');
-  var selAll=document.getElementById('arcSelAll');
-  if(selAll)selAll.checked=sel.length===all.length&&all.length>0;
-  var btn=document.getElementById('arcPrintSelBtn');
-  var cnt=document.getElementById('arcSelCount');
-  if(btn){btn.style.display=sel.length>0?'block':'none';}
-  if(cnt)cnt.textContent=sel.length;
-}
-
-// ── حذف
-function arcDeleteOne(key){
-  showConfirmDialog('Schicht löschen?',function(){
-    localStorage.removeItem(key);
-    arcRender();
-    showToast('🗑 Gelöscht');
-  });
-}
-function arcDeleteAll(){
-  var keys=arcGetKeys();
-  if(!keys.length){showToast('Kein Archiv','error');return;}
-  showConfirmDialog('Alle '+keys.length+' Einträge löschen?',function(){
-    keys.forEach(function(k){localStorage.removeItem(k);});
-    arcRender();
-    showToast('🗑 Archiv geleert');
-  });
-}
-
-// ══════════════════════════════════════════
-// PRINT ENGINE — نفس منطق الزر الأحمر الرئيسي
-// ══════════════════════════════════════════
-function arcPrint(dataArr){
-  // بناء HTML مطابق لبنية الـ proto-table الأصلية
-  var printWin=window.open('','_blank','width=900,height=700');
-  if(!printWin){showToast('Popup blockiert','error');return;}
-  printWin.document.write(arcBuildPrintHTML(dataArr));
-  printWin.document.close();
-  printWin.focus();
-  setTimeout(function(){printWin.print();printWin.close();},400);
-}
-
-function arcBuildPrintHTML(dataArr){
-  var css=
-    '<style>'+
-    '@import url("https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap");'+
-    '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box;}'+
-    'body{font-family:"DM Sans",Arial,sans-serif;margin:0;padding:12px;background:white;color:#141518;font-size:9pt;}'+
-    ':root{--red:#E8394A;--green:#4cba6b;--orange:#f5a623;--bg:#f5f0eb;--card:#ffffff;--border:#E2E5EC;--text:#141518;--muted:#8890A0;}'+
-    '.card{max-width:100%;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:10px;}'+
-    '.card-header{background:linear-gradient(135deg,#1a2a3a,#0d1a26)!important;padding:14px 16px 12px!important;display:flex;justify-content:space-between;align-items:flex-start;}'+
-    '.header-left{display:flex;flex-direction:column;gap:1px;}'+
-    '.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}'+
-    '.header-eyebrow{font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);}'+
-    '.header-title{font-family:"Syne",sans-serif;font-size:18px;font-weight:800;color:white;line-height:1.1;}'+
-    '.header-title span{color:#ffb3b9;}'+
-    '.meta-field{display:flex;flex-direction:column;gap:2px;align-items:flex-end;}'+
-    '.meta-field-label{font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);}'+
-    '.meta-field-val{font-size:11px;font-weight:600;color:white;background:rgba(255,255,255,0.1);padding:4px 10px;border-radius:8px;}'+
-    '.meta-row{display:flex;gap:8px;margin-top:10px;align-items:center;}'+
-    '.meta-pill{background:rgba(255,255,255,0.1);color:white;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid rgba(255,255,255,0.15);}'+
-    '.meta-pill.green{background:rgba(76,186,107,0.15);color:#4cba6b;border-color:rgba(76,186,107,0.3);}'+
-    // جدول البروتوكول
-    '.proto-hdr-row{display:grid;grid-template-columns:180px 70px 70px 1fr;gap:6px;padding:8px 16px;background:#f0f2f5;font-size:8pt;font-weight:700;color:#555;border-top:1px solid var(--border);}'+
-    '.proto-row{display:grid;grid-template-columns:180px 70px 70px 1fr;gap:6px;padding:9px 16px;border-bottom:1px solid #eee;align-items:start;page-break-inside:avoid;}'+
-    '.proto-row:nth-child(even){background:#fafbfc;}'+
-    '.row-num-id{font-size:7px;font-weight:700;color:var(--muted);letter-spacing:1px;}'+
-    '.row-kunde{font-size:11px;font-weight:700;color:var(--text);}'+
-    '.row-time{font-size:11px;font-weight:600;color:#555;text-align:center;}'+
-    '.notiz-item{font-size:9pt;color:var(--text);display:flex;align-items:center;gap:4px;}'+
-    '.notiz-cnt{font-family:"Syne",sans-serif;font-size:11px;font-weight:800;}'+
-    // footer
-    '.card-footer{padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);}'+
-    '.chips{display:flex;gap:6px;flex-wrap:wrap;}'+
-    '.chip{background:white;border:1.5px solid var(--border);border-radius:20px;padding:3px 12px;font-size:9pt;font-weight:600;display:flex;align-items:center;gap:5px;}'+
-    '.chip-dot{width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0;}'+
-    '.footer-brand{font-family:"Syne",sans-serif;font-size:8px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}'+
-    '.footer-brand span{color:var(--red);}'+
-    // توقيع
-    '.sig-area{padding:14px 16px 10px;border-top:1px solid var(--border);display:flex;gap:40px;}'+
-    '.sig-line{flex:1;border-top:1px solid #aaa;padding-top:4px;font-size:8pt;color:#888;}'+
-    // page break
-    '.page-sep{page-break-before:always;padding-top:4mm;}'+
-    '@page{size:A4 portrait;margin:5mm;}'+
-    '@media print{body{padding:0;}.chip.no-print{display:none;}}'+
-    '</style>';
-
-  var body='';
-  dataArr.forEach(function(d,di){
-    if(!d)return;
-    if(di>0)body+='<div class="page-sep"></div>';
-    var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-    var vorfaelle=rows.reduce(function(s,r){return s+(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —'&&n.ev!=='Freitext…';}).length;},0);
-
-    // ── Card Header
-    body+='<div class="card">';
-    body+='<div class="card-header">';
-    body+='<div class="header-left">';
-    body+='<div class="header-eyebrow">Tagesbericht · Vorfallprotokoll</div>';
-    body+='<div class="header-title">Denis <span>Protokoll</span></div>';
-    body+='</div>';
-    body+='<div class="header-right">';
-    if(d.mitarbeiter){body+='<div class="meta-field"><div class="meta-field-label">Mitarbeiter</div><div class="meta-field-val">'+d.mitarbeiter+'</div></div>';}
-    body+='<div class="meta-row">';
-    body+='<div class="meta-pill">'+(d.day||'—')+'</div>';
-    body+='<div class="meta-pill">'+(d.date||'—')+'</div>';
-    body+='<div class="meta-pill green">● Regulär</div>';
-    body+='</div>';
-    body+='</div>';
-    body+='</div>';
-
-    // ── Table Header
-    body+='<div class="proto-hdr-row">';
-    body+='<div>Kunde</div><div style="text-align:center;color:var(--green);">Beginn</div><div style="text-align:center;color:var(--orange);">Ende</div><div style="color:var(--red);">Dienstnotiz</div>';
-    body+='</div>';
-
-    // ── Rows
-    if(!rows.length){
-      body+='<div style="padding:20px;text-align:center;color:#aaa;font-size:10pt;">Keine Einträge</div>';
-    } else {
-      rows.forEach(function(r,ri){
-        var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —'&&n.ev!=='Freitext…';});
-        var freis=(r.n||[]).filter(function(n){return n.tx&&n.tx.trim();});
-        body+='<div class="proto-row">';
-        body+='<div><div class="row-num-id">#'+String(ri+1).padStart(2,'0')+'</div><div class="row-kunde">'+r.k+'</div></div>';
-        body+='<div class="row-time">'+(r.b||'')+'</div>';
-        body+='<div class="row-time">'+(r.e||'')+'</div>';
-        body+='<div>';
-        evts.forEach(function(n){
-          body+='<div class="notiz-item">';
-          if(n.c>1)body+='<span class="notiz-cnt">'+n.c+'×</span> ';
-          body+=n.ev;
-          body+='</div>';
-        });
-        freis.forEach(function(n){
-          body+='<div style="font-size:8.5pt;color:#666;font-style:italic;">'+n.tx+'</div>';
-        });
-        body+='</div>';
-        body+='</div>';
-      });
-    }
-
-    // ── Signature Area
-    body+='<div class="sig-area">';
-    if(d.signature){
-      body+='<div class="sig-line"><img src="'+d.signature+'" style="max-height:50px;max-width:180px;"><br>Mitarbeiter</div>';
-    } else {
-      body+='<div class="sig-line" style="color:#ccc;">Keine Unterschrift<br><span style="color:#888;">Mitarbeiter</span></div>';
-    }
-    body+='<div class="sig-line">　<br>Vorgesetzter</div>';
-    body+='</div>';
-
-    // ── Footer
-    body+='<div class="card-footer">';
-    body+='<div class="chips">';
-    body+='<div class="chip"><span class="chip-dot"></span>'+rows.length+' Kunden</div>';
-    body+='<div class="chip"><span class="chip-dot"></span>'+vorfaelle+' Vorfälle</div>';
-    body+='<div class="chip"><span class="chip-dot"></span>'+rows.length+' Zeilen</div>';
-    body+='</div>';
-    body+='<div class="footer-brand">Denis <span>Protokoll</span></div>';
-    body+='</div>';
-    body+='</div>';
-  });
-
-  return '<!DOCTYPE html><html><head><meta charset="utf-8">'+css+'</head><body>'+body+'</body></html>';
-}
-
-function arcPrintSelected(){
-  var sel=Array.from(document.querySelectorAll('.arcSel:checked'));
-  if(!sel.length){showToast('Keine Auswahl','error');return;}
-  var arr=sel.map(function(cb){return arcParseData(cb.dataset.key);}).filter(Boolean);
-  arcPrint(arr);
-}
-
-// ── طباعة الكل
-function arcPrintAll(){
-  var keys=arcFilterKeys(arcGetKeys());
-  if(!keys.length){showToast('Kein Archiv','error');return;}
-  var arr=keys.map(function(k){return arcParseData(k);}).filter(Boolean);
-  if(arr.length>1){
-    showConfirmDialog(arr.length+' Schichten drucken?',function(){arcPrint(arr);});
-  } else {
-    arcPrint(arr);
-  }
-}
-
-// ── PDF
-function arcPDF(d){
-  if(!d)return;
-  var lib=window.jspdf;
-  if(!lib){showToast('jsPDF lädt noch…','error');return;}
-  var doc=new lib.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-  var W=210,mg=10,cW=W-2*mg,y=mg;
-
-  doc.setFillColor(26,37,53);doc.rect(0,0,W,26,'F');
-  doc.setTextColor(255,255,255);doc.setFontSize(14);doc.setFont('helvetica','bold');
-  doc.text('PROTOKOLL'+(d.day?' — '+d.day+' '+d.date:''),mg,10);
-  doc.setFontSize(8);doc.setFont('helvetica','normal');
-  if(d.mitarbeiter)doc.text('Mitarbeiter: '+d.mitarbeiter,mg,16);
-  if(d.shiftStart)doc.text(d.shiftStart+' – '+d.shiftEnd,W-mg-20,16);
-  doc.text('Gedruckt: '+new Date().toLocaleString('de-DE'),mg,22);
-  y=32;
-
-  var cols=[8,52,14,14,cW-88];var heads=['#','Standort','Von','Bis','Ereignisse'];
-  doc.setFillColor(240,242,245);doc.rect(mg,y,cW,5,'F');
-  doc.setTextColor(80,80,80);doc.setFontSize(7);doc.setFont('helvetica','bold');
-  var x=mg;
-  heads.forEach(function(h,i){doc.text(h,x+1,y+3.5);x+=cols[i];});
-  y+=6;doc.setFont('helvetica','normal');doc.setFontSize(7.5);
-
-  rows.forEach(function(r,ri){
-    var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';}).map(function(n){return(n.c>1?n.c+'x ':'')+n.ev;}).join(', ')||'—';
-    var lines=doc.splitTextToSize(evts,cols[4]-2);
-    var rh=Math.max(5,lines.length*3.5+1.5);
-    if(y+rh>290){doc.addPage();y=mg;}
-    if(ri%2===0){doc.setFillColor(248,249,252);doc.rect(mg,y,cW,rh,'F');}
-    doc.setTextColor(0,0,0);
-    var x2=mg;
-    [String(ri+1),r.k,r.b||'—',r.e||'—'].forEach(function(txt,i){
-      doc.text(String(txt).substring(0,cols[i]/2),x2+1,y+3.5);x2+=cols[i];
-    });
-    doc.text(lines,x2+1,y+3.5);
-    y+=rh;
-  });
-
-  var fname='Protokoll_'+(d.date||'export').replace(/\./g,'-')+'.pdf';
-  doc.save(fname);
-  showToast('📄 PDF gespeichert');
-}
-
-// ── معاينة مفصلة
-function arcPreview(key){
-  var d=arcParseData(key);if(!d)return;
-  var old=document.getElementById('arcPrevModal');if(old)old.remove();
-  var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-  var ev_total=rows.reduce(function(s,r){return s+(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';}).length;},0);
-
-  var ov=document.createElement('div');
-  ov.id='arcPrevModal';
-  ov.style.cssText='position:fixed;inset:0;z-index:9999995;background:#0f1923;overflow-y:auto;font-family:"DM Sans",sans-serif;';
-  ov.innerHTML=
-    '<div style="background:#1e2d3d;padding:50px 14px 12px;position:sticky;top:0;z-index:1;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'+
-        '<div>'+
-          '<div style="font-family:Syne,sans-serif;font-size:15px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
-          (d.mitarbeiter?'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">👤 '+d.mitarbeiter+'</div>':'')+
-        '</div>'+
-        '<div style="display:flex;gap:6px;">'+
-          '<button class="arc-prev-print" style="padding:7px 12px;border-radius:9px;border:none;background:#E8394A;color:white;font-size:12px;font-weight:700;cursor:pointer;">🖨</button>'+
-          '<button class="arc-prev-pdf" style="padding:7px 12px;border-radius:9px;border:none;background:#3d6a9e;color:white;font-size:12px;font-weight:700;cursor:pointer;">📄</button>'+
-          '<button onclick="document.getElementById(\'arcPrevModal\').remove()" style="padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.6);font-size:12px;cursor:pointer;">✕</button>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">'+
-        '<div style="background:rgba(61,82,104,0.5);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:white;">'+rows.length+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">BESUCHE</div></div>'+
-        '<div style="background:rgba(76,186,107,0.15);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:#4cba6b;">'+ev_total+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">EREIGNISSE</div></div>'+
-        '<div style="background:rgba(61,82,104,0.5);border-radius:8px;padding:7px;text-align:center;"><div style="font-size:18px;font-weight:800;color:white;">'+(d.shiftStart||'—')+'</div><div style="font-size:8px;color:rgba(255,255,255,0.4);">BEGINN</div></div>'+
-      '</div>'+
-    '</div>'+
-    '<div id="arcPrevRows" style="padding:10px;display:flex;flex-direction:column;gap:5px;"></div>';
-
-  ov.querySelector('.arc-prev-print').addEventListener('click',function(){arcPrint([d]);});
-  ov.querySelector('.arc-prev-pdf').addEventListener('click',function(){arcPDF(d);});
-
-  var rowsEl=ov.querySelector('#arcPrevRows');
-  rows.forEach(function(r){
-    var evts=(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —';});
-    var div=document.createElement('div');
-    div.style.cssText='background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;';
-    div.innerHTML=
-      '<div style="display:flex;justify-content:space-between;margin-bottom:5px;">'+
-        '<div style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:white;">'+r.k+'</div>'+
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);">'+(r.b||'—')+' – '+(r.e||'—')+'</div>'+
-      '</div>'+
-      (evts.length
-        ? evts.map(function(n){return '<div style="font-size:11px;color:rgba(255,255,255,0.5);">• '+(n.c>1?n.c+'× ':'')+n.ev+'</div>';}).join('')
-        : '<div style="font-size:11px;color:rgba(255,255,255,0.2);">— Keine Ereignisse</div>');
-    rowsEl.appendChild(div);
-  });
-
-  document.body.appendChild(ov);
-}
+// كيش مؤشر - يظهر مرة واحدة فقط
+(function(){
+  if(!('caches' in window))return;
+  caches.open('denis-v1').then(function(c){return c.keys();}).then(function(keys){
+    if(!keys.length){cachePageResources&&cachePageResources();setTimeout(function(){showToast&&showToast('📥 Offline gespeichert ✅');},3000);}
+  }).catch(function(){});
+})();
 
 </script>
+<!-- ARCHIVE -->
+<div id="archiveBg" onclick="closeArchive()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999989;"></div>
+<div id="archivePanel" style="position:fixed;left:0;top:0;bottom:0;width:310px;max-width:94vw;background:#1a2535;z-index:9999990;transform:translateX(-100%);transition:transform 0.3s ease;display:flex;flex-direction:column;overflow:hidden;">
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1e2d3d,#243447);padding:44px 14px 10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.07);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">📁</span>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:white;">Archiv</div>
+          <div id="archiveStats" style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;margin-top:1px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;align-items:center;">
+        <button onclick="archiveExportAll()" title="Exportieren" style="background:rgba(21,101,192,0.2);border:1px solid rgba(21,101,192,0.4);color:rgba(100,180,255,0.9);font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;cursor:pointer;">📤</button>
+        <button onclick="archiveDeleteAll()" title="Alle löschen" style="background:rgba(232,57,74,0.15);border:1px solid rgba(232,57,74,0.3);color:rgba(232,57,74,0.8);font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;cursor:pointer;">🗑</button>
+        <button onclick="closeArchive()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <!-- Search -->
+    <input id="archiveSearch" type="text" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍 Datum, Standort, Mitarbeiter…" oninput="filterArchive(this.value)"
+      style="width:100%;padding:8px 11px;border-radius:9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:white;font-size:12px;outline:none;box-sizing:border-box;margin-bottom:8px;">
+    <!-- Quick Stats -->
+    <div id="arcQuickStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:2px;"></div>
+  </div>
+  <!-- Filter Tabs -->
+  <div style="display:flex;gap:3px;padding:8px 10px 4px;flex-shrink:0;background:#1a2535;">
+    <button onclick="arcSetFilter('all')" id="arcTab_all" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(232,57,74,0.2);border-color:rgba(232,57,74,0.4);color:#E8394A;font-size:9px;font-weight:700;cursor:pointer;">Alle</button>
+    <button onclick="arcSetFilter('week')" id="arcTab_week" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-size:9px;font-weight:700;cursor:pointer;">7 Tage</button>
+    <button onclick="arcSetFilter('month')" id="arcTab_month" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-size:9px;font-weight:700;cursor:pointer;">30 Tage</button>
+    <button onclick="arcSetFilter('danger')" id="arcTab_danger" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-size:9px;font-weight:700;cursor:pointer;">⚠️</button>
+  </div>
+  <!-- List -->
+  <div id="archiveList" style="flex:1;overflow-y:auto;padding:6px 8px 8px;display:flex;flex-direction:column;gap:5px;"></div>
+</div>
+</body>
 </html>
