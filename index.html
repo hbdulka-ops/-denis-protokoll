@@ -2659,60 +2659,166 @@ function getSelectedPrintData() {
   return { hasCurrent: hasCurrent, archiveKeys: archiveKeys, total: (hasCurrent?1:0)+archiveKeys.length };
 }
 
-// ── طباعة بنفس جودة @media print ──────────────────────────────
-// ── طباعة عبر DOM-Swap: نفس جودة الزر الأحمر تماماً ──────────
+// ── تقرير واحد = مباشر، عدة تقارير = iframe موحّد ──────────────
 function executePrint() {
   var sel = getSelectedPrintData();
   if (!sel.total) { showToast('Nichts ausgewählt', 'error'); return; }
   closePrintSelect();
 
-  var datasets = [];
-  if (sel.hasCurrent) datasets.push(null); // null = aktueller Stand bleibt
-  sel.archiveKeys.forEach(function(k) {
-    try { datasets.push(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
-  });
-
-  // Nur aktueller Bericht → direkter Druck
-  if (datasets.length === 1 && datasets[0] === null) {
+  // تقرير واحد حالي فقط
+  if (sel.hasCurrent && !sel.archiveKeys.length) {
     sortRowsByTime();
     setTimeout(function(){ window.print(); }, 200);
     return;
   }
 
-  printDatasetsViaSwap(datasets);
-}
+  var datasets = [];
+  if (sel.hasCurrent) datasets.push(collectData());
+  sel.archiveKeys.forEach(function(k) {
+    try { datasets.push(JSON.parse(localStorage.getItem(k) || '{}')); } catch(e) {}
+  });
 
-function printDatasetsViaSwap(datasets) {
-  // Snapshot aktueller DOM-Zustand
-  var originalData = collectData();
-  var originalShiftNotes = localStorage.getItem('denis_shift_notes') || '';
-  var printQueue = datasets.filter(function(d){ return d !== null; });
-  if (!printQueue.length) { window.print(); return; }
-
-  showToast('🖨 Drucke ' + printQueue.length + ' Bericht(e)…');
-
-  var currentIdx = 0;
-
-  function printNext() {
-    if (currentIdx >= printQueue.length) {
-      // Alles gedruckt → Originaldaten wiederherstellen
-      restoreDOMData(originalData, originalShiftNotes);
-      showToast('✅ Alle Berichte gedruckt!', 'success');
-      return;
-    }
-    var data = printQueue[currentIdx];
-    currentIdx++;
-    loadDOMData(data, function() {
-      sortRowsByTime();
-      setTimeout(function() {
-        window.print();
-        // Nächsten nach kurzer Pause
-        setTimeout(printNext, 800);
-      }, 300);
-    });
+  // تقرير أرشيف واحد → DOM-Swap
+  if (datasets.length === 1) {
+    printSingleArchive(datasets[0]);
+    return;
   }
 
-  printNext();
+  // عدة تقارير → iframe موحّد
+  printMultiReportsIframe(datasets);
+}
+
+function printSingleArchive(data) {
+  var orig = collectData();
+  var origNotes = localStorage.getItem('denis_shift_notes') || '';
+  loadDOMData(data, function() {
+    sortRowsByTime();
+    setTimeout(function() {
+      window.print();
+      setTimeout(function() { restoreDOMData(orig, origNotes); }, 800);
+    }, 300);
+  });
+}
+
+function printMultiReportsIframe(datasets) {
+  showToast('\u{1F5A8} Vorbereitung…');
+  var css = '';
+  try {
+    Array.from(document.styleSheets).forEach(function(ss) {
+      try { Array.from(ss.cssRules).forEach(function(r){ css += r.cssText + '\n'; }); } catch(e){}
+    });
+  } catch(e){}
+
+  var sig = localStorage.getItem('denis_signature') || '';
+  var pagesHtml = datasets.map(function(data){ return buildFullReportPage(data, sig); }).join('\n');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8">'
+    + '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    + '<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">'
+    + '<style>' + css
+    + 'body{background:white!important;margin:0!important;padding:8px!important;}'
+    + '.no-print,.toolbar,.add-zone,.time-now-btn,.bottom-actions,.progress-wrap,.autosave-bar,.toast-wrap,.pdf-loading,.report-overlay,.overlay-base,#pinScreen,#homeScreen,#checkinScreen,#fabCheckin,.kunde-back,.notiz-del,.rm-row-btn,.add-row-btn{display:none!important;}'
+    + '.card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;width:100%!important;margin:0!important;padding:0!important;page-break-after:always;break-after:page;}'
+    + '.card:last-child{page-break-after:auto!important;break-after:auto!important;}'
+    + '.proto-row{page-break-inside:avoid!important;break-inside:avoid!important;}'
+    + '.print-sig-area{display:block!important;}'
+    + '.col-headers{display:flex!important;}'
+    + 'input,select,textarea{border:none!important;background:transparent!important;-webkit-appearance:none;appearance:none;pointer-events:none;}'
+    + '@page{size:A4 portrait;margin:5mm;}'
+    + '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}'
+    + '</style></head><body>' + pagesHtml + '</body></html>';
+
+  var iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:210mm;height:297mm;border:none;visibility:hidden;';
+  document.body.appendChild(iframe);
+  var doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(html); doc.close();
+
+  setTimeout(function() {
+    try { iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+    catch(e) { showToast('\u274C Druckfehler: ' + e.message, 'error'); }
+    setTimeout(function(){ iframe.remove(); }, 3000);
+  }, 1000);
+}
+
+function buildFullReportPage(data, sig) {
+  var rows = data.rows || [];
+  var mitarb = data.mitarbeiter || '\u2014';
+  var day = data.day || '';
+  var date = data.date || '\u2014';
+  var proto = data.protokollNr || '\u2014';
+  sig = sig || localStorage.getItem('denis_signature') || '';
+
+  var rowsHtml = rows.map(function(row, i) {
+    var kunde = (row.k && row.k !== '\u2014 Standort \u2014') ? row.k : '\u2014 Standort \u2014';
+    var notizen = (row.n || []).filter(function(n){ return n.ev && n.ev !== '\u2014 Ereignis \u2014'; });
+    var isDanger = notizen.some(function(n){ return DANGER_EVENTS.indexOf(n.ev) >= 0; });
+    var notizHtml = notizen.length
+      ? '<ul class="notiz-list">' + notizen.map(function(n){
+          var d = DANGER_EVENTS.indexOf(n.ev) >= 0;
+          var o = typeof ORANGE_EVENTS !== 'undefined' && ORANGE_EVENTS.indexOf(n.ev) >= 0;
+          var b = typeof BLUE_EVENTS !== 'undefined' && BLUE_EVENTS.indexOf(n.ev) >= 0;
+          var col = d ? '#c0392b' : o ? '#e67e22' : b ? '#2980b9' : 'inherit';
+          return '<li style="color:' + col + ';font-weight:' + (d?'700':'400') + ';">'
+            + (n.c > 1 ? '[' + n.c + '\u00D7] ' : '') + n.ev
+            + (n.ft ? ' \u2013 <em>' + n.ft + '</em>' : '') + '</li>';
+        }).join('') + '</ul>'
+      : '<span style="color:#ccc;font-size:11px;">\u2014</span>';
+
+    return '<div class="proto-row' + (isDanger ? ' danger' : '') + '" id="row-p' + i + '">'
+      + '<div class="proto-cell cell-kunde"><span class="row-num">#' + String(i+1).padStart(2,'0') + '</span><span class="kunde-name">' + kunde + '</span></div>'
+      + '<div class="proto-cell cell-time"><input class="time-input-direct" value="' + (row.b||'') + '" readonly></div>'
+      + '<div class="proto-cell cell-time"><input class="time-input-direct" value="' + (row.e||'') + '" readonly></div>'
+      + '<div class="proto-cell cell-notiz">' + notizHtml + '</div>'
+      + '</div>';
+  }).join('');
+
+  var sigHtml = sig ? '<img src="' + sig + '" style="height:60px;max-width:180px;">'
+    : '<span style="font-size:11px;color:#999;">Keine Unterschrift</span>';
+
+  var kunden = rows.filter(function(r){ return r.k && r.k !== '\u2014 Standort \u2014'; }).length;
+  var vorfaelle = rows.reduce(function(s,r){ return s + ((r.n||[]).filter(function(n){ return n.ev && n.ev !== '\u2014 Ereignis \u2014'; }).length); }, 0);
+
+  return '<div class="card">'
+    + '<div class="card-header print-header">'
+    +   '<div class="header-left">'
+    +     '<div class="header-eyebrow">Tagesbericht \u00B7 Vorfallprotokoll</div>'
+    +     '<div class="header-title print-header-title">Denis <span>Protokoll</span></div>'
+    +   '</div>'
+    +   '<div class="header-right">'
+    +     '<div class="meta-field"><span class="meta-field-label">Mitarbeiter</span>'
+    +     '<input class="meta-field-input" value="' + mitarb + '" readonly></div>'
+    +     '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">'
+    +       '<select class="day-select" disabled><option selected>' + day + '</option></select>'
+    +       '<input class="date-input" value="' + date + '" readonly>'
+    +     '</div>'
+    +     '<div class="proto-nr-display"><span class="proto-nr-dot"></span><span>' + proto + '</span></div>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="col-headers">'
+    +   '<div class="col-tag tag-kunde">Kunde</div>'
+    +   '<div class="col-tag tag-beginn">Beginn</div>'
+    +   '<div class="col-tag tag-ende">Ende</div>'
+    +   '<div class="col-tag tag-notiz">Dienstnotiz</div>'
+    + '</div>'
+    + '<div class="rows-wrap">' + (rowsHtml || '<div style="padding:20px;text-align:center;color:#aaa;font-size:12px;">Keine Eintr\u00E4ge</div>') + '</div>'
+    + '<div class="print-sig-area">'
+    +   '<div style="display:flex;gap:40px;align-items:flex-end;">'
+    +     '<div style="flex:1;"><div style="height:60px;display:flex;align-items:flex-end;">' + sigHtml + '</div>'
+    +     '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px;font-size:10px;color:#555;">' + mitarb + '</div></div>'
+    +     '<div style="flex:1;"><div style="height:60px;"></div>'
+    +     '<div style="border-top:1px solid #333;margin-top:4px;padding-top:4px;font-size:10px;color:#555;">Vorgesetzter</div></div>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="card-footer">'
+    +   '<div class="chips">'
+    +     '<div class="chip"><span class="chip-dot"></span><span>' + kunden + ' Kunden</span></div>'
+    +     '<div class="chip"><span class="chip-dot"></span><span>' + vorfaelle + ' Vorf\u00E4lle</span></div>'
+    +     '<div class="chip"><span class="chip-dot"></span><span>' + rows.length + ' Zeilen</span></div>'
+    +   '</div>'
+    +   '<div class="footer-brand">Denis <span>Protokoll</span></div>'
+    + '</div>'
+    + '</div>';
 }
 
 // Lade Daten direkt in den DOM (wie loadData, aber aus Objekt)
@@ -2830,7 +2936,6 @@ function executePDF() {
 }
 
 // Alias für Rückwärtskompatibilität
-function executePrintSelected() { executePrint(); }
 
 // Hilfsfunktion: PDF aus beliebigen Daten bauen
 function buildPDFPage(doc, data) {
