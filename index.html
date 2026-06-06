@@ -249,6 +249,24 @@ body.app-ready::before{opacity:0.5;}
 .settings-pin-btn.del{background:#fff0f1;border-color:#f5c0c4;color:var(--red);}
 /* ARCHIVE */
 .archive-item:hover{border-color:var(--red);background:#fff5f5;}
+/* PRINT ARCHIVE OVERLAY */
+.print-archive-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999995;display:none;align-items:flex-start;justify-content:center;padding:12px;backdrop-filter:blur(4px);overflow-y:auto;}
+.print-archive-overlay.open{display:flex;}
+.print-archive-modal{background:var(--card);border-radius:20px;width:100%;max-width:600px;box-shadow:0 24px 80px rgba(0,0,0,0.5);animation:modalIn 0.3s ease;margin:auto;}
+.pa-tab{flex:1;padding:9px 4px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;}
+.pa-tab.active{background:linear-gradient(135deg,#3d5268,#4a6080);color:white;border-color:transparent;}
+.pa-report-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg);margin-bottom:6px;}
+.pa-report-date{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--text);}
+.pa-report-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+.pa-report-btns{display:flex;gap:6px;}
+.pa-btn{padding:6px 12px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
+.pa-btn-print{background:var(--red);color:white;}
+.pa-btn-pdf{background:#1565c0;color:white;}
+/* PRINT STYLES FOR ARCHIVE REPORTS */
+@media print{
+  .print-archive-report-page{page-break-after:always;}
+  .print-archive-report-page:last-child{page-break-after:avoid;}
+}
 /* CHECKIN */
 #checkinScreen{display:none;position:fixed;inset:0;z-index:99998;background:linear-gradient(160deg,#2d3f52 0%,#1a2535 100%);font-family:'DM Sans',sans-serif;overflow-y:auto;}
 .ci-hdr{background:linear-gradient(135deg,#3d5268,#2d3f52);padding:44px 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -302,7 +320,6 @@ body.app-ready::before{opacity:0.5;}
 .print-sig-area{display:none;margin-top:20px;border-top:1px solid #ddd;padding-top:16px;}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  #archivePanel,#archiveBg,#arcPrev{display:none!important;}
   html,body{background:white!important;padding:0!important;margin:0!important;width:100%!important;font-size:8pt!important;}
   body::before{display:none!important;}
   .no-print,.toolbar,.add-zone,.time-now-btn,.bottom-actions,.kunde-back,
@@ -627,6 +644,7 @@ body.app-ready::before{opacity:0.5;}
     <button class="btn btn-ghost" onclick="openSigModal()">✍️</button>
     <button class="btn btn-ghost" onclick="openDashboard()">📊</button>
     <button class="btn btn-ghost" onclick="openArchive()">📁</button>
+    <button class="btn btn-ghost" onclick="openPrintArchive()" title="Druckarchiv">🗂️</button>
     <button class="btn btn-ghost" onclick="toggleDark()">🌙</button>
     <button class="btn btn-ghost" onclick="toggleSound()" id="soundBtn">🔔</button>
     <button class="btn btn-green" onclick="openReportPreview()">📲 WhatsApp</button>
@@ -1148,89 +1166,36 @@ function saveData(){
 }
 
 // ===== ARCHIVE =====
-var _arcFilter='all';
 function openArchive(){
-  _arcFilter='all';
   renderArchiveList('');
   document.getElementById('archiveSearch').value='';
   document.getElementById('archivePanel').style.transform='translateX(0)';
   document.getElementById('archiveBg').style.display='block';
-  arcSetFilter('all');
-  updateArcQuickStats();
 }
 
-function arcSetFilter(f){
-  _arcFilter=f;
-  ['all','week','month','danger'].forEach(function(t){
-    var btn=document.getElementById('arcTab_'+t);
-    if(!btn)return;
-    if(t===f){btn.style.background='rgba(232,57,74,0.2)';btn.style.borderColor='rgba(232,57,74,0.4)';btn.style.color='#E8394A';}
-    else{btn.style.background='rgba(255,255,255,0.05)';btn.style.borderColor='rgba(255,255,255,0.1)';btn.style.color='rgba(255,255,255,0.4)';}
-  });
-  renderArchiveList(document.getElementById('archiveSearch').value||'');
-}
-function updateArcQuickStats(){
-  var el=document.getElementById('arcQuickStats');if(!el)return;
-  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');});
-  var totalRows=0,dangerTotal=0;
-  keys.forEach(function(k){
-    try{
-      var d=JSON.parse(localStorage.getItem(k));
-      var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-      totalRows+=rows.length;
-      dangerTotal+=rows.filter(function(r){return(r.n||[]).some(function(n){return(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;});}).length;
-    }catch(e){}
-  });
-  el.innerHTML=
-    '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:6px;text-align:center;">'+
-      '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;color:white;">'+keys.length+'</div>'+
-      '<div style="font-size:8px;color:rgba(255,255,255,0.3);">SCHICHTEN</div>'+
-    '</div>'+
-    '<div style="background:rgba(76,186,107,0.1);border-radius:8px;padding:6px;text-align:center;">'+
-      '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;color:#4cba6b;">'+totalRows+'</div>'+
-      '<div style="font-size:8px;color:rgba(255,255,255,0.3);">EINTRÄGE</div>'+
-    '</div>'+
-    '<div style="background:rgba(232,57,74,0.1);border-radius:8px;padding:6px;text-align:center;">'+
-      '<div style="font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;color:#E8394A;">'+dangerTotal+'</div>'+
-      '<div style="font-size:8px;color:rgba(255,255,255,0.3);">VORFÄLLE</div>'+
-    '</div>';
-}
-function archiveExportAll(){
-  var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');});
-  if(!keys.length){showToast('Kein Archiv vorhanden','error');return;}
-  var data={exportDate:new Date().toISOString(),count:keys.length,entries:{}};
-  keys.forEach(function(k){try{data.entries[k]=JSON.parse(localStorage.getItem(k));}catch(e){}});
-  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='Denis_Archiv_'+new Date().toISOString().split('T')[0]+'.json';a.click();
-  URL.revokeObjectURL(url);showToast('📤 Archiv exportiert!','success');
-}
 function renderArchiveList(query){
   var list=document.getElementById('archiveList');
   list.innerHTML='';
   var keys=Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');}).sort().reverse();
   
+  // إحصاء سريع
   var statsEl=document.getElementById('archiveStats');
   if(statsEl){
     var totalRows=0;
     keys.forEach(function(k){try{var d=JSON.parse(localStorage.getItem(k));totalRows+=(d.rows||[]).length;}catch(e){}});
-    statsEl.textContent=keys.length+' Schichten · '+totalRows+' Einträge';
+    statsEl.textContent=keys.length+' Schichten · '+totalRows+' Einträge gesamt';
   }
 
   if(!keys.length){
-    list.innerHTML='<div style="text-align:center;padding:40px 16px;"><div style="font-size:32px;margin-bottom:8px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:12px;">Noch keine archivierten Schichten</div></div>';
+    list.innerHTML='<div style="text-align:center;padding:40px 16px;"><div style="font-size:32px;margin-bottom:8px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:12px;">Kein Archiv vorhanden</div></div>';
     return;
   }
 
   var q=(query||'').toLowerCase().trim();
-  var now=Date.now();
   var filtered=keys.filter(function(key){
+    if(!q)return true;
     try{
       var d=JSON.parse(localStorage.getItem(key));
-      if(_arcFilter==='week'){var ts=d.savedAt?new Date(d.savedAt).getTime():0;if(now-ts>7*24*3600000)return false;}
-      if(_arcFilter==='month'){var ts=d.savedAt?new Date(d.savedAt).getTime():0;if(now-ts>30*24*3600000)return false;}
-      if(_arcFilter==='danger'){var hd=(d.rows||[]).some(function(r){return(r.n||[]).some(function(n){return(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;});});if(!hd)return false;}
-      if(!q)return true;
       var locs=(d.rows||[]).map(function(r){return r.k||'';}).join(' ').toLowerCase();
       var dayDate=((d.day||'')+' '+(d.date||'')).toLowerCase();
       var worker=(d.mitarbeiter||'').toLowerCase();
@@ -1239,148 +1204,52 @@ function renderArchiveList(query){
   });
 
   if(!filtered.length){
-    list.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:30px;font-size:12px;">'+(q?'Keine Ergebnisse für "'+q+'"':'Keine Schichten in diesem Zeitraum')+'</div>';
+    list.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:30px;font-size:12px;">Keine Ergebnisse für "'+query+'"</div>';
     return;
   }
 
   filtered.forEach(function(key){
     try{
       var d=JSON.parse(localStorage.getItem(key));if(!d)return;
-      var rows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
-      var uniqueLocs=[...new Set(rows.map(function(r){return r.k;}))];
-      var rowCount=rows.length;
+      
+      // بيانات مُحسَّنة
+      var locs=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';}).map(function(r){return r.k;});
+      var uniqueLocs=[...new Set(locs)];
+      var rowCount=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';}).length;
       var worker=d.mitarbeiter||'';
-      var protoNr=d.protokollNr||'';
-      var dangerRows=rows.filter(function(r){return(r.n||[]).some(function(n){return(typeof DANGER_EVENTS!=='undefined')&&DANGER_EVENTS.indexOf(n.ev)>=0;});}).length;
-      var totalEvents=rows.reduce(function(s,r){return s+(r.n||[]).filter(function(n){return n.ev&&n.ev!=='— Ereignis —'&&n.ev!=='Freitext…';}).reduce(function(a,n){return a+(n.c||1);},0);},0);
-      var accent=dangerRows>0?'#E8394A':rowCount>10?'#f5a623':'#4cba6b';
-      var locStr=uniqueLocs.slice(0,2).join(', ')+(uniqueLocs.length>2?' +'+(uniqueLocs.length-2):'');
+      var shiftStart=d.shiftStart||'';
+      var shiftEnd=d.shiftEnd||'';
+      var savedAt=d.savedAt?new Date(d.savedAt).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'';
+      
+      // تلوين بحسب حجم الوردية
+      var accent=rowCount>10?'#E8394A':rowCount>5?'#f5a623':'#4cba6b';
 
       var card=document.createElement('div');
-      card.id='arcCard_'+key;
-      var isSelected=_arcSelected.indexOf(key)>=0;
-      card.style.cssText='background:'+(isSelected?'rgba(232,57,74,0.12)':'rgba(255,255,255,0.04)')+';border:1px solid '+(isSelected?'rgba(232,57,74,0.5)':'rgba(255,255,255,0.07)')+';border-left:3px solid '+accent+';border-radius:11px;overflow:hidden;transition:background 0.2s,border-color 0.2s;';
-      if(!_arcSelectMode){
-        card.onmouseover=function(){if(_arcSelected.indexOf(key)<0)this.style.background='rgba(255,255,255,0.07)';};
-        card.onmouseout=function(){if(_arcSelected.indexOf(key)<0)this.style.background='rgba(255,255,255,0.04)';};
-      }
-      if(_arcSelectMode){card.onclick=function(e){e.stopPropagation();arcToggleItem(key);};}
+      card.style.cssText='background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;transition:border-color 0.2s;margin-bottom:2px;';
 
-      var checkMark=_arcSelectMode?
-        '<div style="position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:2px solid '+(isSelected?'#E8394A':'rgba(255,255,255,0.3)')+';background:'+(isSelected?'#E8394A':'transparent')+';display:flex;align-items:center;justify-content:center;font-size:11px;">'+(isSelected?'✓':'')+'</div>':
-        '';
-      card.style.position='relative';
+      var locStr=uniqueLocs.slice(0,3).join(', ')+(uniqueLocs.length>3?' +'+( uniqueLocs.length-3):'');
+
       card.innerHTML=
-        '<div style="padding:10px 12px;cursor:pointer;'+(isSelected?'opacity:1':'')+'">'+
-          checkMark+
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
-            '<div style="font-family:\'Syne\',sans-serif;font-size:12px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
-            '<div style="display:flex;gap:4px;">'+
-              (dangerRows>0?'<span style="background:rgba(232,57,74,0.2);color:#E8394A;font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;">⚠️ '+dangerRows+'</span>':'')+
-              '<span style="background:'+accent+'18;color:'+accent+';font-size:9px;font-weight:800;padding:2px 6px;border-radius:20px;">'+rowCount+'×</span>'+
-            '</div>'+
+        '<div onclick="showArchivePreview(JSON.parse(localStorage.getItem(\''+key+'\')))" style="padding:11px 12px;cursor:pointer;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">'+
+            '<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:800;color:white;">'+(d.day||'')+' '+(d.date||'')+'</div>'+
+            '<span style="background:'+accent+'22;color:'+accent+';border:1px solid '+accent+'44;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;letter-spacing:0.5px;">'+rowCount+' ×</span>'+
           '</div>'+
-          (locStr?'<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:3px;">📍 '+locStr+'</div>':'')+
-          '<div style="display:flex;gap:8px;font-size:9px;color:rgba(255,255,255,0.2);">'+
-            (protoNr?'<span>📋 '+protoNr+'</span>':'')+
+          (locStr?'<div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:4px;">📍 '+locStr+'</div>':'')+
+          '<div style="display:flex;gap:10px;font-size:10px;color:rgba(255,255,255,0.25);">'+
             (worker?'<span>👤 '+worker+'</span>':'')+
-            (totalEvents?'<span>📝 '+totalEvents+'</span>':'')+
+            (savedAt?'<span>💾 '+savedAt+'</span>':'')+
           '</div>'+
         '</div>'+
-        (_arcSelectMode?'':
-          '<div style="display:flex;border-top:1px solid rgba(255,255,255,0.05);">'+
-            '<button onclick="showArchivePreview(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(255,255,255,0.5);font-size:10px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.05);">👁</button>'+
-            '<button onclick="archivePrint(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(232,57,74,0.85);font-size:10px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.05);">🖨</button>'+
-            '<button onclick="archivePDF(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:7px;border:none;background:transparent;color:rgba(100,160,230,0.85);font-size:10px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.05);">📄</button>'+
-            '<button onclick="archiveDeleteOne(\''+key+'\')" style="padding:7px 11px;border:none;background:transparent;color:rgba(232,57,74,0.4);font-size:12px;cursor:pointer;">🗑</button>'+
-          '</div>'
-        );
+        '<div style="display:flex;border-top:1px solid rgba(255,255,255,0.06);">'+
+          '<button onclick="archivePrint(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:8px;border:none;background:transparent;color:rgba(232,57,74,0.85);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.06);">🖨 Drucken</button>'+
+          '<button onclick="archivePDF(JSON.parse(localStorage.getItem(\''+key+'\')))" style="flex:1;padding:8px;border:none;background:transparent;color:rgba(100,160,230,0.85);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(255,255,255,0.06);">📄 PDF</button>'+
+          '<button onclick="archiveDeleteOne(\''+key+'\')" style="padding:8px 14px;border:none;background:transparent;color:rgba(232,57,74,0.4);font-size:13px;cursor:pointer;">🗑</button>'+
+        '</div>';
+
       list.appendChild(card);
     }catch(e){}
   });
-}
-var _arcSelectMode=false;
-var _arcSelected=[];
-
-function arcToggleSelectMode(){
-  _arcSelectMode=!_arcSelectMode;
-  _arcSelected=[];
-  var btn=document.getElementById('arcSelectBtn');
-  var bar=document.getElementById('arcSelectBar');
-  if(_arcSelectMode){
-    btn.style.background='rgba(232,57,74,0.2)';
-    btn.style.borderColor='rgba(232,57,74,0.4)';
-    btn.style.color='#E8394A';
-    bar.style.display='block';
-  } else {
-    btn.style.background='rgba(255,255,255,0.07)';
-    btn.style.borderColor='rgba(255,255,255,0.15)';
-    btn.style.color='rgba(255,255,255,0.5)';
-    bar.style.display='none';
-  }
-  renderArchiveList(document.getElementById('archiveSearch').value||'');
-  arcUpdateSelectCount();
-}
-
-function arcCancelSelect(){
-  _arcSelectMode=false;
-  _arcSelected=[];
-  var btn=document.getElementById('arcSelectBtn');
-  var bar=document.getElementById('arcSelectBar');
-  btn.style.background='rgba(255,255,255,0.07)';
-  btn.style.borderColor='rgba(255,255,255,0.15)';
-  btn.style.color='rgba(255,255,255,0.5)';
-  bar.style.display='none';
-  renderArchiveList(document.getElementById('archiveSearch').value||'');
-}
-
-function arcToggleItem(key){
-  var idx=_arcSelected.indexOf(key);
-  if(idx>=0){_arcSelected.splice(idx,1);}
-  else{_arcSelected.push(key);}
-  arcUpdateSelectCount();
-  // Update card visuals
-  var card=document.getElementById('arcCard_'+key);
-  if(card){
-    if(_arcSelected.indexOf(key)>=0){
-      card.style.background='rgba(232,57,74,0.12)';
-      card.style.borderColor='rgba(232,57,74,0.5)';
-    } else {
-      card.style.background='rgba(255,255,255,0.04)';
-      card.style.borderColor='rgba(255,255,255,0.07)';
-    }
-  }
-}
-
-function arcUpdateSelectCount(){
-  var el=document.getElementById('arcSelectCount');
-  if(!el)return;
-  var n=_arcSelected.length;
-  el.textContent=n>0?(n+' Schicht'+(n>1?'en':'')+' ausgewählt'):'Schichten antippen zum Auswählen';
-  var printBtn=document.querySelector('#arcSelectBar button');
-  if(printBtn)printBtn.style.opacity=n>0?'1':'0.4';
-}
-
-function arcPrintSelected(){
-  if(!_arcSelected.length){showToast('Keine Schichten ausgewählt','error');return;}
-  var keys=[].concat(_arcSelected);
-  var idx=0;
-  function printNext(){
-    if(idx>=keys.length){
-      arcCancelSelect();
-      return;
-    }
-    var key=keys[idx++];
-    var raw=localStorage.getItem(key);
-    if(!raw){printNext();return;}
-    try{
-      var d=JSON.parse(raw);
-      archivePrint(d);
-      // wait for print dialog to close then continue
-      setTimeout(printNext, 2500);
-    }catch(e){printNext();}
-  }
-  printNext();
 }
 
 function filterArchive(q){renderArchiveList(q);}
@@ -2674,50 +2543,287 @@ function renderDashboardChart(rows){
   }).catch(function(){});
 })();
 
+// ===== PRINT ARCHIVE =====
+var paCurrentTab='daily';
+var paCurrentData=[];
+
+function openPrintArchive(){
+  // ضبط التاريخ الافتراضي
+  var today=new Date();
+  var yyyy=today.getFullYear();
+  var mm=String(today.getMonth()+1).padStart(2,'0');
+  var dd=String(today.getDate()).padStart(2,'0');
+  document.getElementById('paDailyDate').value=yyyy+'-'+mm+'-'+dd;
+  // أسبوع
+  var weekInput=document.getElementById('paWeeklyDate');
+  if(weekInput)weekInput.value=getISOWeekString(today);
+  // شهر
+  document.getElementById('paMonthlyDate').value=yyyy+'-'+mm;
+  document.getElementById('printArchiveOverlay').classList.add('open');
+  paLoadReport();
+}
+function closePrintArchive(){
+  document.getElementById('printArchiveOverlay').classList.remove('open');
+}
+function getISOWeekString(d){
+  var date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  date.setUTCDate(date.getUTCDate()+4-(date.getUTCDay()||7));
+  var yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  var weekNo=Math.ceil((((date-yearStart)/86400000)+1)/7);
+  return date.getUTCFullYear()+'-W'+String(weekNo).padStart(2,'0');
+}
+function paSwitchTab(tab,btn){
+  paCurrentTab=tab;
+  document.querySelectorAll('.pa-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('paDailyPicker').style.display=tab==='daily'?'flex':'none';
+  document.getElementById('paWeeklyPicker').style.display=tab==='weekly'?'flex':'none';
+  document.getElementById('paMonthlyPicker').style.display=tab==='monthly'?'flex':'none';
+  document.getElementById('paReportList').innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px;">Bitte Zeitraum wählen und auf Laden klicken</div>';
+  document.getElementById('paStats').style.display='none';
+  document.getElementById('paActions').style.display='none';
+}
+
+function paGetAllArchiveKeys(){
+  return Object.keys(localStorage).filter(function(k){return k.startsWith('arc_');}).sort();
+}
+
+function paParseArcDate(key){
+  // arc_YYYY_MM_DD
+  var m=key.match(/arc_(\d{4})_(\d{2})_(\d{2})/);
+  if(!m)return null;
+  return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]));
+}
+
+function paLoadReport(){
+  var keys=paGetAllArchiveKeys();
+  var filtered=[];
+  if(paCurrentTab==='daily'){
+    var sel=document.getElementById('paDailyDate').value;// YYYY-MM-DD
+    if(!sel){showToast('Bitte Datum wählen','error');return;}
+    var parts=sel.split('-');
+    var targetKey='arc_'+parts[0]+'_'+parts[1]+'_'+parts[2];
+    keys.forEach(function(k){if(k===targetKey)filtered.push(k);});
+  } else if(paCurrentTab==='weekly'){
+    var wval=document.getElementById('paWeeklyDate').value;// YYYY-Www
+    if(!wval){showToast('Bitte Woche wählen','error');return;}
+    var wParts=wval.split('-W');
+    var wYear=parseInt(wParts[0]);var wWeek=parseInt(wParts[1]);
+    keys.forEach(function(k){
+      var d=paParseArcDate(k);if(!d)return;
+      if(getWeekNumber(d).year===wYear&&getWeekNumber(d).week===wWeek)filtered.push(k);
+    });
+  } else if(paCurrentTab==='monthly'){
+    var mval=document.getElementById('paMonthlyDate').value;// YYYY-MM
+    if(!mval){showToast('Bitte Monat wählen','error');return;}
+    var mParts=mval.split('-');
+    var mYear=mParts[0];var mMonth=mParts[1];
+    keys.forEach(function(k){
+      var m2=k.match(/arc_(\d{4})_(\d{2})_/);
+      if(m2&&m2[1]===mYear&&m2[2]===mMonth)filtered.push(k);
+    });
+  }
+  paCurrentData=filtered;
+  paRenderReport(filtered);
+}
+
+function getWeekNumber(d){
+  var date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  date.setUTCDate(date.getUTCDate()+4-(date.getUTCDay()||7));
+  var yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  var weekNo=Math.ceil((((date-yearStart)/86400000)+1)/7);
+  return{year:date.getUTCFullYear(),week:weekNo};
+}
+
+function paRenderReport(keys){
+  var list=document.getElementById('paReportList');
+  var statsEl=document.getElementById('paStats');
+  var actionsEl=document.getElementById('paActions');
+  if(!keys.length){
+    list.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px;">📭 Keine Einträge für diesen Zeitraum</div>';
+    statsEl.style.display='none';
+    actionsEl.style.display='none';
+    return;
+  }
+  // Sammle Daten
+  var allData=[];
+  var totalRows=0,totalEvents=0,totalDanger=0,totalMinutes=0;
+  keys.forEach(function(k){
+    try{
+      var d=JSON.parse(localStorage.getItem(k));
+      if(!d)return;
+      allData.push({key:k,data:d});
+      var validRows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
+      totalRows+=validRows.length;
+      validRows.forEach(function(r){
+        (r.n||[]).forEach(function(n){if(n.ev&&n.ev!=='— Ereignis —'&&n.ev!=='Freitext…'){totalEvents+=(n.c||1);if(DANGER_EVENTS.indexOf(n.ev)>=0)totalDanger++;}});
+        if(r.b&&r.e){var bh=parseInt(r.b),bm=parseInt(r.b.split(':')[1]);var eh=parseInt(r.e),em=parseInt(r.e.split(':')[1]);var diff=(eh*60+em)-(bh*60+bm);if(diff<0)diff+=1440;totalMinutes+=diff;}
+      });
+    }catch(e){}
+  });
+  // إحصاءات
+  document.getElementById('paStatsGrid').innerHTML=
+    '<div style="text-align:center;background:#3d526812;border:1.5px solid #3d526830;border-radius:10px;padding:10px;"><div style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:#3d5268;">'+keys.length+'</div><div style="font-size:9px;font-weight:700;color:var(--muted);">SCHICHTEN</div></div>'+
+    '<div style="text-align:center;background:#4cba6b12;border:1.5px solid #4cba6b30;border-radius:10px;padding:10px;"><div style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:#4cba6b;">'+totalRows+'</div><div style="font-size:9px;font-weight:700;color:var(--muted);">BESUCHE</div></div>'+
+    '<div style="text-align:center;background:#f5a62312;border:1.5px solid #f5a62330;border-radius:10px;padding:10px;"><div style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:#f5a623;">'+totalEvents+'</div><div style="font-size:9px;font-weight:700;color:var(--muted);">EREIGNISSE</div></div>'+
+    '<div style="text-align:center;background:#E8394A12;border:1.5px solid #E8394A30;border-radius:10px;padding:10px;"><div style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:#E8394A;">'+totalDanger+'</div><div style="font-size:9px;font-weight:700;color:var(--muted);">VORFÄLLE</div></div>';
+  statsEl.style.display='block';
+  // قائمة التقارير
+  list.innerHTML='';
+  allData.forEach(function(item){
+    var d=item.data;var k=item.key;
+    var validRows=(d.rows||[]).filter(function(r){return r.k&&r.k!=='— Standort —';});
+    var evCount=0;validRows.forEach(function(r){(r.n||[]).forEach(function(n){if(n.ev&&n.ev!=='— Ereignis —')evCount+=(n.c||1);});});
+    var accentColor=evCount>5?'#E8394A':evCount>2?'#f5a623':'#4cba6b';
+    var row=document.createElement('div');row.className='pa-report-row';
+    row.innerHTML=
+      '<div style="flex:1;min-width:0;">'
+        +'<div class="pa-report-date">'+(d.day||'')+' – '+(d.date||k.replace('arc_','').replace(/_/g,'.'))+'</div>'
+        +'<div class="pa-report-meta">👤 '+(d.mitarbeiter||'—')+' · <span style="color:'+accentColor+';font-weight:700;">'+validRows.length+' Besuche · '+evCount+' Ereignisse</span></div>'
+      +'</div>'
+      +'<div class="pa-report-btns">'
+        +'<button class="pa-btn pa-btn-print" onclick="paPrintOne(\''+k+'\')" title="Drucken">🖨️</button>'
+        +'<button class="pa-btn pa-btn-pdf" onclick="paPDFOne(\''+k+'\')" title="PDF">📄</button>'
+      +'</div>';
+    list.appendChild(row);
+  });
+  actionsEl.style.display='flex';
+}
+
+function paPrintOne(key){
+  var d;
+  try{d=JSON.parse(localStorage.getItem(key));}catch(e){showToast('Fehler','error');return;}
+  archivePrint(d);
+}
+
+function paPDFOne(key){
+  var d;
+  try{d=JSON.parse(localStorage.getItem(key));}catch(e){showToast('Fehler','error');return;}
+  archivePDF(d);
+}
+
+function paPrintAll(){
+  if(!paCurrentData.length){showToast('Keine Daten','error');return;}
+  // نطبع واحدة تلو الأخرى
+  var origData=localStorage.getItem('denis_protokoll');
+  var origRows=document.getElementById('rowsWrap').innerHTML;
+  var origId=rowId;
+  var queue=paCurrentData.slice();
+  function printNext(){
+    if(!queue.length){
+      // استعادة البيانات الأصلية
+      if(origData)localStorage.setItem('denis_protokoll',origData);
+      document.getElementById('rowsWrap').innerHTML=origRows;
+      rowId=origId;
+      Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+      loadData();updateSummary();
+      return;
+    }
+    var key=queue.shift();
+    var d;try{d=JSON.parse(localStorage.getItem(key));}catch(e){printNext();return;}
+    localStorage.setItem('denis_protokoll',JSON.stringify(d));
+    document.getElementById('rowsWrap').innerHTML='';rowId=0;
+    Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+    loadData();updateSummary();
+    setTimeout(function(){window.print();setTimeout(printNext,1200);},400);
+  }
+  closePrintArchive();
+  setTimeout(printNext,300);
+  showToast('🖨️ Drucke '+paCurrentData.length+' Berichte…','info');
+}
+
+function paPDFAll(){
+  if(!paCurrentData.length){showToast('Keine Daten','error');return;}
+  showToast('📄 PDF wird für '+paCurrentData.length+' Berichte erstellt…','info');
+  var queue=paCurrentData.slice();
+  var origData=localStorage.getItem('denis_protokoll');
+  var origRows=document.getElementById('rowsWrap').innerHTML;
+  var origId=rowId;
+  function pdfNext(){
+    if(!queue.length){
+      if(origData)localStorage.setItem('denis_protokoll',origData);
+      document.getElementById('rowsWrap').innerHTML=origRows;
+      rowId=origId;
+      Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+      loadData();updateSummary();
+      showToast('✅ Alle PDFs erstellt!','success');
+      return;
+    }
+    var key=queue.shift();
+    var d;try{d=JSON.parse(localStorage.getItem(key));}catch(e){pdfNext();return;}
+    localStorage.setItem('denis_protokoll',JSON.stringify(d));
+    document.getElementById('rowsWrap').innerHTML='';rowId=0;
+    Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+    loadData();updateSummary();
+    setTimeout(function(){generatePDFAndSave();setTimeout(pdfNext,1000);},400);
+  }
+  closePrintArchive();
+  setTimeout(pdfNext,300);
+}
+
 </script>
 <!-- ARCHIVE -->
 <div id="archiveBg" onclick="closeArchive()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999989;"></div>
-<div id="archivePanel" style="position:fixed;left:0;top:0;bottom:0;width:310px;max-width:94vw;background:#1a2535;z-index:9999990;transform:translateX(-100%);transition:transform 0.3s ease;display:flex;flex-direction:column;overflow:hidden;">
-  <!-- Header -->
-  <div style="background:linear-gradient(135deg,#1e2d3d,#243447);padding:44px 14px 10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.07);">
+<div id="archivePanel" style="position:fixed;left:0;top:0;bottom:0;width:290px;max-width:92vw;background:#1a2535;z-index:9999990;transform:translateX(-100%);transition:transform 0.3s ease;display:flex;flex-direction:column;overflow:hidden;">
+  <div style="background:#243447;padding:14px 16px 10px;flex-shrink:0;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:18px;">📁</span>
-        <div>
-          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:white;">Archiv</div>
-          <div id="archiveStats" style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;margin-top:1px;"></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:5px;align-items:center;">
-        <button onclick="arcToggleSelectMode()" id="arcSelectBtn" title="Mehrfachauswahl" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;cursor:pointer;">☑</button>
-        <button onclick="archiveExportAll()" title="Exportieren" style="background:rgba(21,101,192,0.2);border:1px solid rgba(21,101,192,0.4);color:rgba(100,180,255,0.9);font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;cursor:pointer;">📤</button>
-        <button onclick="archiveDeleteAll()" title="Alle löschen" style="background:rgba(232,57,74,0.15);border:1px solid rgba(232,57,74,0.3);color:rgba(232,57,74,0.8);font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;cursor:pointer;">🗑</button>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:white;">📁 Archiv</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="archiveDeleteAll()" title="Alle löschen" style="background:rgba(232,57,74,0.15);border:1px solid rgba(232,57,74,0.3);color:rgba(232,57,74,0.8);font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;cursor:pointer;">🗑 Alle</button>
         <button onclick="closeArchive()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;">✕</button>
       </div>
     </div>
-    <!-- Search -->
-    <input id="archiveSearch" type="text" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍 Datum, Standort, Mitarbeiter…" oninput="filterArchive(this.value)"
-      style="width:100%;padding:8px 11px;border-radius:9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:white;font-size:12px;outline:none;box-sizing:border-box;margin-bottom:8px;">
-    <!-- Quick Stats -->
-    <div id="arcQuickStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:2px;"></div>
+    <input id="archiveSearch" type="text" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍 Suchen…" oninput="filterArchive(this.value)"
+      style="width:100%;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.07);color:white;font-size:12px;outline:none;box-sizing:border-box;margin-bottom:8px;">
+    <div id="archiveStats" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;text-align:right;padding-bottom:2px;"></div>
   </div>
-  <!-- Filter Tabs -->
-  <div style="display:flex;gap:3px;padding:8px 10px 4px;flex-shrink:0;background:#1a2535;">
-    <button onclick="arcSetFilter('all')" id="arcTab_all" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(232,57,74,0.2);border-color:rgba(232,57,74,0.4);color:#E8394A;font-size:9px;font-weight:700;cursor:pointer;">Alle</button>
-    <button onclick="arcSetFilter('week')" id="arcTab_week" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-size:9px;font-weight:700;cursor:pointer;">7 Tage</button>
-    <button onclick="arcSetFilter('month')" id="arcTab_month" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-size:9px;font-weight:700;cursor:pointer;">30 Tage</button>
-    <button onclick="arcSetFilter('danger')" id="arcTab_danger" style="flex:1;padding:5px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);font-size:9px;font-weight:700;cursor:pointer;">⚠️</button>
-  </div>
-  <!-- List -->
-  <!-- Multi-select bar -->
-  <div id="arcSelectBar" style="display:none;padding:8px;border-top:1px solid rgba(255,255,255,0.08);background:#1a2535;flex-shrink:0;">
-    <div style="display:flex;gap:6px;align-items:center;">
-      <div id="arcSelectCount" style="flex:1;font-size:10px;color:rgba(255,255,255,0.4);font-weight:700;letter-spacing:0.5px;"></div>
-      <button onclick="arcPrintSelected()" style="padding:7px 12px;border:none;border-radius:8px;background:rgba(232,57,74,0.2);border:1px solid rgba(232,57,74,0.4);color:#E8394A;font-size:11px;font-weight:700;cursor:pointer;">🖨 Drucken</button>
-      <button onclick="arcCancelSelect()" style="padding:7px 10px;border:none;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);font-size:11px;cursor:pointer;">✕</button>
+  <div id="archiveList" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;"></div>
+</div>
+<!-- PRINT ARCHIVE OVERLAY -->
+<div class="print-archive-overlay" id="printArchiveOverlay">
+  <div class="print-archive-modal">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title">🗂️ Druckarchiv</div>
+      <button class="modal-close" onclick="closePrintArchive()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;" id="paTabs">
+        <button class="pa-tab active" onclick="paSwitchTab('daily',this)">📅 Täglich</button>
+        <button class="pa-tab" onclick="paSwitchTab('weekly',this)">📆 Wöchentlich</button>
+        <button class="pa-tab" onclick="paSwitchTab('monthly',this)">🗓️ Monatlich</button>
+      </div>
+      <!-- Date selector -->
+      <div id="paDateRow" style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div id="paDailyPicker" style="display:flex;gap:6px;align-items:center;flex:1;">
+          <label style="font-size:11px;font-weight:700;color:var(--muted);">Datum:</label>
+          <input type="date" id="paDailyDate" class="settings-input" style="width:auto;flex:1;">
+        </div>
+        <div id="paWeeklyPicker" style="display:none;gap:6px;align-items:center;flex:1;">
+          <label style="font-size:11px;font-weight:700;color:var(--muted);">KW / Jahr:</label>
+          <input type="week" id="paWeeklyDate" class="settings-input" style="width:auto;flex:1;">
+        </div>
+        <div id="paMonthlyPicker" style="display:none;gap:6px;align-items:center;flex:1;">
+          <label style="font-size:11px;font-weight:700;color:var(--muted);">Monat:</label>
+          <input type="month" id="paMonthlyDate" class="settings-input" style="width:auto;flex:1;">
+        </div>
+        <button onclick="paLoadReport()" style="padding:8px 16px;border-radius:10px;border:none;background:linear-gradient(135deg,#3d5268,#4a6080);color:white;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">🔍 Laden</button>
+      </div>
+      <!-- Summary stats -->
+      <div id="paStats" style="display:none;background:#f8f9fc;border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="paStatsGrid"></div>
+      </div>
+      <!-- Report list -->
+      <div id="paReportList" style="max-height:320px;overflow-y:auto;">
+        <div style="text-align:center;padding:30px;color:var(--muted);font-size:12px;">Bitte Zeitraum wählen und auf Laden klicken</div>
+      </div>
+      <!-- Action buttons -->
+      <div id="paActions" style="display:none;padding-top:12px;border-top:1.5px solid var(--border);margin-top:12px;display:none;gap:8px;">
+        <button class="pa-btn pa-btn-print" onclick="paPrintAll()" style="flex:1;padding:11px;">🖨️ Alle drucken</button>
+        <button class="pa-btn pa-btn-pdf" onclick="paPDFAll()" style="flex:1;padding:11px;">📄 PDF Export</button>
+      </div>
     </div>
   </div>
-  <div id="archiveList" style="flex:1;overflow-y:auto;padding:6px 8px 8px;display:flex;flex-direction:column;gap:5px;"></div>
 </div>
 </body>
 </html>
