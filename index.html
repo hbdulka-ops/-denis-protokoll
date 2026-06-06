@@ -324,7 +324,7 @@ body.app-ready::before{opacity:0.5;}
   body::before{display:none!important;}
   .no-print,.toolbar,.add-zone,.time-now-btn,.bottom-actions,.kunde-back,
   .progress-wrap,.autosave-bar,
-  .toast-wrap,.pdf-loading,.report-overlay,.overlay-base,#pinScreen,#homeScreen,#checkinScreen,#fabCheckin,#archivePreviewOverlay{display:none!important;}
+  .toast-wrap,.pdf-loading,.report-overlay,.overlay-base,#pinScreen,#homeScreen,#checkinScreen,#fabCheckin,#archivePreviewOverlay,#archivePanel,#archiveBg,#printArchiveOverlay,.print-archive-overlay{display:none!important;}
   .card{box-shadow:none!important;border-radius:0!important;max-width:100%!important;width:100%!important;margin:0!important;padding:2px!important;}
   .proto-table{width:100%!important;font-size:7.5pt!important;border-collapse:collapse!important;}
   .proto-row{page-break-inside:avoid!important;}
@@ -1350,25 +1350,58 @@ function showArchivePreview(d){
 }
 function archivePrint(d){
   var ov=document.getElementById('arcPrev');if(ov)ov.style.display='none';
+  // أخفِ كل الأوفرلي والشاشات الثانية قبل الطباعة
+  var ci=document.getElementById('checkinScreen');
+  var ciWasOpen=ci&&ci.style.display!=='none';
+  if(ciWasOpen)ci.style.display='none';
+  var arcPanel=document.getElementById('archivePanel');
+  var arcBg=document.getElementById('archiveBg');
+  var arcPanelWasOpen=arcPanel&&arcPanel.style.transform!=='translateX(-100%)';
+  if(arcPanel)arcPanel.style.transform='translateX(-100%)';
+  if(arcBg)arcBg.style.display='none';
+  var printArcOv=document.getElementById('printArchiveOverlay');
+  var printArcWasOpen=printArcOv&&printArcOv.classList.contains('open');
+  if(printArcWasOpen)printArcOv.classList.remove('open');
+  // تحميل بيانات الأرشيف في البروتوكول الرئيسي
   var orig=localStorage.getItem('denis_protokoll');
   localStorage.setItem('denis_protokoll',JSON.stringify(d));
   document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
   loadData();updateSummary();
-  setTimeout(function(){window.print();setTimeout(function(){
-    if(ov)ov.style.display='flex';
-    if(orig)localStorage.setItem('denis_protokoll',orig);
-    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
-  },1000);},300);
+  sortRowsByTime();
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){
+      // استعادة كل شيء
+      if(ciWasOpen&&ci)ci.style.display='block';
+      if(arcPanelWasOpen&&arcPanel)arcPanel.style.transform='translateX(0)';
+      if(arcBg&&arcPanelWasOpen)arcBg.style.display='block';
+      if(printArcWasOpen&&printArcOv)printArcOv.classList.add('open');
+      if(ov)ov.style.display='flex';
+      if(orig)localStorage.setItem('denis_protokoll',orig);
+      document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
+    },1200);
+  },400);
 }
 function archivePDF(d){
+  var ci=document.getElementById('checkinScreen');
+  var ciWasOpen=ci&&ci.style.display!=='none';
+  if(ciWasOpen)ci.style.display='none';
+  var printArcOv=document.getElementById('printArchiveOverlay');
+  var printArcWasOpen=printArcOv&&printArcOv.classList.contains('open');
+  if(printArcWasOpen)printArcOv.classList.remove('open');
   var orig=localStorage.getItem('denis_protokoll');
   localStorage.setItem('denis_protokoll',JSON.stringify(d));
   document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
   loadData();updateSummary();
-  setTimeout(function(){generatePDFAndSave();setTimeout(function(){
-    if(orig)localStorage.setItem('denis_protokoll',orig);
-    document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
-  },1000);},300);
+  setTimeout(function(){
+    generatePDFAndSave();
+    setTimeout(function(){
+      if(ciWasOpen&&ci)ci.style.display='block';
+      if(printArcWasOpen&&printArcOv)printArcOv.classList.add('open');
+      if(orig)localStorage.setItem('denis_protokoll',orig);
+      document.getElementById('rowsWrap').innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});loadData();updateSummary();
+    },1200);
+  },400);
 }
 function manualSave(){saveData();showToast('💾 Gespeichert!','success');}
 function loadData(){
