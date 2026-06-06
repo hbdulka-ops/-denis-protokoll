@@ -337,6 +337,7 @@ body.app-ready::before{opacity:0.5;}
   .nc-wrap,.nc-num{font-size:7pt!important;}
   textarea,.freitext-area{font-size:7pt!important;padding:1px!important;min-height:16px!important;}
   .rows-wrap{margin:0!important;}
+  [style*="page-break-before:always"]{page-break-before:always!important;}
   @page{size:A4 portrait;margin:5mm;}
 }
 </style>
@@ -2737,46 +2738,97 @@ function paPDFOne(key){
 
 function paPrintAll(){
   if(!paCurrentData.length){showToast('Keine Daten','error');return;}
-  // نطبع واحدة تلو الأخرى
+
+  // جمع كل بيانات التقارير
+  var allReports=[];
+  paCurrentData.forEach(function(key){
+    try{var d=JSON.parse(localStorage.getItem(key));if(d)allReports.push(d);}catch(e){}
+  });
+  if(!allReports.length){showToast('Keine Daten','error');return;}
+
+  // إخفاء كل الشاشات
+  var ci=document.getElementById('checkinScreen');
+  var ciWasOpen=ci&&ci.style.display!=='none';
+  if(ciWasOpen)ci.style.display='none';
+  var arcPanel=document.getElementById('archivePanel');
+  var arcBg=document.getElementById('archiveBg');
+  if(arcPanel)arcPanel.style.transform='translateX(-100%)';
+  if(arcBg)arcBg.style.display='none';
+  var printArcOv=document.getElementById('printArchiveOverlay');
+  if(printArcOv)printArcOv.classList.remove('open');
+
   var origData=localStorage.getItem('denis_protokoll');
-  var origRows=document.getElementById('rowsWrap').innerHTML;
-  var origId=rowId;
-  var queue=paCurrentData.slice();
-  function printNext(){
-    if(!queue.length){
-      // استعادة البيانات الأصلية
-      if(origData)localStorage.setItem('denis_protokoll',origData);
-      document.getElementById('rowsWrap').innerHTML=origRows;
-      rowId=origId;
-      Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
-      loadData();updateSummary();
-      return;
+
+  // بناء كل الصفوف في البروتوكول الرئيسي مع فاصل صفحات
+  var wrap=document.getElementById('rowsWrap');
+  wrap.innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+
+  // حفظ بيانات أول تقرير في localStorage وتحميل الهيدر
+  localStorage.setItem('denis_protokoll',JSON.stringify(allReports[0]));
+  if(allReports[0].day)document.getElementById('daySelect').value=allReports[0].day;
+  if(allReports[0].date)document.getElementById('dateInput').value=allReports[0].date;
+  if(allReports[0].mitarbeiter)document.getElementById('mitarbeiterName').value=allReports[0].mitarbeiter;
+  if(allReports[0].protokollNr)applyProtoNr(allReports[0].protokollNr);
+
+  // أضف صفوف كل تقرير مع فاصل صفحات بينها
+  allReports.forEach(function(d,i){
+    if(i>0){
+      // فاصل صفحة — صف header مصغّر لكل يوم
+      var pageBreak=document.createElement('div');
+      pageBreak.style.cssText='page-break-before:always;padding:10px 18px 4px;background:#f0f2f5;border-bottom:2px solid #3d5268;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;';
+      pageBreak.innerHTML=
+        '<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:800;color:#3d5268;">Denis <span style="color:#E8394A;">Protokoll</span></div>'
+        +'<div style="font-size:10px;color:#555;font-weight:700;">'+(d.day||'')+' · '+(d.date||'')+' · '+(d.mitarbeiter||'')+'</div>'
+        +'<div style="font-size:9px;color:#999;">'+(d.protokollNr||'')+'</div>';
+      wrap.appendChild(pageBreak);
     }
-    var key=queue.shift();
-    var d;try{d=JSON.parse(localStorage.getItem(key));}catch(e){printNext();return;}
-    localStorage.setItem('denis_protokoll',JSON.stringify(d));
-    document.getElementById('rowsWrap').innerHTML='';rowId=0;
-    Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
-    loadData();updateSummary();
-    setTimeout(function(){window.print();setTimeout(printNext,1200);},400);
-  }
-  closePrintArchive();
-  setTimeout(printNext,300);
-  showToast('🖨️ Drucke '+paCurrentData.length+' Berichte…','info');
+    // أضف صفوف هذا التقرير
+    (d.rows||[]).forEach(function(r){addRow(r);});
+    // فاصل مرئي بين التقارير (ليس آخر واحد)
+    if(i<allReports.length-1){
+      var sep=document.createElement('div');
+      sep.style.cssText='height:1px;background:#ddd;margin:6px 0 2px;';
+      sep.className='print-only-sep';
+      wrap.appendChild(sep);
+    }
+  });
+
+  updateSummary();
+
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){
+      // استعادة كل شيء
+      if(ciWasOpen&&ci)ci.style.display='block';
+      if(printArcOv)printArcOv.classList.add('open');
+      if(origData)localStorage.setItem('denis_protokoll',origData);
+      wrap.innerHTML='';rowId=0;Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
+      loadData();updateSummary();
+      showToast('✅ Druck abgeschlossen','success');
+    },1500);
+  },500);
 }
 
 function paPDFAll(){
   if(!paCurrentData.length){showToast('Keine Daten','error');return;}
   showToast('📄 PDF wird für '+paCurrentData.length+' Berichte erstellt…','info');
-  var queue=paCurrentData.slice();
+
+  // نولّد PDF واحد لكل تقرير بالتسلسل
+  var ci=document.getElementById('checkinScreen');
+  var ciWasOpen=ci&&ci.style.display!=='none';
+  if(ciWasOpen)ci.style.display='none';
+  var printArcOv=document.getElementById('printArchiveOverlay');
+  if(printArcOv)printArcOv.classList.remove('open');
+
   var origData=localStorage.getItem('denis_protokoll');
-  var origRows=document.getElementById('rowsWrap').innerHTML;
-  var origId=rowId;
+  var queue=paCurrentData.slice();
+
   function pdfNext(){
     if(!queue.length){
+      if(ciWasOpen&&ci)ci.style.display='block';
+      if(printArcOv)printArcOv.classList.add('open');
       if(origData)localStorage.setItem('denis_protokoll',origData);
-      document.getElementById('rowsWrap').innerHTML=origRows;
-      rowId=origId;
+      document.getElementById('rowsWrap').innerHTML='';rowId=0;
       Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
       loadData();updateSummary();
       showToast('✅ Alle PDFs erstellt!','success');
@@ -2788,10 +2840,9 @@ function paPDFAll(){
     document.getElementById('rowsWrap').innerHTML='';rowId=0;
     Object.keys(nCounts).forEach(function(k){delete nCounts[k];});
     loadData();updateSummary();
-    setTimeout(function(){generatePDFAndSave();setTimeout(pdfNext,1000);},400);
+    setTimeout(function(){generatePDFAndSave();setTimeout(pdfNext,1200);},500);
   }
-  closePrintArchive();
-  setTimeout(pdfNext,300);
+  pdfNext();
 }
 
 </script>
